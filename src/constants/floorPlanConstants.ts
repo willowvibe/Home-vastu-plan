@@ -2,6 +2,7 @@ import { FloorPlan, RoomType } from "../types";
 
 export const ROOM_TYPES: { type: RoomType; w: number; h: number }[] = [
   { type: "Bedroom", w: 12, h: 12 },
+  { type: "Master Bedroom", w: 14, h: 12 },
   { type: "Kitchen", w: 10, h: 10 },
   { type: "Living Room", w: 16, h: 16 },
   { type: "Bathroom", w: 6, h: 8 },

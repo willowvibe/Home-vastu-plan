@@ -1,7 +1,23 @@
 import { GoogleGenAI } from "@google/genai";
 import { FloorPlan } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let ai: GoogleGenAI | null = null;
+
+function getAI(): GoogleGenAI {
+  if (!ai) {
+    // Vite injects env vars via define; fall back to import.meta.env for standard Vite usage
+    const key =
+      (typeof process !== "undefined" && process.env?.GEMINI_API_KEY) ||
+      (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_GEMINI_API_KEY);
+    if (!key) {
+      throw new Error(
+        "GEMINI_API_KEY not configured. Please set it in your environment or .env file.",
+      );
+    }
+    ai = new GoogleGenAI({ apiKey: key });
+  }
+  return ai;
+}
 
 export async function analyzeFloorPlan(plan: FloorPlan, currentFloor: number) {
   const prompt = `
@@ -11,7 +27,7 @@ Plot Size: ${plan.plotWidth} ft x ${plan.plotHeight} ft.
 North is UP (Y=0 is North, Y=${plan.plotHeight} is South, X=0 is West, X=${plan.plotWidth} is East).
 
 Rooms on this floor:
-${plan.rooms.filter(r => r.floor === currentFloor).map(r => `- ${r.type}: ${r.w}x${r.h} ft at (X:${r.x}, Y:${r.y})`).join('\n')}
+${plan.rooms.filter((r) => r.floor === currentFloor).map((r) => `- ${r.type}: ${r.w}x${r.h} ft at (X:${r.x}, Y:${r.y})`).join("\n")}
 
 Provide a detailed analysis covering:
 1. Vastu Compliance (Score out of 100, what's good, what's bad, and remedies).
@@ -21,24 +37,24 @@ Provide a detailed analysis covering:
 Format your response in clean Markdown with clear headings and bullet points.
 `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+  const response = await getAI().models.generateContent({
+    model: "gemini-2.5-pro-preview-03-25",
     contents: prompt,
   });
 
-  return response.text;
+  return response.text || "";
 }
 
 export async function editFloorPlanImage(imageFile: File, promptText: string) {
   const base64Data = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve((reader.result as string).split(',')[1]);
-    reader.onerror = reject;
+    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onerror = () => reject(new Error("Failed to read image file"));
     reader.readAsDataURL(imageFile);
   });
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-image",
+  const response = await getAI().models.generateContent({
+    model: "gemini-2.0-flash-exp-image-generation",
     contents: {
       parts: [
         {
@@ -59,6 +75,6 @@ export async function editFloorPlanImage(imageFile: File, promptText: string) {
       return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
     }
   }
-  
+
   throw new Error("No image generated");
 }

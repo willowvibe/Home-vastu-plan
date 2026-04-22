@@ -30,11 +30,20 @@ import {
   Copy,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { toPng } from "html-to-image";
 import LZString from "lz-string";
 import { ProjectManager } from "./components/ProjectManager";
 import { PresentationExport } from "./components/PresentationExport";
 import { Header } from "./components/layout/Header";
+import { useFloorPlan } from "./hooks/useFloorPlan";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import {
+  exportToPNG,
+  exportToJSON,
+  importJSONFile,
+  exportToSVG,
+  generateShareLink,
+  checkPlanSize,
+} from "./lib/exports";
 import {
   ROOM_TYPES,
   INITIAL_PLAN,
@@ -44,9 +53,17 @@ import {
 } from "./constants/floorPlanConstants";
 
 export default function App() {
-  const [plan, setPlan] = useState<FloorPlan>(INITIAL_PLAN);
-  const [history, setHistory] = useState<FloorPlan[]>([INITIAL_PLAN]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  const {
+    plan,
+    setPlan,
+    updatePlan,
+    commitHistory,
+    undo,
+    redo,
+    resetPlan,
+    historyIndex,
+    historyLength,
+  } = useFloorPlan(INITIAL_PLAN);
 
   const [currentFloor, setCurrentFloor] = useState(0);
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
@@ -84,8 +101,7 @@ export default function App() {
           LZString.decompressFromEncodedURIComponent(sharedPlan) || "{}",
         );
         if (decoded.rooms) {
-          setPlan(decoded);
-          setHistory([decoded]);
+          resetPlan(decoded);
           if (decoded.analysis) {
             setAnalysis(decoded.analysis);
           }
@@ -98,31 +114,6 @@ export default function App() {
       }
     }
   }, []);
-
-  const updatePlan = useCallback(
-    (newPlan: FloorPlan | ((prev: FloorPlan) => FloorPlan)) => {
-      setPlan((prev) =>
-        typeof newPlan === "function" ? newPlan(prev) : newPlan,
-      );
-    },
-    [],
-  );
-
-  const commitHistory = useCallback(() => {
-    setPlan((currentPlan) => {
-      setHistory((prevHistory) => {
-        const lastHistory = prevHistory[historyIndex];
-        if (JSON.stringify(lastHistory) !== JSON.stringify(currentPlan)) {
-          const newHistory = prevHistory.slice(0, historyIndex + 1);
-          newHistory.push(currentPlan);
-          setHistoryIndex(newHistory.length - 1);
-          return newHistory;
-        }
-        return prevHistory;
-      });
-      return currentPlan;
-    });
-  }, [historyIndex]);
 
   const handleSelectRoom = useCallback(
     (roomId: string | null, isShiftKey: boolean = false) => {
@@ -142,49 +133,6 @@ export default function App() {
     },
     [],
   );
-
-  const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      setHistoryIndex(historyIndex - 1);
-      setPlan(history[historyIndex - 1]);
-    }
-  }, [history, historyIndex]);
-
-  const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      setHistoryIndex(historyIndex + 1);
-      setPlan(history[historyIndex + 1]);
-    }
-  }, [history, historyIndex]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
-        if (e.shiftKey) {
-          redo();
-        } else {
-          undo();
-        }
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "y") {
-        redo();
-      } else if (e.key === "Delete" || e.key === "Backspace") {
-        if (selectedRoomIds.length > 1) {
-          deleteSelectedRooms();
-        } else if (selectedRoomIds.length === 1) {
-          deleteRoom(selectedRoomIds[0]);
-        }
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "d") {
-        e.preventDefault();
-        if (selectedRoomIds.length > 1) {
-          duplicateSelectedRooms();
-        } else if (selectedRoomIds.length === 1) {
-          duplicateRoom(selectedRoomIds[0]);
-        }
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [undo, redo, selectedRoomIds]);
 
   const addRoom = (type: RoomType, defaultW: number, defaultH: number) => {
     const newRoom: Room = {
@@ -368,15 +316,10 @@ export default function App() {
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     try {
-      const dataUrl = await toPng(canvasContainerRef.current, {
-        backgroundColor: "#ffffff",
-        pixelRatio: 2,
-      });
-
-      const link = document.createElement("a");
-      link.download = `VastuPlan_Floor_${currentFloor}.png`;
-      link.href = dataUrl;
-      link.click();
+      await exportToPNG(
+        canvasContainerRef.current,
+        `VastuPlan_Floor_${currentFloor}.png`,
+      );
     } catch (error) {
       console.error("Export failed:", error);
       alert("Failed to export floor plan.");
@@ -388,54 +331,21 @@ export default function App() {
 
   const handleShare = (mode: "view" | "comment") => {
     try {
-      const planWithAnalysis = {
-        ...plan,
-        analysis: analysis || undefined,
-      };
-      const jsonString = JSON.stringify(planWithAnalysis);
-      const maxSize = 1000000;
-      if (jsonString.length > maxSize) {
-        alert(
-          `Plan is too large to share. The plan exceeds ${maxSize} bytes. Try removing some rooms or elements.`,
-        );
-        return;
-      }
-      const encoded = LZString.compressToEncodedURIComponent(jsonString);
-      const url = `${window.location.origin}${window.location.pathname}?mode=${mode}&plan=${encoded}`;
+      const url = generateShareLink(plan, analysis, mode);
       navigator.clipboard.writeText(url);
       alert(`Share link (${mode} mode) copied to clipboard!`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to generate share link", error);
-      alert("Failed to generate share link. Plan might be too large.");
+      alert(error.message || "Failed to generate share link. Plan might be too large.");
     }
   };
 
   const handleExportJSON = () => {
     try {
-      const planData = {
-        ...plan,
-        analysis: analysis || undefined,
-        exportedAt: new Date().toISOString(),
-        version: "2.0",
-      };
-      const jsonString = JSON.stringify(planData, null, 2);
-      const maxSize = 2000000;
-      if (jsonString.length > maxSize) {
-        alert(
-          `Plan is too large to export. The plan exceeds ${maxSize} bytes.`,
-        );
-        return;
-      }
-      const blob = new Blob([jsonString], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.download = `VastuPlan_Floor_${currentFloor}.json`;
-      link.href = url;
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
+      exportToJSON(plan, `VastuPlan_Floor_${currentFloor}.json`, analysis);
+    } catch (error: any) {
       console.error("Failed to export JSON", error);
-      alert("Failed to export floor plan as JSON.");
+      alert(error.message || "Failed to export floor plan as JSON.");
     }
   };
 
@@ -443,55 +353,31 @@ export default function App() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".json";
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-      const maxSize = 5000000;
-      if (file.size > maxSize) {
-        alert(
-          `File is too large. Maximum allowed size is ${maxSize} bytes. Please use a smaller plan file.`,
-        );
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const data = JSON.parse(event.target?.result as string);
-          if (data.rooms && Array.isArray(data.rooms)) {
-            setPlan(data);
-            setHistory([data]);
-            setHistoryIndex(0);
-            if (data.analysis) {
-              setAnalysis(data.analysis);
-            }
-            alert("Floor plan imported successfully!");
-          } else {
-            alert("Invalid floor plan format.");
+      try {
+        const result = await importJSONFile(file);
+        if (result) {
+          resetPlan(result.plan);
+          if (result.analysis) {
+            setAnalysis(result.analysis);
           }
-        } catch (error) {
-          console.error("Failed to import JSON", error);
-          alert("Failed to import floor plan. Invalid JSON format.");
+          alert("Floor plan imported successfully!");
+        } else {
+          alert("Invalid floor plan format.");
         }
-      };
-      reader.readAsText(file);
+      } catch (error: any) {
+        console.error("Failed to import JSON", error);
+        alert(error.message || "Failed to import floor plan. Invalid JSON format.");
+      }
     };
     input.click();
   };
 
-  const checkPlanSize = () => {
-    const jsonString = JSON.stringify({
-      ...plan,
-      analysis: analysis || undefined,
-    });
-    const sizeKB = (jsonString.length / 1024).toFixed(2);
-    const isLarge = jsonString.length > 1000000;
-    return { sizeKB, isLarge, maxSize: 1000000 };
-  };
-
   const handlePrint = () => {
-    const { sizeKB, isLarge } = checkPlanSize();
+    const { sizeKB, isLarge } = checkPlanSize(plan, analysis);
     if (isLarge) {
       const confirmPrint = confirm(
         `Your plan is large (${sizeKB} KB). Printing may take time. Do you want to continue?`,
@@ -505,64 +391,8 @@ export default function App() {
   };
 
   const handleExportSVG = () => {
-    if (!canvasContainerRef.current) return;
     try {
-      const canvasElement = canvasContainerRef.current.querySelector(
-        "div[style*='relative bg-white border-2']",
-      );
-      if (!canvasElement) {
-        alert("Could not find canvas element for export.");
-        return;
-      }
-
-      const svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${plan.plotWidth * 20}" height="${plan.plotHeight * 20}" viewBox="0 0 ${plan.plotWidth * 20} ${plan.plotHeight * 20}">
-          <rect width="100%" height="100%" fill="white"/>
-          <defs>
-            <pattern id="grid" width="${20}" height="${20}" patternUnits="userSpaceOnUse">
-              <path d="M ${20} 0 L 0 0 0 ${20}" fill="none" stroke="#e5e7eb" stroke-width="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)"/>
-          ${plan.rooms
-            .filter((r) => r.floor === currentFloor)
-            .map(
-              (r) => `
-          <rect x="${r.x * 20}" y="${r.y * 20}" width="${r.w * 20}" height="${r.h * 20}" fill="#f0fdf4" stroke="#65a30d" stroke-width="${((r.wallThickness || 9) / 12) * 20}" rx="2"/>
-          <text x="${(r.x + r.w / 2) * 20}" y="${(r.y + r.h / 2) * 20}" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="12" fill="#1f2937">${r.type}</text>
-        `,
-            )
-            .join("")}
-          ${
-            showVastuGrid
-              ? Array.from({ length: 3 })
-                  .map((_, row) =>
-                    Array.from({ length: 3 })
-                      .map(
-                        (_, col) => `
-          <rect x="${((col * (plan.plotWidth - plan.setbacks.left - plan.setbacks.right)) / 3 + plan.setbacks.left) * 20}" y="${((row * (plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom)) / 3 + plan.setbacks.top) * 20}" width="${((plan.plotWidth - plan.setbacks.left - plan.setbacks.right) / 3) * 20}" height="${((plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom) / 3) * 20}" fill="none" stroke="#6366f1" stroke-width="0.5" stroke-dasharray="4,4"/>
-        `,
-                      )
-                      .join(""),
-                  )
-                  .join("")
-              : ""
-          }
-          <g transform="translate(${plan.setbacks.left * 20}, ${plan.setbacks.top * 20}) rotate(${plan.northAngle})">
-            <path d="M0 -40 L0 40" stroke="#ef4444" stroke-width="2"/>
-            <circle cx="0" cy="40" r="4" fill="#ef4444"/>
-            <text x="0" y="-45" text-anchor="middle" font-size="12" fill="#ef4444" font-weight="bold">N</text>
-          </g>
-        </svg>
-      `;
-
-      const blob = new Blob([svgContent], { type: "image/svg+xml" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.download = `VastuPlan_Floor_${currentFloor}.svg`;
-      link.href = url;
-      link.click();
-      URL.revokeObjectURL(url);
+      exportToSVG(plan, currentFloor, showVastuGrid);
     } catch (error) {
       console.error("Failed to export SVG", error);
       alert("Failed to export floor plan as SVG.");
@@ -617,6 +447,30 @@ export default function App() {
     }));
     commitHistory();
   };
+
+  const handleDelete = useCallback(() => {
+    if (selectedRoomIds.length > 1) {
+      deleteSelectedRooms();
+    } else if (selectedRoomIds.length === 1) {
+      deleteRoom(selectedRoomIds[0]);
+    }
+  }, [selectedRoomIds]);
+
+  const handleDuplicate = useCallback(() => {
+    if (selectedRoomIds.length > 1) {
+      duplicateSelectedRooms();
+    } else if (selectedRoomIds.length === 1) {
+      duplicateRoom(selectedRoomIds[0]);
+    }
+  }, [selectedRoomIds]);
+
+  useKeyboardShortcuts({
+    undo,
+    redo,
+    onDelete: handleDelete,
+    onDuplicate: handleDuplicate,
+    hasSelection: selectedRoomIds.length > 0,
+  });
 
   const totalArea = plan.plotWidth * plan.plotHeight;
   const buildableWidth = Math.max(
@@ -698,9 +552,7 @@ export default function App() {
                     onChange={(e) => {
                       const template = PLAN_TEMPLATES[e.target.value];
                       if (template) {
-                        setPlan(template);
-                        setHistory([template]);
-                        setHistoryIndex(0);
+                        resetPlan(template);
                       }
                     }}
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
@@ -1681,9 +1533,7 @@ export default function App() {
         <ProjectManager
           currentPlan={plan}
           onLoadPlan={(p) => {
-            setPlan(p);
-            setHistory([p]);
-            setHistoryIndex(0);
+            resetPlan(p);
           }}
           onClose={() => setShowProjectManager(false)}
         />
