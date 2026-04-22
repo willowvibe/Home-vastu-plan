@@ -34,131 +34,14 @@ import { toPng } from "html-to-image";
 import LZString from "lz-string";
 import { ProjectManager } from "./components/ProjectManager";
 import { PresentationExport } from "./components/PresentationExport";
-
-const ROOM_TYPES: { type: RoomType; w: number; h: number }[] = [
-  { type: "Bedroom", w: 12, h: 12 },
-  { type: "Kitchen", w: 10, h: 10 },
-  { type: "Living Room", w: 16, h: 16 },
-  { type: "Bathroom", w: 6, h: 8 },
-  { type: "Pooja Room", w: 5, h: 5 },
-  { type: "Dining", w: 10, h: 12 },
-  { type: "Balcony", w: 10, h: 5 },
-  { type: "Stairs", w: 6, h: 12 },
-  { type: "Study", w: 10, h: 10 },
-  { type: "Store", w: 6, h: 6 },
-  { type: "Parking", w: 10, h: 16 },
-];
-
-const INITIAL_PLAN: FloorPlan = {
-  plotWidth: 30,
-  plotHeight: 40,
-  northAngle: 0,
-  roadDirection: "S",
-  unit: "ft",
-  setbacks: { top: 3, right: 3, bottom: 3, left: 3 }, // Default 3ft setbacks
-  rooms: [],
-};
-
-// Plan Templates
-const PLAN_TEMPLATES: Record<string, FloorPlan> = {
-  "Small Apartment": {
-    plotWidth: 25,
-    plotHeight: 35,
-    northAngle: 0,
-    roadDirection: "N",
-    unit: "ft",
-    setbacks: { top: 2, right: 2, bottom: 2, left: 2 },
-    rooms: [
-      { id: "tmpl-1", type: "Living Room", x: 2, y: 2, w: 12, h: 10, floor: 0, wallThickness: 9 },
-      { id: "tmpl-2", type: "Kitchen", x: 14, y: 2, w: 8, h: 10, floor: 0, wallThickness: 9 },
-      { id: "tmpl-3", type: "Bathroom", x: 2, y: 12, w: 5, h: 6, floor: 0, wallThickness: 9 },
-      { id: "tmpl-4", type: "Bedroom", x: 9, y: 12, w: 10, h: 10, floor: 0, wallThickness: 9 },
-    ],
-  },
-  "Medium House": {
-    plotWidth: 35,
-    plotHeight: 45,
-    northAngle: 0,
-    roadDirection: "N",
-    unit: "ft",
-    setbacks: { top: 3, right: 3, bottom: 3, left: 3 },
-    rooms: [
-      { id: "tmpl-5", type: "Living Room", x: 3, y: 3, w: 16, h: 14, floor: 0, wallThickness: 9 },
-      { id: "tmpl-6", type: "Dining", x: 21, y: 3, w: 10, h: 12, floor: 0, wallThickness: 9 },
-      { id: "tmpl-7", type: "Kitchen", x: 3, y: 18, w: 10, h: 10, floor: 0, wallThickness: 9 },
-      { id: "tmpl-8", type: "Master Bedroom", x: 15, y: 18, w: 14, h: 12, floor: 0, wallThickness: 9 },
-      { id: "tmpl-9", type: "Bathroom", x: 15, y: 31, w: 6, h: 8, floor: 0, wallThickness: 9 },
-      { id: "tmpl-10", type: "Bedroom", x: 23, y: 18, w: 10, h: 10, floor: 0, wallThickness: 9 },
-    ],
-  },
-  "Large Villa": {
-    plotWidth: 45,
-    plotHeight: 60,
-    northAngle: 0,
-    roadDirection: "N",
-    unit: "ft",
-    setbacks: { top: 5, right: 5, bottom: 5, left: 5 },
-    rooms: [
-      { id: "tmpl-11", type: "Living Room", x: 5, y: 5, w: 20, h: 18, floor: 0, wallThickness: 9 },
-      { id: "tmpl-12", type: "Dining", x: 27, y: 5, w: 14, h: 14, floor: 0, wallThickness: 9 },
-      { id: "tmpl-13", type: "Kitchen", x: 5, y: 25, w: 12, h: 10, floor: 0, wallThickness: 9 },
-      { id: "tmpl-14", type: "Master Bedroom", x: 19, y: 25, w: 16, h: 14, floor: 0, wallThickness: 9 },
-      { id: "tmpl-15", type: "Pooja Room", x: 37, y: 25, w: 5, h: 5, floor: 0, wallThickness: 9 },
-      { id: "tmpl-16", type: "Bedroom", x: 5, y: 37, w: 12, h: 12, floor: 0, wallThickness: 9 },
-      { id: "tmpl-17", type: "Study", x: 19, y: 41, w: 10, h: 10, floor: 0, wallThickness: 9 },
-      { id: "tmpl-18", type: "Bathroom", x: 37, y: 31, w: 8, h: 8, floor: 0, wallThickness: 9 },
-      { id: "tmpl-19", type: "Balcony", x: 27, y: 21, w: 10, h: 5, floor: 0, wallThickness: 9 },
-    ],
-  },
-};
-
-const ROOM_ELEMENTS: Record<
-  RoomType,
-  { type: string; w: number; h: number }[]
-> = {
-  Bedroom: [
-    { type: "Bed", w: 6, h: 6.5 },
-    { type: "Cupboard", w: 6, h: 2 },
-    { type: "Side Table", w: 1.5, h: 1.5 },
-  ],
-  Kitchen: [
-    { type: "Stove", w: 3, h: 2 },
-    { type: "Sink", w: 3, h: 2 },
-    { type: "Fridge", w: 2.5, h: 2.5 },
-  ],
-  "Living Room": [
-    { type: "Sofa", w: 7, h: 3 },
-    { type: "TV Unit", w: 6, h: 1.5 },
-    { type: "Coffee Table", w: 4, h: 2 },
-  ],
-  Bathroom: [
-    { type: "Toilet", w: 1.5, h: 2.5 },
-    { type: "Wash Basin", w: 2, h: 1.5 },
-    { type: "Shower", w: 3, h: 3 },
-  ],
-  "Pooja Room": [{ type: "Mandir", w: 3, h: 2 }],
-  Dining: [{ type: "Dining Table", w: 6, h: 4 }],
-  Balcony: [
-    { type: "Chair", w: 2, h: 2 },
-    { type: "Plants", w: 1.5, h: 1.5 },
-  ],
-  Stairs: [],
-  Study: [
-    { type: "Desk", w: 4, h: 2 },
-    { type: "Chair", w: 2, h: 2 },
-    { type: "Bookshelf", w: 3, h: 1.5 },
-  ],
-  Store: [{ type: "Shelf", w: 4, h: 1.5 }],
-  Parking: [
-    { type: "Car", w: 6, h: 14 },
-    { type: "Bike", w: 2.5, h: 6 },
-  ],
-};
-
-const COMMON_ELEMENTS = [
-  { type: "Door", w: 3, h: 0.5 },
-  { type: "Window", w: 4, h: 0.5 },
-];
+import { Header } from "./components/layout/Header";
+import {
+  ROOM_TYPES,
+  INITIAL_PLAN,
+  PLAN_TEMPLATES,
+  ROOM_ELEMENTS,
+  COMMON_ELEMENTS,
+} from "./constants/floorPlanConstants";
 
 export default function App() {
   const [plan, setPlan] = useState<FloorPlan>(INITIAL_PLAN);
@@ -179,6 +62,7 @@ export default function App() {
   const [showVastuGrid, setShowVastuGrid] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [measuring, setMeasuring] = useState(false);
   const [mobileTab, setMobileTab] = useState<
     "settings" | "canvas" | "properties"
   >("canvas");
@@ -240,19 +124,24 @@ export default function App() {
     });
   }, [historyIndex]);
 
-  const handleSelectRoom = useCallback((roomId: string | null, isShiftKey: boolean = false) => {
-    if (roomId === null) {
-      if (!isShiftKey) setSelectedRoomIds([]);
-      return;
-    }
-    if (isShiftKey) {
-      setSelectedRoomIds((prev) =>
-        prev.includes(roomId) ? prev.filter((id) => id !== roomId) : [...prev, roomId]
-      );
-    } else {
-      setSelectedRoomIds([roomId]);
-    }
-  }, []);
+  const handleSelectRoom = useCallback(
+    (roomId: string | null, isShiftKey: boolean = false) => {
+      if (roomId === null) {
+        if (!isShiftKey) setSelectedRoomIds([]);
+        return;
+      }
+      if (isShiftKey) {
+        setSelectedRoomIds((prev) =>
+          prev.includes(roomId)
+            ? prev.filter((id) => id !== roomId)
+            : [...prev, roomId],
+        );
+      } else {
+        setSelectedRoomIds([roomId]);
+      }
+    },
+    [],
+  );
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -444,7 +333,6 @@ export default function App() {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
     try {
-      // Simulate progress updates for analysis
       const progressInterval = setInterval(() => {
         setAnalysisProgress((prev) => {
           if (prev >= 90) {
@@ -505,9 +393,11 @@ export default function App() {
         analysis: analysis || undefined,
       };
       const jsonString = JSON.stringify(planWithAnalysis);
-      const maxSize = 1000000; // 1MB limit
+      const maxSize = 1000000;
       if (jsonString.length > maxSize) {
-        alert(`Plan is too large to share. The plan exceeds ${maxSize} bytes. Try removing some rooms or elements.`);
+        alert(
+          `Plan is too large to share. The plan exceeds ${maxSize} bytes. Try removing some rooms or elements.`,
+        );
         return;
       }
       const encoded = LZString.compressToEncodedURIComponent(jsonString);
@@ -529,9 +419,11 @@ export default function App() {
         version: "2.0",
       };
       const jsonString = JSON.stringify(planData, null, 2);
-      const maxSize = 2000000; // 2MB limit
+      const maxSize = 2000000;
       if (jsonString.length > maxSize) {
-        alert(`Plan is too large to export. The plan exceeds ${maxSize} bytes. Try removing some rooms or elements, or use PNG export instead.`);
+        alert(
+          `Plan is too large to export. The plan exceeds ${maxSize} bytes.`,
+        );
         return;
       }
       const blob = new Blob([jsonString], { type: "application/json" });
@@ -555,21 +447,14 @@ export default function App() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-      // Check file size before reading
-      const maxSize = 5000000; // 5MB limit for imports
+      const maxSize = 5000000;
       if (file.size > maxSize) {
-        alert(`File is too large. Maximum allowed size is ${maxSize} bytes. Please use a smaller plan file.`);
+        alert(
+          `File is too large. Maximum allowed size is ${maxSize} bytes. Please use a smaller plan file.`,
+        );
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
@@ -601,19 +486,18 @@ export default function App() {
       analysis: analysis || undefined,
     });
     const sizeKB = (jsonString.length / 1024).toFixed(2);
-    const isLarge = jsonString.length > 1000000; // 1MB warning threshold
+    const isLarge = jsonString.length > 1000000;
     return { sizeKB, isLarge, maxSize: 1000000 };
   };
 
   const handlePrint = () => {
-    // Check plan size before printing
     const { sizeKB, isLarge } = checkPlanSize();
     if (isLarge) {
-      const confirmPrint = confirm(`Your plan is large (${sizeKB} KB). Printing may take time. Do you want to continue?`);
+      const confirmPrint = confirm(
+        `Your plan is large (${sizeKB} KB). Printing may take time. Do you want to continue?`,
+      );
       if (!confirmPrint) return;
     }
-    const printContent = document.querySelector(".print-area");
-    if (printContent) {
     const printContent = document.querySelector(".print-area");
     if (printContent) {
       window.print();
@@ -634,38 +518,36 @@ export default function App() {
       const svgContent = `
         <svg xmlns="http://www.w3.org/2000/svg" width="${plan.plotWidth * 20}" height="${plan.plotHeight * 20}" viewBox="0 0 ${plan.plotWidth * 20} ${plan.plotHeight * 20}">
           <rect width="100%" height="100%" fill="white"/>
-          <!-- Grid Lines -->
           <defs>
             <pattern id="grid" width="${20}" height="${20}" patternUnits="userSpaceOnUse">
               <path d="M ${20} 0 L 0 0 0 ${20}" fill="none" stroke="#e5e7eb" stroke-width="1"/>
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)"/>
-          <!-- Rooms -->
           ${plan.rooms
             .filter((r) => r.floor === currentFloor)
             .map(
               (r) => `
-          <rect x="${r.x * 20}" y="${r.y * 20}" width="${r.w * 20}" height="${r.h * 20}" fill="#f0fdf4" stroke="#65a30d" stroke-width="${(r.wallThickness || 9) / 12 * 20}" rx="2"/>
+          <rect x="${r.x * 20}" y="${r.y * 20}" width="${r.w * 20}" height="${r.h * 20}" fill="#f0fdf4" stroke="#65a30d" stroke-width="${((r.wallThickness || 9) / 12) * 20}" rx="2"/>
           <text x="${(r.x + r.w / 2) * 20}" y="${(r.y + r.h / 2) * 20}" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="12" fill="#1f2937">${r.type}</text>
         `,
             )
             .join("")}
-          <!-- Vastu Grid -->
-          ${showVastuGrid
-            ? Array.from({ length: 3 })
-                .map((_, row) =>
-                  Array.from({ length: 3 })
-                    .map(
-                      (_, col) => `
-          <rect x="${(col * (plan.plotWidth - plan.setbacks.left - plan.setbacks.right) / 3 + plan.setbacks.left) * 20}" y="${(row * (plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom) / 3 + plan.setbacks.top) * 20}" width="${((plan.plotWidth - plan.setbacks.left - plan.setbacks.right) / 3) * 20}" height="${((plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom) / 3) * 20}" fill="none" stroke="#6366f1" stroke-width="0.5" stroke-dasharray="4,4"/>
+          ${
+            showVastuGrid
+              ? Array.from({ length: 3 })
+                  .map((_, row) =>
+                    Array.from({ length: 3 })
+                      .map(
+                        (_, col) => `
+          <rect x="${((col * (plan.plotWidth - plan.setbacks.left - plan.setbacks.right)) / 3 + plan.setbacks.left) * 20}" y="${((row * (plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom)) / 3 + plan.setbacks.top) * 20}" width="${((plan.plotWidth - plan.setbacks.left - plan.setbacks.right) / 3) * 20}" height="${((plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom) / 3) * 20}" fill="none" stroke="#6366f1" stroke-width="0.5" stroke-dasharray="4,4"/>
         `,
-                    )
-                    .join(""),
-                )
-                .join("")
-            : ""}
-          <!-- North Indicator -->
+                      )
+                      .join(""),
+                  )
+                  .join("")
+              : ""
+          }
           <g transform="translate(${plan.setbacks.left * 20}, ${plan.setbacks.top * 20}) rotate(${plan.northAngle})">
             <path d="M0 -40 L0 40" stroke="#ef4444" stroke-width="2"/>
             <circle cx="0" cy="40" r="4" fill="#ef4444"/>
@@ -752,95 +634,23 @@ export default function App() {
   const vastuScore = calculateOverallVastuScore(plan);
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans ${darkMode ? "bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-900"}`}>
+    <div
+      className={`min-h-screen flex flex-col font-sans ${darkMode ? "bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-900"}`}
+    >
       {/* Header */}
-      <header className={`border-b px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between sticky top-0 z-20 gap-3 md:gap-0 ${darkMode ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"}`}>
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${darkMode ? "bg-indigo-600" : "bg-indigo-600"}`}>
-              <Layers className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className={`text-xl font-bold tracking-tight ${darkMode ? "text-white" : "text-slate-900"}`}>
-                VastuPlan 2D
-              </h1>
-              <p className={`text-xs font-medium ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
-                Indian Home Design & Vastu
-              </p>
-            </div>
-          </div>
-
-          {/* Mobile Vastu Score */}
-          {plan.rooms.length > 0 && (
-            <div className={`md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg border ${darkMode ? "bg-slate-800 border-slate-600" : "bg-slate-50 border-slate-200"}`}>
-              <div
-                className={`text-sm font-bold ${vastuScore >= 80 ? "text-emerald-600" : vastuScore >= 50 ? "text-amber-600" : "text-red-600"}`}
-              >
-                {vastuScore}/100
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto justify-between md:justify-end">
-          {appMode !== "edit" && (
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${darkMode ? "bg-amber-900/30 border-amber-700" : "bg-amber-50 border-amber-200"}`}>
-              <div className={`text-xs font-bold uppercase tracking-wider ${darkMode ? "text-amber-400" : "text-amber-700"}`}>
-                {appMode} Mode
-              </div>
-              {appMode === "view" && (
-                <button
-                  onClick={() => setAppMode("edit")}
-                  className="ml-2 text-xs text-indigo-600 hover:underline"
-                >
-                  Edit Copy
-                </button>
-              )}
-            </div>
-          )}
-
-          {plan.rooms.length > 0 && (
-            <div className="hidden md:flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-              <div className="text-xs font-medium text-slate-500">
-                Vastu Score
-              </div>
-              <div
-                className={`text-sm font-bold ${vastuScore >= 80 ? "text-emerald-600" : vastuScore >= 50 ? "text-amber-600" : "text-red-600"}`}
-              >
-                {vastuScore}/100
-              </div>
-            </div>
-          )}
-
-          <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
-            <button
-              onClick={() => setShowProjectManager(true)}
-              className="px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 hover:text-indigo-600 transition-colors flex items-center gap-2"
-              title="Projects & Versions"
-            >
-              <FolderOpen className="w-4 h-4" />
-              <span className="hidden md:inline">Projects</span>
-            </button>
-            <div className="w-px h-6 bg-slate-300 mx-1 self-center"></div>
-            <button
-              onClick={() => setActiveTab("design")}
-              className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === "design" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
-            >
-              Floor Plan
-            </button>
-            <button
-              onClick={() => setActiveTab("image")}
-              className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === "image" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
-            >
-              AI Image Editor
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header
+        plan={plan}
+        appMode={appMode}
+        setAppMode={setAppMode}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        setShowProjectManager={setShowProjectManager}
+        vastuScore={vastuScore}
+        darkMode={darkMode}
+      />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-        {/* Mobile Tabs */}
         <div className="md:hidden flex border-b border-slate-200 bg-white shrink-0">
           <button
             onClick={() => setMobileTab("settings")}
@@ -864,13 +674,20 @@ export default function App() {
 
         {activeTab === "design" ? (
           <>
-            {/* Left Sidebar - Tools */}
+            {/* Left Sidebar */}
             <div
               className={`w-full md:w-72 flex-col overflow-y-auto shrink-0 custom-scrollbar ${mobileTab === "settings" ? "flex" : "hidden md:flex"} ${appMode !== "edit" ? "opacity-50 pointer-events-none" : ""} ${darkMode ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"}`}
             >
-              <div className={`p-5 border-b ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
-                <h3 className={`text-sm font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 ${darkMode ? "text-slate-100" : "text-slate-900"}`}>
-                  <Map className={`w-4 h-4 ${darkMode ? "text-slate-500" : "text-slate-400"}`} /> Plot Settings
+              <div
+                className={`p-5 border-b ${darkMode ? "border-slate-800" : "border-slate-100"}`}
+              >
+                <h3
+                  className={`text-sm font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 ${darkMode ? "text-slate-100" : "text-slate-900"}`}
+                >
+                  <Map
+                    className={`w-4 h-4 ${darkMode ? "text-slate-500" : "text-slate-400"}`}
+                  />{" "}
+                  Plot Settings
                 </h3>
 
                 <div className="mb-4">
@@ -889,15 +706,21 @@ export default function App() {
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
                   >
                     <option value="">Select Template...</option>
-                    <option value="Small Apartment">Small Apartment (25x35 ft)</option>
-                    <option value="Medium House">Medium House (35x45 ft)</option>
+                    <option value="Small Apartment">
+                      Small Apartment (25x35 ft)
+                    </option>
+                    <option value="Medium House">
+                      Medium House (35x45 ft)
+                    </option>
                     <option value="Large Villa">Large Villa (45x60 ft)</option>
                   </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+                    <label
+                      className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                    >
                       Width (ft)
                     </label>
                     <input
@@ -914,7 +737,9 @@ export default function App() {
                     />
                   </div>
                   <div>
-                    <label className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+                    <label
+                      className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                    >
                       Length (ft)
                     </label>
                     <input
@@ -933,7 +758,7 @@ export default function App() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="text-xs text-slate-500 mb-1 block flex items-center justify-between">
+                  <label className="text-xs text-slate-500 mb-1 flex items-center justify-between">
                     <span>North Direction (Angle)</span>
                     <span className="font-mono">{plan.northAngle}°</span>
                   </label>
@@ -1104,24 +929,40 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className={`mt-4 p-3 rounded-lg border flex flex-col gap-2 text-xs ${darkMode ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-100"}`}>
+                <div
+                  className={`mt-4 p-3 rounded-lg border flex flex-col gap-2 text-xs ${darkMode ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-100"}`}
+                >
                   <div className="flex justify-between items-center">
-                    <span className={`${darkMode ? "text-slate-400" : "text-slate-500"}`}>Plot Area:</span>
-                    <strong className={`${darkMode ? "text-slate-200" : "text-slate-800"}`}>
+                    <span
+                      className={`${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                    >
+                      Plot Area:
+                    </span>
+                    <strong
+                      className={`${darkMode ? "text-slate-200" : "text-slate-800"}`}
+                    >
                       {totalArea} sq ft
                     </strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className={`${darkMode ? "text-slate-400" : "text-slate-500"}`}>Buildable Area:</span>
+                    <span
+                      className={`${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                    >
+                      Buildable Area:
+                    </span>
                     <strong className="text-emerald-700">
                       {buildableArea} sq ft
                     </strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className={`${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+                    <span
+                      className={`${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                    >
                       Built-up (Floor {currentFloor}):
                     </span>
-                    <strong className={`${darkMode ? "text-indigo-400" : "text-indigo-700"}`}>
+                    <strong
+                      className={`${darkMode ? "text-indigo-400" : "text-indigo-700"}`}
+                    >
                       {builtUpArea} sq ft
                     </strong>
                   </div>
@@ -1169,15 +1010,13 @@ export default function App() {
                     onClick={handleImportJSON}
                     className="flex-1 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition-colors flex items-center justify-center gap-1"
                   >
-                    <FolderOpen className="w-3 h-3" />
-                    Import JSON
+                    <FolderOpen className="w-3 h-3" /> Import JSON
                   </button>
                   <button
                     onClick={handleExportJSON}
                     className="flex-1 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition-colors flex items-center justify-center gap-1"
                   >
-                    <FileText className="w-3 h-3" />
-                    Export JSON
+                    <FileText className="w-3 h-3" /> Export JSON
                   </button>
                 </div>
               </div>
@@ -1216,10 +1055,9 @@ export default function App() {
                       setSelectedRoomIds([]);
                     }
                   }}
-                  className="w-full py-2 text-xs font-medium text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200 rounded-lg transition-colors flex items-center justify-center gap-1"
+                  className="w-full mt-2 py-2 text-xs font-medium text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200 rounded-lg transition-colors flex items-center justify-center gap-1"
                 >
-                  <Trash2 className="w-3 h-3" />
-                  Clear Floor
+                  <Trash2 className="w-3 h-3" /> Clear Floor
                 </button>
               </div>
 
@@ -1246,7 +1084,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Center - Canvas */}
+            {/* Center Canvas */}
             <div
               className={`flex-1 overflow-auto p-4 md:p-8 flex-col items-center relative ${mobileTab === "canvas" ? "flex" : "hidden md:flex"} ${darkMode ? "bg-slate-900" : "bg-slate-100"}`}
             >
@@ -1378,9 +1216,13 @@ export default function App() {
             {/* Print Area (hidden on screen, visible when printing) */}
             <div className="hidden print-area print:block">
               <div className="p-8 bg-white">
-                <h1 className="text-2xl font-bold mb-4">VastuPlan Floor Plan</h1>
+                <h1 className="text-2xl font-bold mb-4">
+                  VastuPlan Floor Plan
+                </h1>
                 <p className="text-sm text-slate-600 mb-4">
-                  Floor {currentFloor === 0 ? "Ground" : `Floor ${currentFloor}`} - {new Date().toLocaleDateString()}
+                  Floor{" "}
+                  {currentFloor === 0 ? "Ground" : `Floor ${currentFloor}`} -{" "}
+                  {new Date().toLocaleDateString()}
                 </p>
                 <div className="print-only" ref={canvasContainerRef}>
                   <Canvas
@@ -1389,6 +1231,8 @@ export default function App() {
                     zoom={zoom}
                     showVastuGrid={showVastuGrid}
                     snapToGrid={snapToGrid}
+                    measuring={measuring}
+                    setMeasuring={setMeasuring}
                     onUpdateRoom={() => {}}
                     onUpdateRoomEnd={() => {}}
                     onSelectRoom={() => {}}
@@ -1397,42 +1241,23 @@ export default function App() {
                 </div>
               </div>
             </div>
-          </>
-        ) : (
-          <div className="flex-1 p-6 bg-slate-100 flex justify-center">
-            <div className="w-full max-w-4xl">
-              <ImageEditor />
-            </div>
-          </div>
-        )}
-      </main>
-      {showProjectManager && (
-        <ProjectManager
-          currentPlan={plan}
-          onLoadPlan={(p) => {
-            setPlan(p);
-            setHistory([p]);
-            setHistoryIndex(0);
-          }}
-          onClose={() => setShowProjectManager(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-            </div>
 
             {/* Right Sidebar - Analysis & Properties */}
             <div
               className={`w-full md:w-80 flex-col overflow-hidden shrink-0 ${mobileTab === "properties" ? "flex" : "hidden md:flex"} ${appMode !== "edit" ? "opacity-50 pointer-events-none" : ""} ${darkMode ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"}`}
             >
               {selectedRoomIds.length > 0 ? (
-                <div className={`p-5 border-b ${darkMode ? "border-slate-700 bg-blue-900/20" : "border-slate-100 bg-blue-50/50"}`}>
+                <div
+                  className={`p-5 border-b ${darkMode ? "border-slate-700 bg-blue-900/20" : "border-slate-100 bg-blue-50/50"}`}
+                >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className={`text-sm font-semibold uppercase tracking-wider ${darkMode ? "text-slate-100" : "text-slate-900"}`}>
-                        {selectedRoomIds.length === 1 ? "Room Properties" : `${selectedRoomIds.length} Rooms Selected`}
+                      <h3
+                        className={`text-sm font-semibold uppercase tracking-wider ${darkMode ? "text-slate-100" : "text-slate-900"}`}
+                      >
+                        {selectedRoomIds.length === 1
+                          ? "Room Properties"
+                          : `${selectedRoomIds.length} Rooms Selected`}
                       </h3>
                     </div>
                     <div className="flex gap-1">
@@ -1446,21 +1271,33 @@ export default function App() {
                         </button>
                       )}
                       <button
-                        onClick={() => selectedRoomIds.length === 1 ? duplicateRoom(selectedRoomIds[0]) : duplicateSelectedRooms()}
+                        onClick={() =>
+                          selectedRoomIds.length === 1
+                            ? duplicateRoom(selectedRoomIds[0])
+                            : duplicateSelectedRooms()
+                        }
                         className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-md transition-colors border border-transparent hover:border-slate-300"
                         title="Duplicate Room"
                       >
                         <Copy className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => selectedRoomIds.length === 1 ? rotateRoom(selectedRoomIds[0]) : rotateSelectedRooms()}
+                        onClick={() =>
+                          selectedRoomIds.length === 1
+                            ? rotateRoom(selectedRoomIds[0])
+                            : rotateSelectedRooms()
+                        }
                         className="p-1.5 text-slate-600 hover:bg-white rounded-md transition-colors border border-transparent hover:border-slate-200"
                         title="Rotate 90°"
                       >
                         <RotateCw className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => selectedRoomIds.length === 1 ? deleteRoom(selectedRoomIds[0]) : deleteSelectedRooms()}
+                        onClick={() =>
+                          selectedRoomIds.length === 1
+                            ? deleteRoom(selectedRoomIds[0])
+                            : deleteSelectedRooms()
+                        }
                         className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition-colors border border-transparent hover:border-red-200"
                         title="Delete Room"
                       >
@@ -1669,20 +1506,22 @@ export default function App() {
 
                         {/* Room Organization */}
                         <div className="pt-4 border-t border-slate-200">
-                          <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
+                          <h4
+                            className={`text-xs font-bold uppercase tracking-wider mb-3 ${darkMode ? "text-slate-300" : "text-slate-700"}`}
+                          >
                             Organization
                           </h4>
-
-                          {/* Category */}
                           <div className="mb-3">
-                            <label className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+                            <label
+                              className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                            >
                               Category
                             </label>
                             <select
                               value={room.category || "Other"}
                               onChange={(e) => {
                                 updateRoom(room.id, {
-                                  category: e.target.value as RoomCategory,
+                                  category: e.target.value as any,
                                 });
                                 commitHistory();
                               }}
@@ -1699,7 +1538,6 @@ export default function App() {
                             </select>
                           </div>
 
-                          {/* Tags */}
                           <div className="mb-3">
                             <label className="text-[10px] text-slate-500 block mb-1">
                               Tags (comma-separated)
@@ -1712,15 +1550,14 @@ export default function App() {
                                   .join(", ") || ""
                               }
                               onChange={(e) => {
-                                const tags: RoomTags = {};
+                                const tags: any = {};
                                 e.target.value
                                   .split(",")
                                   .map((tag) => tag.trim())
                                   .filter(Boolean)
                                   .forEach((item) => {
                                     const [key, value] = item.split(":");
-                                    tags[key.trim()] =
-                                      value?.trim() || true;
+                                    tags[key.trim()] = value?.trim() || true;
                                   });
                                 updateRoom(room.id, { tags });
                                 commitHistory();
@@ -1728,14 +1565,17 @@ export default function App() {
                               placeholder="vip:yes, entertainment:true"
                               className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? "bg-slate-800 border-slate-600 text-white" : "bg-white border-slate-200 text-slate-900"}`}
                             />
-                            <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
+                            <p
+                              className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}
+                            >
                               Format: key:value, key2:true
                             </p>
                           </div>
 
-                          {/* Notes */}
                           <div className="mb-2">
-                            <label className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+                            <label
+                              className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                            >
                               Notes
                             </label>
                             <textarea
@@ -1752,21 +1592,20 @@ export default function App() {
 
                         {/* Vastu Card */}
                         <div
-                          className={`p-3 rounded-lg border ${
-                            vastu.status === "good"
-                              ? "bg-emerald-50 border-emerald-200"
-                              : vastu.status === "average"
-                                ? "bg-amber-50 border-amber-200"
-                                : "bg-red-50 border-red-200"
-                          } ${darkMode ? "dark:invert dark:filter" : ""}`}
+                          className={`p-3 rounded-lg border ${vastu.status === "good" ? "bg-emerald-50 border-emerald-200" : vastu.status === "average" ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200"} ${darkMode ? "dark:invert dark:filter" : ""}`}
                         >
                           <h4 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1">
                             <Compass className="w-3 h-3" /> Vastu Check
                           </h4>
-                          <div className={`text-sm mb-2 ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
-                            Current Zone: <strong>{vastu.currentDirection}</strong>
+                          <div
+                            className={`text-sm mb-2 ${darkMode ? "text-slate-300" : "text-slate-700"}`}
+                          >
+                            Current Zone:{" "}
+                            <strong>{vastu.currentDirection}</strong>
                           </div>
-                          <p className={`text-xs leading-relaxed ${darkMode ? "text-slate-400" : "text-slate-600"}`}>
+                          <p
+                            className={`text-xs leading-relaxed ${darkMode ? "text-slate-400" : "text-slate-600"}`}
+                          >
                             {vastu.feedback}
                           </p>
                         </div>
@@ -1779,8 +1618,8 @@ export default function App() {
               <div className="p-5 flex-1 overflow-y-auto flex flex-col custom-scrollbar">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    AI Vastu & Build Guide
+                    <Sparkles className="w-4 h-4 text-amber-500" /> AI Vastu &
+                    Build Guide
                   </h3>
                 </div>
 
@@ -1796,7 +1635,7 @@ export default function App() {
                   >
                     {isAnalyzing ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />{" "}
                         Analyzing...
                       </>
                     ) : (
@@ -1837,6 +1676,7 @@ export default function App() {
           </div>
         )}
       </main>
+
       {showProjectManager && (
         <ProjectManager
           currentPlan={plan}
@@ -1853,6 +1693,7 @@ export default function App() {
         <PresentationExport
           canvasRef={canvasContainerRef}
           plan={plan}
+          currentFloor={currentFloor}
           onClose={() => setShowPresentationExport(false)}
         />
       )}
@@ -1862,7 +1703,9 @@ export default function App() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">VastuPlan Floor Plan</h1>
           <p className="text-sm text-slate-600 mb-8">
-            Floor {currentFloor === 0 ? "Ground" : `Floor ${currentFloor}`} | {new Date().toLocaleDateString()} | Generated on {new Date().toLocaleTimeString()}
+            Floor {currentFloor === 0 ? "Ground" : `Floor ${currentFloor}`} |{" "}
+            {new Date().toLocaleDateString()} | Generated on{" "}
+            {new Date().toLocaleTimeString()}
           </p>
           <div className="border border-slate-200 p-4">
             <Canvas
@@ -1881,11 +1724,13 @@ export default function App() {
           </div>
           <div className="mt-8 text-center text-sm text-slate-500">
             <p>VastuScore: {vastuScore}/100</p>
-            <p>Total Area: {totalArea} sq ft | Buildable: {buildableArea} sq ft | Built-up: {builtUpArea} sq ft</p>
+            <p>
+              Total Area: {totalArea} sq ft | Buildable: {buildableArea} sq ft |
+              Built-up: {builtUpArea} sq ft
+            </p>
           </div>
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,5 +1,6 @@
 export type RoomType =
   | "Bedroom"
+  | "Master Bedroom"
   | "Kitchen"
   | "Living Room"
   | "Bathroom"

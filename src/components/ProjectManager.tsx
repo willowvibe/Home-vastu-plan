@@ -9,7 +9,7 @@ import {
   X,
   History,
   Save,
-  Compare,
+  GitCompare,
 } from "lucide-react";
 
 interface ProjectManagerProps {
@@ -244,7 +244,38 @@ export function ProjectManager({
                               </div>
                             </div>
                           </div>
+
+                          {/* Fixed layout: Combined all buttons into one action container */}
                           <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (selectedVersionIds.includes(version.id)) {
+                                  setSelectedVersionIds(
+                                    selectedVersionIds.filter(
+                                      (id) => id !== version.id,
+                                    ),
+                                  );
+                                } else {
+                                  setSelectedVersionIds([
+                                    ...selectedVersionIds,
+                                    version.id,
+                                  ]);
+                                }
+                              }}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                selectedVersionIds.includes(version.id)
+                                  ? "bg-indigo-100 text-indigo-700"
+                                  : "text-slate-400 hover:bg-slate-100"
+                              }`}
+                              title={
+                                selectedVersionIds.includes(version.id)
+                                  ? "Deselect for comparison"
+                                  : "Select for comparison"
+                              }
+                            >
+                              <GitCompare className="w-4 h-4" />
+                            </button>
                             <button
                               onClick={() => handleLoadVersion(version)}
                               className="px-4 py-2 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 rounded-lg text-sm font-medium transition-colors shadow-sm"
@@ -262,84 +293,59 @@ export function ProjectManager({
                             </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (selectedVersionIds.includes(version.id)) {
-                                setSelectedVersionIds(
-                                  selectedVersionIds.filter((id) => id !== version.id)
-                                );
-                              } else {
-                                setSelectedVersionIds([...selectedVersionIds, version.id]);
-                              }
-                            }}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              selectedVersionIds.includes(version.id)
-                                ? "bg-indigo-100 text-indigo-700"
-                                : "text-slate-400 hover:bg-slate-100"
-                            }`}
-                            title={
-                              selectedVersionIds.includes(version.id)
-                                ? "Deselect for comparison"
-                                : "Select for comparison"
-                            }
-                          >
-                            <Compare className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
                       ))}
-                    </div>
-                    {selectedVersionIds.length >= 2 && (
-                      <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-                        <h4 className="text-xs font-bold text-indigo-800 mb-2">
-                          Version Comparison
-                        </h4>
-                        <div className="space-y-2">
-                          {projects
-                            .find((p) => p.id === activeProjectId)
-                            ?.versions
-                            .filter((v) => selectedVersionIds.includes(v.id))
-                            .map((v, i) => (
-                              <div key={v.id} className="text-xs text-slate-700">
-                                <span className="font-medium">
-                                  {i === 0 ? "Version A" : "Version B"}:{" "}
-                                </span>
-                                {v.plan.rooms.length} rooms
-                              </div>
-                            ))}
-                        </div>
-                        {(() => {
-                          const comparedVersions = projects
-                            .find((p) => p.id === activeProjectId)
-                            ?.versions.filter((v) =>
-                              selectedVersionIds.includes(v.id)
-                            );
-                          if (comparedVersions && comparedVersions.length >= 2) {
-                            const diff = compareVersions(
-                              comparedVersions[0],
-                              comparedVersions[1]
-                            );
-                            return (
-                              <div className="mt-2 pt-2 border-t border-indigo-200 text-xs">
-                                <p className="font-medium text-indigo-700 mb-1">
-                                  Changes:
-                                </p>
-                                <p className="text-slate-600">
-                                  {diff.rooms === 0
-                                    ? "No change in room count"
-                                    : diff.rooms > 0
-                                      ? `${diff.rooms} room(s) added`
-                                      : `${Math.abs(diff.rooms)} room(s) removed`}
-                                </p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
-                      </div>
-                    )}
                   </div>
+
+                  {selectedVersionIds.length >= 2 && (
+                    <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                      <h4 className="text-xs font-bold text-indigo-800 mb-2">
+                        Version Comparison
+                      </h4>
+                      <div className="space-y-2">
+                        {projects
+                          .find((p) => p.id === activeProjectId)
+                          ?.versions.filter((v) =>
+                            selectedVersionIds.includes(v.id),
+                          )
+                          .map((v, i) => (
+                            <div key={v.id} className="text-xs text-slate-700">
+                              <span className="font-medium">
+                                {i === 0 ? "Version A" : "Version B"}:{" "}
+                              </span>
+                              {v.plan.rooms.length} rooms
+                            </div>
+                          ))}
+                      </div>
+                      {(() => {
+                        const comparedVersions = projects
+                          .find((p) => p.id === activeProjectId)
+                          ?.versions.filter((v) =>
+                            selectedVersionIds.includes(v.id),
+                          );
+                        if (comparedVersions && comparedVersions.length >= 2) {
+                          const diff = compareVersions(
+                            comparedVersions[0],
+                            comparedVersions[1],
+                          );
+                          return (
+                            <div className="mt-2 pt-2 border-t border-indigo-200 text-xs">
+                              <p className="font-medium text-indigo-700 mb-1">
+                                Changes:
+                              </p>
+                              <p className="text-slate-600">
+                                {diff.rooms === 0
+                                  ? "No change in room count"
+                                  : diff.rooms > 0
+                                    ? `${diff.rooms} room(s) added`
+                                    : `${Math.abs(diff.rooms)} room(s) removed`}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
