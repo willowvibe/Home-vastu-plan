@@ -34,6 +34,7 @@ import LZString from "lz-string";
 import { ProjectManager } from "./components/ProjectManager";
 import { PresentationExport } from "./components/PresentationExport";
 import { Header } from "./components/layout/Header";
+import { LayerManager } from "./components/LayerManager";
 import { useFloorPlan } from "./hooks/useFloorPlan";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import {
@@ -78,8 +79,22 @@ export default function App() {
   const [linkSetbacks, setLinkSetbacks] = useState(true);
   const [showVastuGrid, setShowVastuGrid] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem("vastuplan-darkmode") === "true";
+    } catch {
+      return false;
+    }
+  });
   const [measuring, setMeasuring] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("vastuplan-darkmode", String(darkMode));
+    } catch {
+      // ignore
+    }
+  }, [darkMode]);
   const [mobileTab, setMobileTab] = useState<
     "settings" | "canvas" | "properties"
   >("canvas");
@@ -275,6 +290,13 @@ export default function App() {
       }
     });
     commitHistory();
+  };
+
+  const updateLayers = (newLayers: typeof plan.layers) => {
+    updatePlan((prev) => ({
+      ...prev,
+      layers: newLayers,
+    }));
   };
 
   const handleAnalyze = async () => {
@@ -501,6 +523,7 @@ export default function App() {
         setShowProjectManager={setShowProjectManager}
         vastuScore={vastuScore}
         darkMode={darkMode}
+        setDarkMode={setDarkMode}
       />
 
       {/* Main Content */}
@@ -913,6 +936,14 @@ export default function App() {
                 </button>
               </div>
 
+              <LayerManager
+                layers={plan.layers || []}
+                onUpdateLayers={updateLayers}
+                darkMode={darkMode}
+                rooms={plan.rooms}
+                currentFloor={currentFloor}
+              />
+
               <div className="p-5 flex-1">
                 <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Plus className="w-4 h-4 text-slate-400" /> Add Rooms
@@ -1061,6 +1092,7 @@ export default function App() {
                   onUpdateRoomEnd={commitHistory}
                   onSelectRoom={handleSelectRoom}
                   selectedRoomIds={selectedRoomIds}
+                  layers={plan.layers}
                 />
               </div>
             </div>
@@ -1089,6 +1121,7 @@ export default function App() {
                     onUpdateRoomEnd={() => {}}
                     onSelectRoom={() => {}}
                     selectedRoomIds={[]}
+                    layers={plan.layers}
                   />
                 </div>
               </div>
@@ -1363,6 +1396,32 @@ export default function App() {
                           >
                             Organization
                           </h4>
+                          {(plan.layers || []).length > 0 && (
+                            <div className="mb-3">
+                              <label
+                                className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                              >
+                                Layer
+                              </label>
+                              <select
+                                value={room.category || ""}
+                                onChange={(e) => {
+                                  updateRoom(room.id, {
+                                    category: (e.target.value || undefined) as any,
+                                  });
+                                  commitHistory();
+                                }}
+                                className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? "bg-slate-800 border-slate-600 text-white" : "bg-white border-slate-200 text-slate-900"}`}
+                              >
+                                <option value="">No Layer</option>
+                                {(plan.layers || []).map((layer) => (
+                                  <option key={layer.id} value={layer.name}>
+                                    {layer.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
                           <div className="mb-3">
                             <label
                               className={`text-xs mb-1 block ${darkMode ? "text-slate-400" : "text-slate-500"}`}
@@ -1570,6 +1629,7 @@ export default function App() {
               onUpdateRoomEnd={() => {}}
               onSelectRoom={() => {}}
               selectedRoomIds={[]}
+              layers={plan.layers}
             />
           </div>
           <div className="mt-8 text-center text-sm text-slate-500">

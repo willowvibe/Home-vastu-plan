@@ -1,5 +1,5 @@
 import React from "react";
-import { Layers, FolderOpen } from "lucide-react";
+import { Layers, FolderOpen, Sun, Moon } from "lucide-react";
 import { FloorPlan } from "../../types";
 
 interface HeaderProps {
@@ -11,6 +11,7 @@ interface HeaderProps {
   setShowProjectManager: (show: boolean) => void;
   vastuScore: number;
   darkMode: boolean;
+  setDarkMode: (value: boolean) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   setShowProjectManager,
   vastuScore,
   darkMode,
+  setDarkMode,
 }) => {
   return (
     <header
@@ -95,6 +97,15 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
         )}
+
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className={`p-2 rounded-lg border transition-colors ${darkMode ? "bg-slate-800 border-slate-600 text-amber-400 hover:bg-slate-700" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          aria-label={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
 
         <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
           <button

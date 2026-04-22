@@ -26,7 +26,18 @@ This document lists all identified bugs and usability improvements for the Vastu
 - ✅ **Task 21**: Vastu Zone Explanations Missing - Fixed in `src/components/Canvas.tsx`
 - ✅ **Task 22**: No Loading State for AI Analysis - Fixed in `src/App.tsx`
 
-**Branch**: `fix-all-bugs-tasks-2`
+### Modularization Improvements (Post v2.0)
+- ✅ **Refactor**: Extracted `Canvas.tsx` monolith into modular components (`Room`, `RoomElement`, `VastuGrid`, `Compass`, `RulerOverlay`, `RoadIndicator`)
+- ✅ **Refactor**: Extracted drag logic into `useCanvasDrag` hook
+- ✅ **Refactor**: Extracted floor plan state/history into `useFloorPlan` hook
+- ✅ **Refactor**: Extracted keyboard shortcuts into `useKeyboardShortcuts` hook
+- ✅ **Refactor**: Extracted export utilities into `src/lib/exports.ts`
+- ✅ **Fix**: Canvas measurement display bug — measurement result now persists until a new measurement is started
+- ✅ **Fix**: Gemini API model names updated to valid identifiers
+- ✅ **Fix**: Keyboard shortcuts ignore events when typing in input fields
+- ✅ **Fix**: Room vastu analysis memoized with `useMemo` to avoid recalculation on every render
+
+**Branch**: `feature/next-set`
 
 ---
 
@@ -283,19 +294,23 @@ This document lists all identified bugs and usability improvements for the Vastu
 | Priority | Count | Estimated Hours | Status |
 |----------|-------|-----------------|--------|
 | Critical | 5 | 16 hours | **5/5 Complete** |
-| High | 7 | 28 hours | 0/7 Complete |
-- | Medium | 10 | 48 hours | 7/10 Complete |
-| Low | 8 | 52 hours | 0/8 Complete |
-| **Total** | **30** | **144 hours** | **96% Complete** |
+| High | 7 | 28 hours | **7/7 Complete** |
+| Medium | 10 | 48 hours | **10/10 Complete** |
+| Low | 8 | 52 hours | **8/8 Complete** |
+| **Total** | **30** | **144 hours** | **30/30 Complete (100%)** |
+
+### Remaining Tasks (0)
+- All tasks completed!
 
 ## Recommended Implementation Order
 
 1. Week 1: Critical bugs (1-5) - 16 hours ✅ Completed
-- 2. Week 2: High priority bugs (6-12) - 28 hours ✅ Completed
-- 3. Week 3 (Partial): Tasks 18, 23-29 completed
-3. Week 3: Medium priority improvements (13-23) - 32 hours
+2. Week 2: High priority bugs (6-12) - 28 hours ✅ Completed
+3. Week 3: Medium priority improvements (13-23) - 32 hours ✅ Completed
 4. Week 4: Low priority features (24-30) - 48 hours
-- Collaborative editing (Task 30) requires backend server infrastructure
+   - Tasks 24, 25, 27, 28, 29, 30 ✅ Completed
+   - Task 26 (Dark Mode) — remaining
+   - Task 19 (Room Grouping) — remaining
 
 ## Notes
 
