@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Room, RoomType, FloorPlan, RoomElement } from "../types";
+import { Room, RoomType, FloorPlan, RoomElement, RoomLayer } from "../types";
 import { cn } from "../utils";
 import { analyzeRoomVastu } from "../services/vastu";
 
@@ -15,6 +15,7 @@ interface CanvasProps {
   onUpdateRoomEnd?: () => void;
   onSelectRoom: (roomId: string | null, isShiftKey?: boolean) => void;
   selectedRoomIds: string[];
+  layers?: RoomLayer[];
 }
 
 const ELEMENT_COLORS: Record<string, string> = {
@@ -56,6 +57,7 @@ export function Canvas({
   onUpdateRoomEnd,
   onSelectRoom,
   selectedRoomIds,
+  layers,
 }: CanvasProps) {
   const PIXELS_PER_FOOT = 20 * zoom;
 
@@ -378,7 +380,13 @@ export function Canvas({
     PIXELS_PER_FOOT,
   ]);
 
-  const floorRooms = plan.rooms.filter((r) => r.floor === currentFloor);
+  const floorRooms = plan.rooms.filter((r) => {
+    if (r.floor !== currentFloor) return false;
+    if (!layers || layers.length === 0) return true;
+    const layer = layers.find((l) => l.name === r.category);
+    if (!layer) return true;
+    return layer.visible;
+  });
   const buildableW = Math.max(
     0,
     plan.plotWidth - plan.setbacks.left - plan.setbacks.right,
@@ -415,7 +423,8 @@ export function Canvas({
               setMeasureEnd(null);
             }
           }
-        }}
+        }
+      }}
     >
       {/* Ruler Measurement Tool */}
       {measuring && (
