@@ -24,14 +24,32 @@ export const Compass: React.FC<CompassProps> = React.memo(({ northAngle }) => {
         <div className="absolute bottom-1 left-1/2 -translate-x-1/2">
           <div className="w-0 h-0 border-l-[5px] border-r-[5px] border-t-[10px] border-l-transparent border-r-transparent border-t-slate-300" />
         </div>
-      </div>
 
-      {/* North label (outside, does not rotate with compass) */}
-      <div
-        className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-red-600 bg-white/80 px-1 rounded"
-        style={{ transform: `rotate(${-northAngle}deg)` }}
-      >
-        N
+        {/* Directional Labels — counter-rotated to stay upright */}
+        <div
+          className="absolute top-0.5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-red-600 leading-none"
+          style={{ transform: `rotate(${-northAngle}deg)` }}
+        >
+          N
+        </div>
+        <div
+          className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-slate-500 leading-none"
+          style={{ transform: `rotate(${-northAngle}deg)` }}
+        >
+          S
+        </div>
+        <div
+          className="absolute top-1/2 right-0.5 -translate-y-1/2 text-[9px] font-bold text-slate-500 leading-none"
+          style={{ transform: `rotate(${-northAngle}deg)` }}
+        >
+          E
+        </div>
+        <div
+          className="absolute top-1/2 left-0.5 -translate-y-1/2 text-[9px] font-bold text-slate-500 leading-none"
+          style={{ transform: `rotate(${-northAngle}deg)` }}
+        >
+          W
+        </div>
       </div>
     </div>
   );

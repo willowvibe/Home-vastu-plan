@@ -331,16 +331,16 @@ These tasks are required before the app can be considered a full-fledged product
 | L1 | Add React Error Boundaries to prevent full-app crashes | ✅ Done | `src/components/ErrorBoundary.tsx` |
 | L2 | Auto-save plan to localStorage on every change | ✅ Done | `src/hooks/useFloorPlan.ts` |
 | L3 | Add keyboard shortcut help modal (`?` key) | ✅ Done | `src/components/ShortcutHelp.tsx` |
-| L4 | Fix ImageEditor model name (validate against current Gemini API) | 🔲 Pending | `src/services/gemini.ts` |
-| L5 | Add undo/redo for element-level changes (not just room-level) | 🔲 Pending | `src/components/Room.tsx` |
+| L4 | Fix ImageEditor model name (validate against current Gemini API) | ✅ Done | `src/services/gemini.ts` |
+| L5 | Add undo/redo for element-level changes (not just room-level) | ✅ Done | `src/components/Room.tsx`, `src/hooks/useCanvasDrag.ts` |
 | L6 | Add input min/max validation to all numeric fields | ✅ Done | `src/App.tsx` |
-| L7 | Add onboarding/tutorial for first-time users | 🔲 Pending | `src/components/Onboarding.tsx` |
+| L7 | Add onboarding/tutorial for first-time users | ✅ Done | `src/components/Onboarding.tsx` |
 | L8 | Add PWA manifest.json and service worker | ✅ Done | `public/manifest.json`, `index.html` |
 | L9 | Improve print styles (hide more UI chrome, add page breaks) | ✅ Done | `src/index.css` |
-| L10 | Add loading skeleton for AI analysis panel | 🔲 Pending | `src/App.tsx` |
+| L10 | Add loading skeleton for AI analysis panel | ✅ Done | `src/App.tsx` |
 | L11 | Add SEO meta tags to index.html | ✅ Done | `index.html` |
-| L12 | Add room search/filter in sidebar | 🔲 Pending | `src/App.tsx` |
-| L13 | Fix roadmap-direction arrow rendering on canvas | 🔲 Pending | `src/components/Compass.tsx` |
+| L12 | Add room search/filter in sidebar | ✅ Done | `src/App.tsx` |
+| L13 | Fix roadmap-direction arrow rendering on canvas | ✅ Done | `src/components/Compass.tsx` |
 
 ### Requires Backend / Infrastructure
 

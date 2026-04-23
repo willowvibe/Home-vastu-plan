@@ -1615,7 +1615,20 @@ export default function App() {
                   )}
                 </div>
 
-                {analysis ? (
+                {isAnalyzing && !analysis ? (
+                  <div className="flex-1 flex flex-col gap-3 animate-pulse">
+                    <div className={`h-5 rounded w-3/4 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-full ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-5/6 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-4 rounded w-1/2 mt-2 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-full ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-4/5 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-2/3 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-4 rounded w-2/3 mt-2 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-full ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-3/4 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                  </div>
+                ) : analysis ? (
                   <div className="prose prose-sm prose-slate max-w-none flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
                     <ReactMarkdown>{analysis}</ReactMarkdown>
                   </div>
