@@ -36,6 +36,7 @@ import { ProjectManager } from "./components/ProjectManager";
 import { PresentationExport } from "./components/PresentationExport";
 import { Header } from "./components/layout/Header";
 import { ShortcutHelp } from "./components/ShortcutHelp";
+import { Onboarding } from "./components/Onboarding";
 import { LayerManager } from "./components/LayerManager";
 import { useFloorPlan } from "./hooks/useFloorPlan";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
@@ -106,6 +107,13 @@ export default function App() {
   const [showProjectManager, setShowProjectManager] = useState(false);
   const [showPresentationExport, setShowPresentationExport] = useState(false);
   const [showShortcutHelp, setShowShortcutHelp] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try {
+      return localStorage.getItem("vastuplan-onboarded") !== "true";
+    } catch {
+      return true;
+    }
+  });
 
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
@@ -1653,6 +1661,19 @@ export default function App() {
 
       {showShortcutHelp && (
         <ShortcutHelp onClose={() => setShowShortcutHelp(false)} />
+      )}
+
+      {showOnboarding && (
+        <Onboarding
+          onClose={() => {
+            setShowOnboarding(false);
+            try {
+              localStorage.setItem("vastuplan-onboarded", "true");
+            } catch {
+              // ignore
+            }
+          }}
+        />
       )}
 
       {/* Print Modal - hidden on screen, visible when printing */}
