@@ -18,12 +18,13 @@ interface RoomProps {
   onPointerDown: (e: React.PointerEvent, room: RoomType, type: "drag" | "resize", handle?: "se" | "sw" | "ne" | "nw") => void;
   onElementPointerDown: (e: React.PointerEvent, room: RoomType, element: RoomType["elements"][0]) => void;
   onUpdateRoom: (id: string, updates: Partial<RoomType>) => void;
+  onUpdateRoomEnd?: () => void;
 }
 
 const TOLERANCE = 0.1;
 
 export const Room: React.FC<RoomProps> = React.memo(
-  ({ room, plan, pixelsPerFoot, isSelected, floorRooms, onPointerDown, onElementPointerDown, onUpdateRoom }) => {
+  ({ room, plan, pixelsPerFoot, isSelected, floorRooms, onPointerDown, onElementPointerDown, onUpdateRoom, onUpdateRoomEnd }) => {
     const vastu = useMemo(() => analyzeRoomVastu(room, plan as any), [room, plan]);
     const vastuColor =
       vastu.status === "good"
@@ -82,8 +83,9 @@ export const Room: React.FC<RoomProps> = React.memo(
           eItem.id === elementId ? { ...eItem, rotation: newRotation % 360 } : eItem,
         );
         onUpdateRoom(room.id, { elements: updatedElements });
+        onUpdateRoomEnd?.();
       },
-      [room, onUpdateRoom],
+      [room, onUpdateRoom, onUpdateRoomEnd],
     );
 
     return (

@@ -136,6 +136,7 @@ export const Canvas: React.FC<CanvasProps> = ({
           onPointerDown={handlePointerDown}
           onElementPointerDown={handleElementPointerDown}
           onUpdateRoom={onUpdateRoom}
+          onUpdateRoomEnd={onUpdateRoomEnd}
         />
       ))}
 

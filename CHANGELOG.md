@@ -57,13 +57,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zoom limits changed from 0.5-2.0 to 0.1-3.0
 - History handling improved
 
-## [1.0.0] - Initial Release
-
-- Initial release of VastuPlan 2D
-- Interactive 2D floor plan design
-- Vastu Shastra compliance analysis
-- Multi-floor support
-
 ## [2.1.0] - 2024-12-10
 
 ### Added
@@ -84,16 +77,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ruler Measurement Tool - Click-to-measure distances on canvas
 
 ### Changed
-- Zoom limits changed from 0.5-2.0 to 0.1-3.0
 - Improved history management for undo/redo
 - Enhanced AI analysis progress indicator
+
+## [1.0.0] - 2024-10-15
+
+- Initial release of VastuPlan 2D
+- Interactive 2D floor plan design
+- Vastu Shastra compliance analysis
+- Multi-floor support
 
 ## [Unreleased] - Upcoming Features
 
 ### Planned
 - Multi-select rooms with Shift+Click (requires refactoring selectedRoomIds)
-- Collaborative editing (requires backend server with WebSockets/Firebase)
+- Collaborative editing backend deployment automation
 
 ### Notes
-- Collaborative editing requires a backend server infrastructure
+- Collaborative editing server is available in `server/` directory
 - Multi-select requires refactoring the room selection system

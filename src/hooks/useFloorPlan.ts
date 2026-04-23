@@ -1,11 +1,25 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { FloorPlan } from "../types";
 
 const MAX_HISTORY_SIZE = 50;
+const AUTO_SAVE_KEY = "vastuplan_autosave";
+
+function loadAutoSave(): FloorPlan | null {
+  try {
+    const saved = localStorage.getItem(AUTO_SAVE_KEY);
+    if (saved) return JSON.parse(saved) as FloorPlan;
+  } catch {
+    // ignore
+  }
+  return null;
+}
 
 export function useFloorPlan(initialPlan: FloorPlan) {
-  const [plan, setPlan] = useState<FloorPlan>(initialPlan);
-  const [history, setHistory] = useState<FloorPlan[]>([initialPlan]);
+  const savedPlan = loadAutoSave();
+  const startPlan = savedPlan || initialPlan;
+
+  const [plan, setPlan] = useState<FloorPlan>(startPlan);
+  const [history, setHistory] = useState<FloorPlan[]>([startPlan]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
   // Use a ref to avoid stale closure issues in nested setState callbacks
@@ -73,7 +87,21 @@ export function useFloorPlan(initialPlan: FloorPlan) {
     setPlan(newPlan);
     setHistory([newPlan]);
     setHistoryIndex(0);
+    try {
+      localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(newPlan));
+    } catch {
+      // ignore
+    }
   }, []);
+
+  // Auto-save plan to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(plan));
+    } catch {
+      // ignore (e.g. quota exceeded)
+    }
+  }, [plan]);
 
   return {
     plan,

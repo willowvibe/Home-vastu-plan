@@ -192,17 +192,17 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 **Estimated Effort:** 4 hours
 
-### 18. Missing Ruler Measurement Tool
+### 18. Missing Ruler Measurement Tool ✅ COMPLETED
 **Issue:** No way to measure distances between rooms.
 
-**Fix Required:** Add click-to-measure functionality
+**Fix Applied:** Added Ruler button to canvas toolbar. Click two points on canvas to measure distance. Measurement result persists until a new measurement is started.
 
 **Estimated Effort:** 6 hours
 
-### 19. No Room Grouping/Organization
+### 19. No Room Grouping/Organization ✅ COMPLETED
 **Issue:** Rooms have no tags, categories, or layers.
 
-**Fix Required:** Add room metadata and layer management
+**Fix Applied:** Added LayerManager component in sidebar. Users can create layers, toggle visibility, and assign rooms to layers via the properties panel. Also added room category, tags, and notes fields.
 
 **Estimated Effort:** 6 hours
 
@@ -220,14 +220,14 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 **Estimated Effort:** 3 hours
 
-- ### 23. Share Link Does Not Include AI Analysis ✅ COMPLETED
+### 22. No Loading State for AI Analysis ✅ COMPLETED
 **Issue:** AI analysis takes time but shows no progress indicator.
 
 **Fix Applied:** Added progress bar that animates during AI analysis. Controls are automatically disabled during analysis.
 
 **Estimated Effort:** 3 hours
 
-### 23. Share Link Does Not Include AI Analysis
+### 23. Share Link Does Not Include AI Analysis ✅ COMPLETED
 **Issue:** Shared plans do not include AI analysis results.
 
 **Fix Required:** Include analysis in compressed plan data
@@ -246,23 +246,31 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 - **Fix Applied:** Added SVG export button that generates clean vector output
 
-### 26. No Dark Mode
+### 26. No Dark Mode ✅ COMPLETED
 **Issue:** Only light theme available.
 
+**Fix Applied:** Added Sun/Moon toggle in Header. Preference persisted to localStorage. All UI elements styled for both light and dark themes.
+
 **Estimated Effort:** 6 hours
 
-### 27. No Plan Templates
+### 27. No Plan Templates ✅ COMPLETED
 **Issue:** Users must start from blank plan.
 
+**Fix Applied:** Added predefined templates (Small Apartment, Medium House, Large Villa) accessible from Plot Settings.
+
 **Estimated Effort:** 6 hours
 
-### 28. No Version Comparison
+### 28. No Version Comparison ✅ COMPLETED
 **Issue:** Cannot compare differences between versions.
+
+**Fix Applied:** Added version comparison in Project Manager with room count diff display.
 
 **Estimated Effort:** 8 hours
 
-### 29. No Plan Import/Export (JSON)
+### 29. No Plan Import/Export (JSON) ✅ COMPLETED
 **Issue:** Cannot import/export raw plan data.
+
+**Fix Applied:** Added JSON import/export buttons in the Data Management section of the sidebar.
 
 **Estimated Effort:** 4 hours
 
@@ -307,10 +315,49 @@ This document lists all identified bugs and usability improvements for the Vastu
 1. Week 1: Critical bugs (1-5) - 16 hours ✅ Completed
 2. Week 2: High priority bugs (6-12) - 28 hours ✅ Completed
 3. Week 3: Medium priority improvements (13-23) - 32 hours ✅ Completed
-4. Week 4: Low priority features (24-30) - 48 hours
-   - Tasks 24, 25, 27, 28, 29, 30 ✅ Completed
-   - Task 26 (Dark Mode) — remaining
-   - Task 19 (Room Grouping) — remaining
+4. Week 4: Low priority features (24-30) - 48 hours ✅ Completed
+   - Tasks 19, 24, 25, 26, 27, 28, 29, 30 ✅ Completed
+
+---
+
+## Launch Readiness (Production Checklist)
+
+These tasks are required before the app can be considered a full-fledged production web application.
+
+### Immediate (No Backend Required)
+
+| # | Task | Status | File(s) |
+|---|------|--------|---------|
+| L1 | Add React Error Boundaries to prevent full-app crashes | ✅ Done | `src/components/ErrorBoundary.tsx` |
+| L2 | Auto-save plan to localStorage on every change | ✅ Done | `src/hooks/useFloorPlan.ts` |
+| L3 | Add keyboard shortcut help modal (`?` key) | ✅ Done | `src/components/ShortcutHelp.tsx` |
+| L4 | Fix ImageEditor model name (validate against current Gemini API) | ✅ Done | `src/services/gemini.ts` |
+| L5 | Add undo/redo for element-level changes (not just room-level) | ✅ Done | `src/components/Room.tsx`, `src/hooks/useCanvasDrag.ts` |
+| L6 | Add input min/max validation to all numeric fields | ✅ Done | `src/App.tsx` |
+| L7 | Add onboarding/tutorial for first-time users | ✅ Done | `src/components/Onboarding.tsx` |
+| L8 | Add PWA manifest.json and service worker | ✅ Done | `public/manifest.json`, `index.html` |
+| L9 | Improve print styles (hide more UI chrome, add page breaks) | ✅ Done | `src/index.css` |
+| L10 | Add loading skeleton for AI analysis panel | ✅ Done | `src/App.tsx` |
+| L11 | Add SEO meta tags to index.html | ✅ Done | `index.html` |
+| L12 | Add room search/filter in sidebar | ✅ Done | `src/App.tsx` |
+| L13 | Fix roadmap-direction arrow rendering on canvas | ✅ Done | `src/components/Compass.tsx` |
+
+### Requires Backend / Infrastructure
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| L14 | Add user authentication (OAuth, email/password) | 🔲 Pending | Need auth provider |
+| L15 | Persist plans to database (PostgreSQL/MongoDB) | 🔲 Pending | Need cloud DB |
+| L16 | Replace URL-based sharing with database share links | 🔲 Pending | Short shareable URLs |
+| L17 | Add auto-save to cloud | 🔲 Pending | Depends on L14, L15 |
+| L18 | Add CI/CD pipeline (GitHub Actions) | 🔲 Pending | Build, test, deploy |
+| L19 | Add Docker support | 🔲 Pending | `Dockerfile`, `docker-compose.yml` |
+| L20 | Add testing infrastructure (Vitest + React Testing Library) | 🔲 Pending | Unit + integration tests |
+| L21 | Add E2E tests (Playwright) | 🔲 Pending | Critical user flows |
+| L22 | Add ESLint + Prettier configuration | 🔲 Pending | Code quality |
+| L23 | Add error tracking (Sentry) | 🔲 Pending | Monitor production errors |
+| L24 | Add analytics (Plausible/PostHog) | 🔲 Pending | Track feature usage |
+| L25 | Deploy collaboration server | 🔲 Pending | `server/` needs hosting |
 
 ## Notes
 

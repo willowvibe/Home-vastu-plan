@@ -64,16 +64,19 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
     - `Ctrl+Z` / `Ctrl+Y` for Undo/Redo
     - `Delete` to remove rooms
     - `Ctrl+D` to duplicate rooms
-    - `R` to rotate elements
+    - `R` to rotate selected rooms
     - `G` to toggle Vastu Grid
+    - `Ctrl+Plus` / `Ctrl+Minus` to zoom in/out
     - `Ctrl+S` to save as PNG
-6.  **Check Vastu**: Toggle the "Vastu Grid" on the canvas toolbar to see the zones. Watch the overall Vastu Score update as you move rooms.
-8.  **Analyze**: Click "Analyze with AI" in the right sidebar for a detailed review.
-9.  **Export**: Click "Export PNG" to save your design.
+8.  **Check Vastu**: Toggle the "Vastu Grid" on the canvas toolbar to see the zones. Watch the overall Vastu Score update as you move rooms.
+9.  **Analyze**: Click "Analyze with AI" in the right sidebar for a detailed review.
+10. **Export**: Click "Export PNG" to save your design.
 
 ## 🧠 Vastu Logic Explained
 
 The app uses a coordinate system relative to the center of the buildable area. It calculates the angle of each room from the center, adjusts it by the user-defined North Angle, and maps it to one of the 8 cardinal/ordinal directions.
+
+For example, a Kitchen placed in the South-East zone will receive a high score, while a Kitchen in the North-East will receive a lower score and a warning, adhering to traditional Vastu guidelines.
 
 ## 🆕 New Features (v2.0)
 
@@ -107,5 +110,3 @@ This version includes significant bug fixes and usability improvements:
 - Fixed wall thickness changes not adjusting element positions
 - Fixed share links not including AI analysis results
 - Fixed large plan handling with size validation and clear error messages
-
-For example, a Kitchen placed in the South-East zone will receive a high score, while a Kitchen in the North-East will receive a lower score and a warning, adhering to traditional Vastu guidelines.

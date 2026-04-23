@@ -28,12 +28,15 @@ import {
   Share2,
   FileText,
   Copy,
+  Search,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import LZString from "lz-string";
 import { ProjectManager } from "./components/ProjectManager";
 import { PresentationExport } from "./components/PresentationExport";
 import { Header } from "./components/layout/Header";
+import { ShortcutHelp } from "./components/ShortcutHelp";
+import { Onboarding } from "./components/Onboarding";
 import { LayerManager } from "./components/LayerManager";
 import { useFloorPlan } from "./hooks/useFloorPlan";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
@@ -68,6 +71,7 @@ export default function App() {
 
   const [currentFloor, setCurrentFloor] = useState(0);
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
+  const [roomSearch, setRoomSearch] = useState("");
 
   const [activeTab, setActiveTab] = useState<"design" | "image">("design");
   const [analysis, setAnalysis] = useState<string | null>(null);
@@ -102,6 +106,14 @@ export default function App() {
   const [appMode, setAppMode] = useState<"edit" | "view" | "comment">("edit");
   const [showProjectManager, setShowProjectManager] = useState(false);
   const [showPresentationExport, setShowPresentationExport] = useState(false);
+  const [showShortcutHelp, setShowShortcutHelp] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try {
+      return localStorage.getItem("vastuplan-onboarded") !== "true";
+    } catch {
+      return true;
+    }
+  });
 
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
@@ -491,6 +503,11 @@ export default function App() {
     redo,
     onDelete: handleDelete,
     onDuplicate: handleDuplicate,
+    onRotate: rotateSelectedRooms,
+    onToggleGrid: () => setShowVastuGrid((prev) => !prev),
+    onZoomIn: () => setZoom((z) => Math.min(3, z + 0.1)),
+    onZoomOut: () => setZoom((z) => Math.max(0.1, z - 0.1)),
+    onShowShortcuts: () => setShowShortcutHelp(true),
     hasSelection: selectedRoomIds.length > 0,
   });
 
@@ -600,11 +617,14 @@ export default function App() {
                     </label>
                     <input
                       type="number"
+                      min="5"
+                      max="500"
                       value={plan.plotWidth}
                       onChange={(e) => {
+                        const val = Math.max(5, Math.min(500, Number(e.target.value) || 10));
                         updatePlan((p) => ({
                           ...p,
-                          plotWidth: Number(e.target.value) || 10,
+                          plotWidth: val,
                         }));
                         commitHistory();
                       }}
@@ -619,11 +639,14 @@ export default function App() {
                     </label>
                     <input
                       type="number"
+                      min="5"
+                      max="500"
                       value={plan.plotHeight}
                       onChange={(e) => {
+                        const val = Math.max(5, Math.min(500, Number(e.target.value) || 10));
                         updatePlan((p) => ({
                           ...p,
-                          plotHeight: Number(e.target.value) || 10,
+                          plotHeight: val,
                         }));
                         commitHistory();
                       }}
@@ -743,11 +766,13 @@ export default function App() {
                       </label>
                       <input
                         type="number"
+                        min="0"
+                        max={plan.plotHeight}
                         value={plan.setbacks.top}
                         onChange={(e) =>
                           handleSetbackChange(
                             "top",
-                            Number(e.target.value) || 0,
+                            Math.max(0, Math.min(plan.plotHeight, Number(e.target.value) || 0)),
                           )
                         }
                         className="w-full border border-slate-200 rounded-md px-2 py-1 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -759,11 +784,13 @@ export default function App() {
                       </label>
                       <input
                         type="number"
+                        min="0"
+                        max={plan.plotWidth}
                         value={plan.setbacks.right}
                         onChange={(e) =>
                           handleSetbackChange(
                             "right",
-                            Number(e.target.value) || 0,
+                            Math.max(0, Math.min(plan.plotWidth, Number(e.target.value) || 0)),
                           )
                         }
                         className="w-full border border-slate-200 rounded-md px-2 py-1 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -775,11 +802,13 @@ export default function App() {
                       </label>
                       <input
                         type="number"
+                        min="0"
+                        max={plan.plotHeight}
                         value={plan.setbacks.bottom}
                         onChange={(e) =>
                           handleSetbackChange(
                             "bottom",
-                            Number(e.target.value) || 0,
+                            Math.max(0, Math.min(plan.plotHeight, Number(e.target.value) || 0)),
                           )
                         }
                         className="w-full border border-slate-200 rounded-md px-2 py-1 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -791,11 +820,13 @@ export default function App() {
                       </label>
                       <input
                         type="number"
+                        min="0"
+                        max={plan.plotWidth}
                         value={plan.setbacks.left}
                         onChange={(e) =>
                           handleSetbackChange(
                             "left",
-                            Number(e.target.value) || 0,
+                            Math.max(0, Math.min(plan.plotWidth, Number(e.target.value) || 0)),
                           )
                         }
                         className="w-full border border-slate-200 rounded-md px-2 py-1 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -948,8 +979,20 @@ export default function App() {
                 <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Plus className="w-4 h-4 text-slate-400" /> Add Rooms
                 </h3>
+                <div className="relative mb-3">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search room types..."
+                    value={roomSearch}
+                    onChange={(e) => setRoomSearch(e.target.value)}
+                    className={`w-full border rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? "bg-slate-800 border-slate-600 text-white placeholder-slate-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400"}`}
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-2">
-                  {ROOM_TYPES.map((rt) => (
+                  {ROOM_TYPES.filter((rt) =>
+                    rt.type.toLowerCase().includes(roomSearch.toLowerCase())
+                  ).map((rt) => (
                     <button
                       key={rt.type}
                       onClick={() => addRoom(rt.type, rt.w, rt.h)}
@@ -964,6 +1007,11 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+                {ROOM_TYPES.filter((rt) =>
+                  rt.type.toLowerCase().includes(roomSearch.toLowerCase())
+                ).length === 0 && (
+                  <p className="text-xs text-slate-400 text-center py-2">No rooms match your search.</p>
+                )}
               </div>
             </div>
 
@@ -990,7 +1038,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={redo}
-                    disabled={historyIndex === history.length - 1}
+                    disabled={historyIndex === historyLength - 1}
                     className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Redo (Ctrl+Y)"
                   >
@@ -1000,7 +1048,7 @@ export default function App() {
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
+                    onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
                     className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-sm transition-colors"
                     title="Zoom Out"
                   >
@@ -1010,7 +1058,7 @@ export default function App() {
                     {Math.round(zoom * 100)}%
                   </div>
                   <button
-                    onClick={() => setZoom((z) => Math.min(2, z + 0.1))}
+                    onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
                     className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-sm transition-colors"
                     title="Zoom In"
                   >
@@ -1215,10 +1263,12 @@ export default function App() {
                             </label>
                             <input
                               type="number"
+                              min="2"
+                              max="500"
                               value={room.w}
                               onChange={(e) =>
                                 updateRoom(room.id, {
-                                  w: Number(e.target.value) || 2,
+                                  w: Math.max(2, Math.min(500, Number(e.target.value) || 2)),
                                 })
                               }
                               onBlur={commitHistory}
@@ -1231,10 +1281,12 @@ export default function App() {
                             </label>
                             <input
                               type="number"
+                              min="2"
+                              max="500"
                               value={room.h}
                               onChange={(e) =>
                                 updateRoom(room.id, {
-                                  h: Number(e.target.value) || 2,
+                                  h: Math.max(2, Math.min(500, Number(e.target.value) || 2)),
                                 })
                               }
                               onBlur={commitHistory}
@@ -1563,7 +1615,20 @@ export default function App() {
                   )}
                 </div>
 
-                {analysis ? (
+                {isAnalyzing && !analysis ? (
+                  <div className="flex-1 flex flex-col gap-3 animate-pulse">
+                    <div className={`h-5 rounded w-3/4 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-full ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-5/6 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-4 rounded w-1/2 mt-2 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-full ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-4/5 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-2/3 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-4 rounded w-2/3 mt-2 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-full ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                    <div className={`h-3 rounded w-3/4 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`} />
+                  </div>
+                ) : analysis ? (
                   <div className="prose prose-sm prose-slate max-w-none flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
                     <ReactMarkdown>{analysis}</ReactMarkdown>
                   </div>
@@ -1604,6 +1669,23 @@ export default function App() {
           plan={plan}
           currentFloor={currentFloor}
           onClose={() => setShowPresentationExport(false)}
+        />
+      )}
+
+      {showShortcutHelp && (
+        <ShortcutHelp onClose={() => setShowShortcutHelp(false)} />
+      )}
+
+      {showOnboarding && (
+        <Onboarding
+          onClose={() => {
+            setShowOnboarding(false);
+            try {
+              localStorage.setItem("vastuplan-onboarded", "true");
+            } catch {
+              // ignore
+            }
+          }}
         />
       )}
 

@@ -50,6 +50,18 @@ npm run dev
 npm run build
 ```
 
+### Collaboration Server (Optional)
+
+To run the real-time collaboration backend:
+
+```bash
+cd server
+npm install
+npm run dev
+```
+
+The server runs on port 3001 by default. Set `VITE_COLLAB_SERVER_URL` in your `.env` file to point to the server.
+
 ## Coding Standards
 
 - Use TypeScript for all code
