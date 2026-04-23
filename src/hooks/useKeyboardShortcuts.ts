@@ -9,6 +9,7 @@ interface UseKeyboardShortcutsOptions {
   onToggleGrid?: () => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
+  onShowShortcuts?: () => void;
   hasSelection: boolean;
 }
 
@@ -21,6 +22,7 @@ export function useKeyboardShortcuts({
   onToggleGrid,
   onZoomIn,
   onZoomOut,
+  onShowShortcuts,
   hasSelection,
 }: UseKeyboardShortcutsOptions) {
   const handleKeyDown = useCallback(
@@ -70,9 +72,12 @@ export function useKeyboardShortcuts({
       } else if ((e.ctrlKey || e.metaKey) && e.key === "-") {
         e.preventDefault();
         onZoomOut?.();
+      } else if (e.key === "?" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        onShowShortcuts?.();
       }
     },
-    [undo, redo, onDelete, onDuplicate, onRotate, onToggleGrid, onZoomIn, onZoomOut, hasSelection],
+    [undo, redo, onDelete, onDuplicate, onRotate, onToggleGrid, onZoomIn, onZoomOut, onShowShortcuts, hasSelection],
   );
 
   useEffect(() => {

@@ -34,6 +34,7 @@ import LZString from "lz-string";
 import { ProjectManager } from "./components/ProjectManager";
 import { PresentationExport } from "./components/PresentationExport";
 import { Header } from "./components/layout/Header";
+import { ShortcutHelp } from "./components/ShortcutHelp";
 import { LayerManager } from "./components/LayerManager";
 import { useFloorPlan } from "./hooks/useFloorPlan";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
@@ -102,6 +103,7 @@ export default function App() {
   const [appMode, setAppMode] = useState<"edit" | "view" | "comment">("edit");
   const [showProjectManager, setShowProjectManager] = useState(false);
   const [showPresentationExport, setShowPresentationExport] = useState(false);
+  const [showShortcutHelp, setShowShortcutHelp] = useState(false);
 
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
@@ -495,6 +497,7 @@ export default function App() {
     onToggleGrid: () => setShowVastuGrid((prev) => !prev),
     onZoomIn: () => setZoom((z) => Math.min(3, z + 0.1)),
     onZoomOut: () => setZoom((z) => Math.max(0.1, z - 0.1)),
+    onShowShortcuts: () => setShowShortcutHelp(true),
     hasSelection: selectedRoomIds.length > 0,
   });
 
@@ -604,11 +607,14 @@ export default function App() {
                     </label>
                     <input
                       type="number"
+                      min="5"
+                      max="500"
                       value={plan.plotWidth}
                       onChange={(e) => {
+                        const val = Math.max(5, Math.min(500, Number(e.target.value) || 10));
                         updatePlan((p) => ({
                           ...p,
-                          plotWidth: Number(e.target.value) || 10,
+                          plotWidth: val,
                         }));
                         commitHistory();
                       }}
@@ -623,11 +629,14 @@ export default function App() {
                     </label>
                     <input
                       type="number"
+                      min="5"
+                      max="500"
                       value={plan.plotHeight}
                       onChange={(e) => {
+                        const val = Math.max(5, Math.min(500, Number(e.target.value) || 10));
                         updatePlan((p) => ({
                           ...p,
-                          plotHeight: Number(e.target.value) || 10,
+                          plotHeight: val,
                         }));
                         commitHistory();
                       }}
@@ -747,11 +756,13 @@ export default function App() {
                       </label>
                       <input
                         type="number"
+                        min="0"
+                        max={plan.plotHeight}
                         value={plan.setbacks.top}
                         onChange={(e) =>
                           handleSetbackChange(
                             "top",
-                            Number(e.target.value) || 0,
+                            Math.max(0, Math.min(plan.plotHeight, Number(e.target.value) || 0)),
                           )
                         }
                         className="w-full border border-slate-200 rounded-md px-2 py-1 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -763,11 +774,13 @@ export default function App() {
                       </label>
                       <input
                         type="number"
+                        min="0"
+                        max={plan.plotWidth}
                         value={plan.setbacks.right}
                         onChange={(e) =>
                           handleSetbackChange(
                             "right",
-                            Number(e.target.value) || 0,
+                            Math.max(0, Math.min(plan.plotWidth, Number(e.target.value) || 0)),
                           )
                         }
                         className="w-full border border-slate-200 rounded-md px-2 py-1 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -779,11 +792,13 @@ export default function App() {
                       </label>
                       <input
                         type="number"
+                        min="0"
+                        max={plan.plotHeight}
                         value={plan.setbacks.bottom}
                         onChange={(e) =>
                           handleSetbackChange(
                             "bottom",
-                            Number(e.target.value) || 0,
+                            Math.max(0, Math.min(plan.plotHeight, Number(e.target.value) || 0)),
                           )
                         }
                         className="w-full border border-slate-200 rounded-md px-2 py-1 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -795,11 +810,13 @@ export default function App() {
                       </label>
                       <input
                         type="number"
+                        min="0"
+                        max={plan.plotWidth}
                         value={plan.setbacks.left}
                         onChange={(e) =>
                           handleSetbackChange(
                             "left",
-                            Number(e.target.value) || 0,
+                            Math.max(0, Math.min(plan.plotWidth, Number(e.target.value) || 0)),
                           )
                         }
                         className="w-full border border-slate-200 rounded-md px-2 py-1 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -1219,10 +1236,12 @@ export default function App() {
                             </label>
                             <input
                               type="number"
+                              min="2"
+                              max="500"
                               value={room.w}
                               onChange={(e) =>
                                 updateRoom(room.id, {
-                                  w: Number(e.target.value) || 2,
+                                  w: Math.max(2, Math.min(500, Number(e.target.value) || 2)),
                                 })
                               }
                               onBlur={commitHistory}
@@ -1235,10 +1254,12 @@ export default function App() {
                             </label>
                             <input
                               type="number"
+                              min="2"
+                              max="500"
                               value={room.h}
                               onChange={(e) =>
                                 updateRoom(room.id, {
-                                  h: Number(e.target.value) || 2,
+                                  h: Math.max(2, Math.min(500, Number(e.target.value) || 2)),
                                 })
                               }
                               onBlur={commitHistory}
@@ -1609,6 +1630,10 @@ export default function App() {
           currentFloor={currentFloor}
           onClose={() => setShowPresentationExport(false)}
         />
+      )}
+
+      {showShortcutHelp && (
+        <ShortcutHelp onClose={() => setShowShortcutHelp(false)} />
       )}
 
       {/* Print Modal - hidden on screen, visible when printing */}

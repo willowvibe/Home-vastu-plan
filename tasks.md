@@ -318,6 +318,47 @@ This document lists all identified bugs and usability improvements for the Vastu
 4. Week 4: Low priority features (24-30) - 48 hours ✅ Completed
    - Tasks 19, 24, 25, 26, 27, 28, 29, 30 ✅ Completed
 
+---
+
+## Launch Readiness (Production Checklist)
+
+These tasks are required before the app can be considered a full-fledged production web application.
+
+### Immediate (No Backend Required)
+
+| # | Task | Status | File(s) |
+|---|------|--------|---------|
+| L1 | Add React Error Boundaries to prevent full-app crashes | ✅ Done | `src/components/ErrorBoundary.tsx` |
+| L2 | Auto-save plan to localStorage on every change | ✅ Done | `src/hooks/useFloorPlan.ts` |
+| L3 | Add keyboard shortcut help modal (`?` key) | ✅ Done | `src/components/ShortcutHelp.tsx` |
+| L4 | Fix ImageEditor model name (validate against current Gemini API) | 🔲 Pending | `src/services/gemini.ts` |
+| L5 | Add undo/redo for element-level changes (not just room-level) | 🔲 Pending | `src/components/Room.tsx` |
+| L6 | Add input min/max validation to all numeric fields | ✅ Done | `src/App.tsx` |
+| L7 | Add onboarding/tutorial for first-time users | 🔲 Pending | `src/components/Onboarding.tsx` |
+| L8 | Add PWA manifest.json and service worker | ✅ Done | `public/manifest.json`, `index.html` |
+| L9 | Improve print styles (hide more UI chrome, add page breaks) | ✅ Done | `src/index.css` |
+| L10 | Add loading skeleton for AI analysis panel | 🔲 Pending | `src/App.tsx` |
+| L11 | Add SEO meta tags to index.html | ✅ Done | `index.html` |
+| L12 | Add room search/filter in sidebar | 🔲 Pending | `src/App.tsx` |
+| L13 | Fix roadmap-direction arrow rendering on canvas | 🔲 Pending | `src/components/Compass.tsx` |
+
+### Requires Backend / Infrastructure
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| L14 | Add user authentication (OAuth, email/password) | 🔲 Pending | Need auth provider |
+| L15 | Persist plans to database (PostgreSQL/MongoDB) | 🔲 Pending | Need cloud DB |
+| L16 | Replace URL-based sharing with database share links | 🔲 Pending | Short shareable URLs |
+| L17 | Add auto-save to cloud | 🔲 Pending | Depends on L14, L15 |
+| L18 | Add CI/CD pipeline (GitHub Actions) | 🔲 Pending | Build, test, deploy |
+| L19 | Add Docker support | 🔲 Pending | `Dockerfile`, `docker-compose.yml` |
+| L20 | Add testing infrastructure (Vitest + React Testing Library) | 🔲 Pending | Unit + integration tests |
+| L21 | Add E2E tests (Playwright) | 🔲 Pending | Critical user flows |
+| L22 | Add ESLint + Prettier configuration | 🔲 Pending | Code quality |
+| L23 | Add error tracking (Sentry) | 🔲 Pending | Monitor production errors |
+| L24 | Add analytics (Plausible/PostHog) | 🔲 Pending | Track feature usage |
+| L25 | Deploy collaboration server | 🔲 Pending | `server/` needs hosting |
+
 ## Notes
 
 - All fixes should include unit tests where applicable

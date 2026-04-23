@@ -17,7 +17,12 @@
 @layer utilities {
     /* Print styles - hide UI elements when printing */
     @media print {
-        .no-print {
+        .no-print,
+        header,
+        aside,
+        .custom-scrollbar::-webkit-scrollbar,
+        button:not(.print-keep),
+        .print-hide {
             display: none !important;
         }
         .print-only {
@@ -26,10 +31,15 @@
         body {
             margin: 0;
             padding: 0;
+            background: white !important;
         }
         .print-area {
             width: 100%;
             max-width: 100%;
+        }
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
     }
 }
