@@ -192,17 +192,17 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 **Estimated Effort:** 4 hours
 
-### 18. Missing Ruler Measurement Tool
+### 18. Missing Ruler Measurement Tool ✅ COMPLETED
 **Issue:** No way to measure distances between rooms.
 
-**Fix Required:** Add click-to-measure functionality
+**Fix Applied:** Added Ruler button to canvas toolbar. Click two points on canvas to measure distance. Measurement result persists until a new measurement is started.
 
 **Estimated Effort:** 6 hours
 
-### 19. No Room Grouping/Organization
+### 19. No Room Grouping/Organization ✅ COMPLETED
 **Issue:** Rooms have no tags, categories, or layers.
 
-**Fix Required:** Add room metadata and layer management
+**Fix Applied:** Added LayerManager component in sidebar. Users can create layers, toggle visibility, and assign rooms to layers via the properties panel. Also added room category, tags, and notes fields.
 
 **Estimated Effort:** 6 hours
 
@@ -220,14 +220,14 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 **Estimated Effort:** 3 hours
 
-- ### 23. Share Link Does Not Include AI Analysis ✅ COMPLETED
+### 22. No Loading State for AI Analysis ✅ COMPLETED
 **Issue:** AI analysis takes time but shows no progress indicator.
 
 **Fix Applied:** Added progress bar that animates during AI analysis. Controls are automatically disabled during analysis.
 
 **Estimated Effort:** 3 hours
 
-### 23. Share Link Does Not Include AI Analysis
+### 23. Share Link Does Not Include AI Analysis ✅ COMPLETED
 **Issue:** Shared plans do not include AI analysis results.
 
 **Fix Required:** Include analysis in compressed plan data
@@ -246,23 +246,31 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 - **Fix Applied:** Added SVG export button that generates clean vector output
 
-### 26. No Dark Mode
+### 26. No Dark Mode ✅ COMPLETED
 **Issue:** Only light theme available.
 
+**Fix Applied:** Added Sun/Moon toggle in Header. Preference persisted to localStorage. All UI elements styled for both light and dark themes.
+
 **Estimated Effort:** 6 hours
 
-### 27. No Plan Templates
+### 27. No Plan Templates ✅ COMPLETED
 **Issue:** Users must start from blank plan.
 
+**Fix Applied:** Added predefined templates (Small Apartment, Medium House, Large Villa) accessible from Plot Settings.
+
 **Estimated Effort:** 6 hours
 
-### 28. No Version Comparison
+### 28. No Version Comparison ✅ COMPLETED
 **Issue:** Cannot compare differences between versions.
+
+**Fix Applied:** Added version comparison in Project Manager with room count diff display.
 
 **Estimated Effort:** 8 hours
 
-### 29. No Plan Import/Export (JSON)
+### 29. No Plan Import/Export (JSON) ✅ COMPLETED
 **Issue:** Cannot import/export raw plan data.
+
+**Fix Applied:** Added JSON import/export buttons in the Data Management section of the sidebar.
 
 **Estimated Effort:** 4 hours
 
@@ -307,10 +315,8 @@ This document lists all identified bugs and usability improvements for the Vastu
 1. Week 1: Critical bugs (1-5) - 16 hours ✅ Completed
 2. Week 2: High priority bugs (6-12) - 28 hours ✅ Completed
 3. Week 3: Medium priority improvements (13-23) - 32 hours ✅ Completed
-4. Week 4: Low priority features (24-30) - 48 hours
-   - Tasks 24, 25, 27, 28, 29, 30 ✅ Completed
-   - Task 26 (Dark Mode) — remaining
-   - Task 19 (Room Grouping) — remaining
+4. Week 4: Low priority features (24-30) - 48 hours ✅ Completed
+   - Tasks 19, 24, 25, 26, 27, 28, 29, 30 ✅ Completed
 
 ## Notes
 

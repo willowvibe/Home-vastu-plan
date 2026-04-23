@@ -491,6 +491,10 @@ export default function App() {
     redo,
     onDelete: handleDelete,
     onDuplicate: handleDuplicate,
+    onRotate: rotateSelectedRooms,
+    onToggleGrid: () => setShowVastuGrid((prev) => !prev),
+    onZoomIn: () => setZoom((z) => Math.min(3, z + 0.1)),
+    onZoomOut: () => setZoom((z) => Math.max(0.1, z - 0.1)),
     hasSelection: selectedRoomIds.length > 0,
   });
 
@@ -990,7 +994,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={redo}
-                    disabled={historyIndex === history.length - 1}
+                    disabled={historyIndex === historyLength - 1}
                     className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Redo (Ctrl+Y)"
                   >
@@ -1000,7 +1004,7 @@ export default function App() {
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
+                    onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
                     className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-sm transition-colors"
                     title="Zoom Out"
                   >
@@ -1010,7 +1014,7 @@ export default function App() {
                     {Math.round(zoom * 100)}%
                   </div>
                   <button
-                    onClick={() => setZoom((z) => Math.min(2, z + 0.1))}
+                    onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
                     className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-sm transition-colors"
                     title="Zoom In"
                   >

@@ -52,6 +52,13 @@ This document lists all tasks that have been completed.
 - ✅ Keyboard shortcuts ignore events when user is typing in inputs
 - ✅ Room vastu analysis memoized with useMemo
 
+## Bug Fixes (Post-Merge Cleanup)
+- ✅ **Redo button crash**: Fixed `history.length` ReferenceError in App.tsx (used `historyLength` from useFloorPlan)
+- ✅ **Zoom limits incorrect**: Fixed hardcoded 0.5-2.0 limits to 0.1-3.0 in App.tsx toolbar buttons
+- ✅ **Element rotation history**: Fixed double-click element rotation not saving to undo history (added `onUpdateRoomEnd` propagation through Canvas → Room)
+- ✅ **Missing keyboard shortcuts**: Added `R` (rotate), `G` (toggle grid), `Ctrl+Plus/Minus` (zoom) shortcuts to match README documentation
+- ✅ **Server type errors**: Excluded `server/` directory from root `tsconfig.json` to avoid missing dependency errors
+
 ## Summary
 
 | Priority | Total | Completed | Percentage |

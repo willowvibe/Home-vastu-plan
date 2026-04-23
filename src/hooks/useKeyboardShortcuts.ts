@@ -5,6 +5,10 @@ interface UseKeyboardShortcutsOptions {
   redo: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onRotate?: () => void;
+  onToggleGrid?: () => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
   hasSelection: boolean;
 }
 
@@ -13,6 +17,10 @@ export function useKeyboardShortcuts({
   redo,
   onDelete,
   onDuplicate,
+  onRotate,
+  onToggleGrid,
+  onZoomIn,
+  onZoomOut,
   hasSelection,
 }: UseKeyboardShortcutsOptions) {
   const handleKeyDown = useCallback(
@@ -46,9 +54,25 @@ export function useKeyboardShortcuts({
         if (hasSelection) {
           onDuplicate();
         }
+      } else if (e.key === "r" || e.key === "R") {
+        if (hasSelection && onRotate) {
+          e.preventDefault();
+          onRotate();
+        }
+      } else if (e.key === "g" || e.key === "G") {
+        if (onToggleGrid) {
+          e.preventDefault();
+          onToggleGrid();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === "+" || e.key === "=")) {
+        e.preventDefault();
+        onZoomIn?.();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "-") {
+        e.preventDefault();
+        onZoomOut?.();
       }
     },
-    [undo, redo, onDelete, onDuplicate, hasSelection],
+    [undo, redo, onDelete, onDuplicate, onRotate, onToggleGrid, onZoomIn, onZoomOut, hasSelection],
   );
 
   useEffect(() => {
