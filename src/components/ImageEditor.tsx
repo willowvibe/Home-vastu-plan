@@ -24,11 +24,15 @@ export function ImageEditor() {
 
   const handleEdit = async () => {
     if (!image || !prompt) return;
-    
+
     setIsProcessing(true);
     try {
       const editedImageUrl = await editFloorPlanImage(image, prompt);
-      setResult(editedImageUrl);
+      if (editedImageUrl) {
+        setResult(editedImageUrl);
+      } else {
+        alert("Image editing is not available with the current model. Try describing what you want in text instead.");
+      }
     } catch (error) {
       console.error("Error editing image:", error);
       alert("Failed to edit image. Please try again.");

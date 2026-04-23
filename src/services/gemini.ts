@@ -38,7 +38,7 @@ Format your response in clean Markdown with clear headings and bullet points.
 `;
 
   const response = await getAI().models.generateContent({
-    model: "gemini-2.5-pro-preview-03-25",
+    model: "gemini-2.5-flash",
     contents: prompt,
   });
 
@@ -54,7 +54,7 @@ export async function editFloorPlanImage(imageFile: File, promptText: string) {
   });
 
   const response = await getAI().models.generateContent({
-    model: "gemini-2.0-flash-exp-image-generation",
+    model: "gemini-2.0-flash",
     contents: {
       parts: [
         {
@@ -76,5 +76,6 @@ export async function editFloorPlanImage(imageFile: File, promptText: string) {
     }
   }
 
-  throw new Error("No image generated");
+  // Fallback: if no image was generated, return null so the UI can show a message
+  return null;
 }

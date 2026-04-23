@@ -28,6 +28,7 @@ import {
   Share2,
   FileText,
   Copy,
+  Search,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import LZString from "lz-string";
@@ -69,6 +70,7 @@ export default function App() {
 
   const [currentFloor, setCurrentFloor] = useState(0);
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
+  const [roomSearch, setRoomSearch] = useState("");
 
   const [activeTab, setActiveTab] = useState<"design" | "image">("design");
   const [analysis, setAnalysis] = useState<string | null>(null);
@@ -969,8 +971,20 @@ export default function App() {
                 <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Plus className="w-4 h-4 text-slate-400" /> Add Rooms
                 </h3>
+                <div className="relative mb-3">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search room types..."
+                    value={roomSearch}
+                    onChange={(e) => setRoomSearch(e.target.value)}
+                    className={`w-full border rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? "bg-slate-800 border-slate-600 text-white placeholder-slate-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400"}`}
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-2">
-                  {ROOM_TYPES.map((rt) => (
+                  {ROOM_TYPES.filter((rt) =>
+                    rt.type.toLowerCase().includes(roomSearch.toLowerCase())
+                  ).map((rt) => (
                     <button
                       key={rt.type}
                       onClick={() => addRoom(rt.type, rt.w, rt.h)}
@@ -985,6 +999,11 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+                {ROOM_TYPES.filter((rt) =>
+                  rt.type.toLowerCase().includes(roomSearch.toLowerCase())
+                ).length === 0 && (
+                  <p className="text-xs text-slate-400 text-center py-2">No rooms match your search.</p>
+                )}
               </div>
             </div>
 
