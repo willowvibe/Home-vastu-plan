@@ -1,4 +1,4 @@
-import plausible, { TrackOptions } from 'plausible-tracker';
+import plausible, { EventOptions } from 'plausible-tracker';
 
 interface AnalyticsConfig {
   enabled?: boolean;
@@ -25,10 +25,7 @@ function getTracker() {
 /**
  * Track a custom event
  */
-export function trackEvent(
-  eventName: string,
-  options?: TrackOptions
-): void {
+export function trackEvent(eventName: string, options?: EventOptions): void {
   if (!config.enabled) {
     console.log(`[Analytics] Event: ${eventName}`, options);
     return;
@@ -58,7 +55,7 @@ export function trackPageView(url?: string): void {
 /**
  * Track a goal conversion
  */
-export function trackGoal(goalName: string, options?: TrackOptions): void {
+export function trackGoal(goalName: string, options?: EventOptions): void {
   trackEvent(goalName, options);
 }
 

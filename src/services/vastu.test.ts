@@ -1,20 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { analyzeRoomVastu, calculateOverallVastuScore, getDirection } from './vastu';
+import type { FloorPlan, Room, RoomType } from '../types';
 
 describe('vastu', () => {
-  const plan = {
+  const plan: FloorPlan = {
     plotWidth: 30,
     plotHeight: 40,
     setbacks: { top: 2, right: 2, bottom: 2, left: 2 },
     northAngle: 0,
-    roadDirection: 'East',
+    roadDirection: 'E',
+    unit: 'ft',
     rooms: [],
     layers: [],
   };
 
   describe('analyzeRoomVastu', () => {
     it('should analyze room and return direction with score', () => {
-      const room = {
+      const room: Room = {
         id: '1',
         type: 'Kitchen',
         x: 10,
@@ -36,16 +38,17 @@ describe('vastu', () => {
     });
 
     it('should return default score for unknown room type', () => {
+      // Use type assertion to bypass TypeScript type checking for unknown type
       const room = {
         id: '1',
-        type: 'Unknown Room' as any,
+        type: 'Unknown Room' as RoomType,
         x: 10,
         y: 10,
         w: 10,
         h: 8,
         floor: 0,
         wallThickness: 9,
-      };
+      } as Room;
 
       const result = analyzeRoomVastu(room, plan);
 
@@ -54,7 +57,7 @@ describe('vastu', () => {
     });
 
     it('should return different scores for different zones', () => {
-      const room = {
+      const room: Room = {
         id: '1',
         type: 'Bedroom',
         x: 5,
@@ -74,7 +77,7 @@ describe('vastu', () => {
 
   describe('calculateOverallVastuScore', () => {
     it('should calculate score for single room', () => {
-      const planWithRoom = {
+      const planWithRoom: FloorPlan = {
         ...plan,
         rooms: [
           {
@@ -97,7 +100,7 @@ describe('vastu', () => {
     });
 
     it('should calculate score for multiple rooms', () => {
-      const planWithRooms = {
+      const planWithRooms: FloorPlan = {
         ...plan,
         rooms: [
           {

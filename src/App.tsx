@@ -381,7 +381,10 @@ export default function App() {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
     trackEvent(EVENTS.AI_ANALYZED, {
-      props: { floor: currentFloor, roomCount: plan.rooms.filter(r => r.floor === currentFloor).length },
+      props: {
+        floor: currentFloor,
+        roomCount: plan.rooms.filter((r) => r.floor === currentFloor).length,
+      },
     });
     try {
       const progressInterval = setInterval(() => {
@@ -1154,6 +1157,7 @@ export default function App() {
 
               <div
                 ref={canvasContainerRef}
+                data-testid="canvas-container"
                 className={`p-4 rounded-xl shadow-sm border inline-block ${appMode === 'view' ? 'pointer-events-none' : ''} ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
               >
                 <Canvas
@@ -1692,10 +1696,12 @@ export default function App() {
       )}
 
       {showShortcutHelp && (
-        <ShortcutHelp onClose={() => {
-          trackEvent(EVENTS.MODAL_CLOSED, { props: { modal: 'shortcuts' } });
-          setShowShortcutHelp(false);
-        }} />
+        <ShortcutHelp
+          onClose={() => {
+            trackEvent(EVENTS.MODAL_CLOSED, { props: { modal: 'shortcuts' } });
+            setShowShortcutHelp(false);
+          }}
+        />
       )}
 
       {showOnboarding && (

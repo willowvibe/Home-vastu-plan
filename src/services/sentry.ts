@@ -24,11 +24,7 @@ export function initSentry(config: SentryConfig = {}) {
     dsn,
     environment,
     release,
-    integrations: [
-      Sentry.reactRouterV6Integration(),
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration(),
-    ],
+    integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
     tracesSampleRate: 0.1,
     profilesSampleRate: 0.1,
     replaysSessionSampleRate: 0.1,
@@ -96,11 +92,7 @@ export function setTag(key: string, value: string) {
   Sentry.setTag(key, value);
 }
 
-export function addBreadcrumb(
-  message: string,
-  category?: string,
-  data?: Record<string, unknown>
-) {
+export function addBreadcrumb(message: string, category?: string, data?: Record<string, unknown>) {
   Sentry.addBreadcrumb({
     message,
     category: category || 'custom',

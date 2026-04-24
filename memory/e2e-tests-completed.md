@@ -7,6 +7,7 @@ type: project
 **E2E Tests Status:** COMPLETED
 
 All 7 Playwright E2E tests pass consistently:
+
 - has title (passes)
 - loads canvas container (passes)
 - has floor selector controls (passes)
@@ -16,6 +17,7 @@ All 7 Playwright E2E tests pass consistently:
 - can export plan as PDF (passes)
 
 **Key Technical Solutions:**
+
 - Onboarding modal handled via `page.context().addInitScript()` to set `localStorage.setItem('vastuplan-onboarded', 'true')` before page loads, completely skipping the modal
 - Download events properly captured using `page.waitForEvent('download')` before clicking export buttons
 - Room counting uses selector `'div.relative.bg-white.border-2 > div:has(> span.text-xs.font-medium)'`
@@ -24,6 +26,7 @@ All 7 Playwright E2E tests pass consistently:
 **Test Location:** `tests/e2e/basic.spec.ts`
 
 **Remaining E2E Test Areas (future work):**
+
 - Multi-floor workflow tests
 - Drag and resize tests
 - Room management (delete, duplicate, rotate)
