@@ -1,35 +1,35 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: 'weekly'
+      day: 'monday'
     open-pull-requests-limit: 10
     reviewers:
-      - "willowvibe"
+      - 'willowvibe'
     commit-message:
-      prefix: "chore"
-      include: "scope"
+      prefix: 'chore'
+      include: 'scope'
     groups:
       react:
         patterns:
-          - "react"
-          - "react-*"
+          - 'react'
+          - 'react-*'
       testing:
         patterns:
-          - "vitest"
-          - "@testing-library/*"
-          - "playwright"
+          - 'vitest'
+          - '@testing-library/*'
+          - 'playwright'
       lint:
         patterns:
-          - "eslint"
-          - "prettier"
-          - "@typescript-eslint/*"
+          - 'eslint'
+          - 'prettier'
+          - '@typescript-eslint/*'
       tailwind:
         patterns:
-          - "@tailwindcss/*"
-          - "tailwindcss"
+          - '@tailwindcss/*'
+          - 'tailwindcss'
     labels:
-      - "dependencies"
-      - "automerge"
+      - 'dependencies'
+      - 'automerge'

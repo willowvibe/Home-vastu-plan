@@ -1,10 +1,5 @@
 const CACHE_NAME = 'vastuplan-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/favicon.svg',
-  '/manifest.json',
-];
+const ASSETS_TO_CACHE = ['/', '/index.html', '/favicon.svg', '/manifest.json'];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -20,9 +15,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+        cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
       );
     })
   );
@@ -31,7 +24,11 @@ self.addEventListener('activate', (event) => {
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   // For API requests, use network-first strategy
-  if (event.request.url.includes('/api/') || event.request.url.includes('vastu') || event.request.url.includes('gemini')) {
+  if (
+    event.request.url.includes('/api/') ||
+    event.request.url.includes('vastu') ||
+    event.request.url.includes('gemini')
+  ) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {

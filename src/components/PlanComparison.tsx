@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X, Compare, Calendar, Save, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Compare, Download } from 'lucide-react';
 import { FloorPlan, Room } from '../types';
 import { Canvas } from './Canvas';
 
@@ -20,8 +20,8 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }
   const [diffType, setDiffType] = useState<'all' | 'added' | 'removed' | 'modified'>('all');
 
   // Get the two most recent plans for comparison
-  const [basePlan, setBasePlan] = useState(plans[0]?.plan || null);
-  const [comparePlan, setComparePlan] = useState(plans[1]?.plan || null);
+  const basePlan = plans[0]?.plan || null;
+  const comparePlan = plans[1]?.plan || null;
 
   const comparePlanName = plans[1]?.name || 'Current Plan';
   const basePlanName = plans[0]?.name || 'Previous Version';
@@ -71,18 +71,6 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }
     if (diffType === 'all') return roomDiffs;
     return roomDiffs.filter((d) => d.type === diffType);
   }, [roomDiffs, diffType]);
-
-  // Color mapping for diff types
-  const getDiffColor = (type: 'added' | 'removed' | 'modified') => {
-    switch (type) {
-      case 'added':
-        return 'border-emerald-500 bg-emerald-50';
-      case 'removed':
-        return 'border-rose-500 bg-rose-50';
-      case 'modified':
-        return 'border-amber-500 bg-amber-50';
-    }
-  };
 
   if (!basePlan || !comparePlan) {
     return (
@@ -185,19 +173,28 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
             <span className="text-slate-600">
-              Added: <strong className="text-emerald-700">{roomDiffs.filter(d => d.type === 'added').length}</strong>
+              Added:{' '}
+              <strong className="text-emerald-700">
+                {roomDiffs.filter((d) => d.type === 'added').length}
+              </strong>
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-rose-500"></div>
             <span className="text-slate-600">
-              Removed: <strong className="text-rose-700">{roomDiffs.filter(d => d.type === 'removed').length}</strong>
+              Removed:{' '}
+              <strong className="text-rose-700">
+                {roomDiffs.filter((d) => d.type === 'removed').length}
+              </strong>
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-amber-500"></div>
             <span className="text-slate-600">
-              Modified: <strong className="text-amber-700">{roomDiffs.filter(d => d.type === 'modified').length}</strong>
+              Modified:{' '}
+              <strong className="text-amber-700">
+                {roomDiffs.filter((d) => d.type === 'modified').length}
+              </strong>
             </span>
           </div>
         </div>
@@ -308,8 +305,8 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }
                               diff.type === 'added'
                                 ? 'bg-emerald-100 text-emerald-700'
                                 : diff.type === 'removed'
-                                ? 'bg-rose-100 text-rose-700'
-                                : 'bg-amber-100 text-amber-700'
+                                  ? 'bg-rose-100 text-rose-700'
+                                  : 'bg-amber-100 text-amber-700'
                             }`}
                           >
                             {diff.type}
@@ -321,15 +318,27 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }
                         <div className="text-xs text-slate-500 space-y-0.5">
                           {diff.type === 'modified' && (
                             <>
-                              <div>Size: {diff.prevRoom?.w}'x{diff.prevRoom?.h}' → {diff.room?.w}'x{diff.room?.h}'</div>
-                              <div>Position: ({diff.prevRoom?.x}, {diff.prevRoom?.y}) → ({diff.room?.x}, {diff.room?.y})</div>
+                              <div>
+                                Size: {diff.prevRoom?.w}'x{diff.prevRoom?.h}' → {diff.room?.w}'x
+                                {diff.room?.h}'
+                              </div>
+                              <div>
+                                Position: ({diff.prevRoom?.x}, {diff.prevRoom?.y}) → ({diff.room?.x}
+                                , {diff.room?.y})
+                              </div>
                             </>
                           )}
                           {diff.type === 'added' && (
-                            <div>Room added: {diff.room?.w}'x{diff.room?.h}' at ({diff.room?.x}, {diff.room?.y})</div>
+                            <div>
+                              Room added: {diff.room?.w}'x{diff.room?.h}' at ({diff.room?.x},{' '}
+                              {diff.room?.y})
+                            </div>
                           )}
                           {diff.type === 'removed' && (
-                            <div>Room removed: {diff.prevRoom?.w}'x{diff.prevRoom?.h}' at ({diff.prevRoom?.x}, {diff.prevRoom?.y})</div>
+                            <div>
+                              Room removed: {diff.prevRoom?.w}'x{diff.prevRoom?.h}' at (
+                              {diff.prevRoom?.x}, {diff.prevRoom?.y})
+                            </div>
                           )}
                         </div>
                       </div>
