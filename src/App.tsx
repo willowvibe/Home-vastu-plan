@@ -75,6 +75,7 @@ export default function App() {
   const [currentFloor, setCurrentFloor] = useState(0);
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
   const [roomSearch, setRoomSearch] = useState('');
+  const [roomCategoryFilter, setRoomCategoryFilter] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<'design' | 'image'>('design');
   const [analysis, setAnalysis] = useState<string | null>(null);
@@ -1010,6 +1011,44 @@ export default function App() {
                 <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Plus className="w-4 h-4 text-slate-400" /> Add Rooms
                 </h3>
+
+                {/* Room Tag Filter */}
+                <div className="mb-4">
+                  <label className="text-xs text-slate-500 mb-2 block">Category Filter</label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setRoomCategoryFilter(null)}
+                      className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                        roomCategoryFilter === null
+                          ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      All
+                    </button>
+                    {[
+                      { id: 'Living', label: 'Living' },
+                      { id: 'Sleeping', label: 'Sleeping' },
+                      { id: 'Kitchen', label: 'Kitchen' },
+                      { id: 'Bathroom', label: 'Bath' },
+                      { id: 'Special', label: 'Special' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setRoomCategoryFilter(cat.id)}
+                        className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                          roomCategoryFilter === cat.id
+                            ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Room Search */}
                 <div className="relative mb-3">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                   <input
@@ -1020,10 +1059,23 @@ export default function App() {
                     className={`w-full border rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-500' : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'}`}
                   />
                 </div>
+
+                {/* Room Grid */}
                 <div className="grid grid-cols-2 gap-2">
-                  {ROOM_TYPES.filter((rt) =>
-                    rt.type.toLowerCase().includes(roomSearch.toLowerCase())
-                  ).map((rt) => (
+                  {ROOM_TYPES.filter((rt) => {
+                    // Search filter
+                    if (roomSearch && !rt.type.toLowerCase().includes(roomSearch.toLowerCase())) {
+                      return false;
+                    }
+                    // Category filter
+                    if (roomCategoryFilter) {
+                      const roomCategory = ROOM_CATEGORIES[rt.type];
+                      if (roomCategory !== roomCategoryFilter) {
+                        return false;
+                      }
+                    }
+                    return true;
+                  }).map((rt) => (
                     <button
                       key={rt.type}
                       onClick={() => addRoom(rt.type, rt.w, rt.h)}
@@ -1038,8 +1090,18 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                {ROOM_TYPES.filter((rt) => rt.type.toLowerCase().includes(roomSearch.toLowerCase()))
-                  .length === 0 && (
+                {ROOM_TYPES.filter((rt) => {
+                  if (roomSearch && !rt.type.toLowerCase().includes(roomSearch.toLowerCase())) {
+                    return false;
+                  }
+                  if (roomCategoryFilter) {
+                    const roomCategory = ROOM_CATEGORIES[rt.type];
+                    if (roomCategory !== roomCategoryFilter) {
+                      return false;
+                    }
+                  }
+                  return true;
+                }).length === 0 && (
                   <p className="text-xs text-slate-400 text-center py-2">
                     No rooms match your search.
                   </p>
