@@ -5,6 +5,8 @@ import { ImageEditor } from './components/ImageEditor';
 import { FloorPlan, Room, RoomType } from './types';
 import { analyzeFloorPlan } from './services/gemini';
 import { analyzeRoomVastu, calculateOverallVastuScore } from './services/vastu';
+import { setUser, addBreadcrumb } from './services/sentry';
+import { trackEvent, EVENTS, EVENT_METADATA } from './services/analytics';
 import {
   Layers,
   Plus,
@@ -99,6 +101,14 @@ export default function App() {
       // ignore
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    // Track dark mode toggle when value changes
+    trackEvent(EVENTS.DARK_MODE_TOGGLED, {
+      props: { enabled: darkMode },
+    });
+  }, [darkMode]);
+
   const [mobileTab, setMobileTab] = useState<'settings' | 'canvas' | 'properties'>('canvas');
 
   const [appMode, setAppMode] = useState<'edit' | 'view' | 'comment'>('edit');
@@ -113,7 +123,27 @@ export default function App() {
     }
   });
 
+  // Track onboarding modal open
+  useEffect(() => {
+    if (showOnboarding) {
+      trackEvent(EVENTS.MODAL_OPENED, { props: { modal: 'onboarding' } });
+    }
+  }, [showOnboarding]);
+
   const canvasContainerRef = useRef<HTMLDivElement>(null);
+
+  // Track plan creation and user activity with Sentry
+  useEffect(() => {
+    // Generate a unique user ID from localStorage or create one
+    let userId = localStorage.getItem('vastuplan-user-id');
+    if (!userId) {
+      userId = `user_${uuidv4()}`;
+      localStorage.setItem('vastuplan-user-id', userId);
+    }
+    setUser(userId);
+    addBreadcrumb('App initialized', 'app');
+    trackEvent(EVENTS.PLAN_CREATED);
+  }, []);
 
   // Load shared plan from URL
   useEffect(() => {
@@ -171,6 +201,15 @@ export default function App() {
     updatePlan((prev) => ({ ...prev, rooms: [...prev.rooms, newRoom] }));
     commitHistory();
     setSelectedRoomIds([newRoom.id]);
+    // Sentry breadcrumb for room addition
+    addBreadcrumb(`Room added: ${type}`, 'room', { floor: currentFloor });
+    // Track room addition event
+    trackEvent(EVENTS.ROOM_ADDED, {
+      props: {
+        roomType: EVENT_METADATA.roomTypes[type] || type.toLowerCase(),
+        floor: currentFloor,
+      },
+    });
   };
 
   const updateRoom = (id: string, updates: Partial<Room>) => {
@@ -224,14 +263,27 @@ export default function App() {
 
   const deleteRoom = useCallback(
     (id: string) => {
+      const room = plan.rooms.find((r) => r.id === id);
+      if (!room) {
+        commitHistory();
+        setSelectedRoomIds([]);
+        return;
+      }
       updatePlan((prev) => ({
         ...prev,
         rooms: prev.rooms.filter((r) => r.id !== id),
       }));
       commitHistory();
       setSelectedRoomIds([]);
+      // Track room deletion
+      trackEvent(EVENTS.ROOM_DELETED, {
+        props: {
+          roomType: EVENT_METADATA.roomTypes[room.type] || room.type.toLowerCase(),
+          floor: room.floor,
+        },
+      });
     },
-    [updatePlan, commitHistory]
+    [plan.rooms, updatePlan, commitHistory]
   );
 
   const deleteSelectedRooms = useCallback(() => {
@@ -241,7 +293,19 @@ export default function App() {
     }));
     commitHistory();
     setSelectedRoomIds([]);
-  }, [updatePlan, commitHistory, selectedRoomIds]);
+    // Track room deletion for each deleted room
+    selectedRoomIds.forEach((id) => {
+      const room = plan.rooms.find((r) => r.id === id);
+      if (room) {
+        trackEvent(EVENTS.ROOM_DELETED, {
+          props: {
+            roomType: EVENT_METADATA.roomTypes[room.type] || room.type.toLowerCase(),
+            floor: room.floor,
+          },
+        });
+      }
+    });
+  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds]);
 
   const duplicateRoom = useCallback(
     (id: string) => {
@@ -316,6 +380,12 @@ export default function App() {
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
+    trackEvent(EVENTS.AI_ANALYZED, {
+      props: {
+        floor: currentFloor,
+        roomCount: plan.rooms.filter((r) => r.floor === currentFloor).length,
+      },
+    });
     try {
       const progressInterval = setInterval(() => {
         setAnalysisProgress((prev) => {
@@ -353,6 +423,7 @@ export default function App() {
 
     try {
       await exportToPNG(canvasContainerRef.current, `VastuPlan_Floor_${currentFloor}.png`);
+      addBreadcrumb('PNG Exported', 'export', { floor: currentFloor });
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export floor plan.');
@@ -366,6 +437,9 @@ export default function App() {
     try {
       const url = generateShareLink(plan, analysis, mode);
       navigator.clipboard.writeText(url);
+      trackEvent(mode === 'view' ? EVENTS.SHARE_VIEW_MODE : EVENTS.SHARE_COMMENT_MODE, {
+        props: { floor: currentFloor, mode },
+      });
       alert(`Share link (${mode} mode) copied to clipboard!`);
     } catch (error: any) {
       console.error('Failed to generate share link', error);
@@ -420,12 +494,15 @@ export default function App() {
     const printContent = document.querySelector('.print-area');
     if (printContent) {
       window.print();
+      trackEvent(EVENTS.EXPORT_PNG, { props: { format: 'print' } });
     }
   };
 
   const handleExportSVG = () => {
     try {
       exportToSVG(plan, currentFloor, showVastuGrid);
+      addBreadcrumb('SVG Exported', 'export', { floor: currentFloor });
+      trackEvent(EVENTS.EXPORT_SVG, { props: { floor: currentFloor } });
     } catch (error) {
       console.error('Failed to export SVG', error);
       alert('Failed to export floor plan as SVG.');
@@ -489,16 +566,26 @@ export default function App() {
     }
   }, [selectedRoomIds, duplicateRoom, duplicateSelectedRooms]);
 
+  const handleToggleGrid = () => {
+    setShowVastuGrid((prev) => !prev);
+    trackEvent(EVENTS.VASTU_GRID_TOGGLED, {
+      props: { enabled: !showVastuGrid },
+    });
+  };
+
   useKeyboardShortcuts({
     undo,
     redo,
     onDelete: handleDelete,
     onDuplicate: handleDuplicate,
     onRotate: rotateSelectedRooms,
-    onToggleGrid: () => setShowVastuGrid((prev) => !prev),
+    onToggleGrid: handleToggleGrid,
     onZoomIn: () => setZoom((z) => Math.min(3, z + 0.1)),
     onZoomOut: () => setZoom((z) => Math.max(0.1, z - 0.1)),
-    onShowShortcuts: () => setShowShortcutHelp(true),
+    onShowShortcuts: () => {
+      trackEvent(EVENTS.MODAL_OPENED, { props: { modal: 'shortcuts' } });
+      setShowShortcutHelp(true);
+    },
     hasSelection: selectedRoomIds.length > 0,
   });
 
@@ -1070,6 +1157,7 @@ export default function App() {
 
               <div
                 ref={canvasContainerRef}
+                data-testid="canvas-container"
                 className={`p-4 rounded-xl shadow-sm border inline-block ${appMode === 'view' ? 'pointer-events-none' : ''} ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
               >
                 <Canvas
@@ -1607,11 +1695,19 @@ export default function App() {
         />
       )}
 
-      {showShortcutHelp && <ShortcutHelp onClose={() => setShowShortcutHelp(false)} />}
+      {showShortcutHelp && (
+        <ShortcutHelp
+          onClose={() => {
+            trackEvent(EVENTS.MODAL_CLOSED, { props: { modal: 'shortcuts' } });
+            setShowShortcutHelp(false);
+          }}
+        />
+      )}
 
       {showOnboarding && (
         <Onboarding
           onClose={() => {
+            trackEvent(EVENTS.MODAL_CLOSED, { props: { modal: 'onboarding' } });
             setShowOnboarding(false);
             try {
               localStorage.setItem('vastuplan-onboarded', 'true');
