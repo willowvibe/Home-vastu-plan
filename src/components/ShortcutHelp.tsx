@@ -1,21 +1,33 @@
-import React from "react";
-import { X, Keyboard, Undo2, Redo2, Trash2, Copy, RotateCw, Grid, ZoomIn, ZoomOut, Download } from "lucide-react";
+import React from 'react';
+import {
+  X,
+  Keyboard,
+  Undo2,
+  Redo2,
+  Trash2,
+  Copy,
+  RotateCw,
+  Grid,
+  ZoomIn,
+  ZoomOut,
+  Download,
+} from 'lucide-react';
 
 interface ShortcutHelpProps {
   onClose: () => void;
 }
 
 const SHORTCUTS = [
-  { keys: ["Ctrl", "Z"], action: "Undo", icon: Undo2 },
-  { keys: ["Ctrl", "Y"], action: "Redo", icon: Redo2 },
-  { keys: ["Delete"], action: "Delete selected room", icon: Trash2 },
-  { keys: ["Ctrl", "D"], action: "Duplicate selected room", icon: Copy },
-  { keys: ["R"], action: "Rotate selected room", icon: RotateCw },
-  { keys: ["G"], action: "Toggle Vastu Grid", icon: Grid },
-  { keys: ["Ctrl", "+"], action: "Zoom in", icon: ZoomIn },
-  { keys: ["Ctrl", "-"], action: "Zoom out", icon: ZoomOut },
-  { keys: ["Ctrl", "S"], action: "Export as PNG", icon: Download },
-  { keys: ["?"], action: "Show this help", icon: Keyboard },
+  { keys: ['Ctrl', 'Z'], action: 'Undo', icon: Undo2 },
+  { keys: ['Ctrl', 'Y'], action: 'Redo', icon: Redo2 },
+  { keys: ['Delete'], action: 'Delete selected room', icon: Trash2 },
+  { keys: ['Ctrl', 'D'], action: 'Duplicate selected room', icon: Copy },
+  { keys: ['R'], action: 'Rotate selected room', icon: RotateCw },
+  { keys: ['G'], action: 'Toggle Vastu Grid', icon: Grid },
+  { keys: ['Ctrl', '+'], action: 'Zoom in', icon: ZoomIn },
+  { keys: ['Ctrl', '-'], action: 'Zoom out', icon: ZoomOut },
+  { keys: ['Ctrl', 'S'], action: 'Export as PNG', icon: Download },
+  { keys: ['?'], action: 'Show this help', icon: Keyboard },
 ];
 
 export const ShortcutHelp: React.FC<ShortcutHelpProps> = ({ onClose }) => {

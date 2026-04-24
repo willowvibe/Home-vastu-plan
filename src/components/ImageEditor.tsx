@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { editFloorPlanImage } from '../services/gemini';
-import { Loader2, Upload, Wand2, Image as ImageIcon } from 'lucide-react';
-import { cn } from '../utils';
+import { Loader2, Upload, Wand2 } from 'lucide-react';
 
 export function ImageEditor() {
   const [image, setImage] = useState<File | null>(null);
@@ -31,11 +30,13 @@ export function ImageEditor() {
       if (editedImageUrl) {
         setResult(editedImageUrl);
       } else {
-        alert("Image editing is not available with the current model. Try describing what you want in text instead.");
+        alert(
+          'Image editing is not available with the current model. Try describing what you want in text instead.'
+        );
       }
     } catch (error) {
-      console.error("Error editing image:", error);
-      alert("Failed to edit image. Please try again.");
+      console.error('Error editing image:', error);
+      alert('Failed to edit image. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -49,13 +50,14 @@ export function ImageEditor() {
           AI Image Editor
         </h2>
         <p className="text-sm text-slate-500 mt-1">
-          Upload a floor plan or room sketch and use Gemini to edit it (e.g., "Add a retro filter", "Make it look like a 3D render").
+          Upload a floor plan or room sketch and use Gemini to edit it (e.g., "Add a retro filter",
+          "Make it look like a 3D render").
         </p>
       </div>
-      
+
       <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-4">
         {!preview ? (
-          <div 
+          <div
             className="border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors"
             onClick={() => fileInputRef.current?.click()}
           >
@@ -66,23 +68,27 @@ export function ImageEditor() {
         ) : (
           <div className="flex flex-col gap-4">
             <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-video flex items-center justify-center">
-              <img src={result || preview} alt="Preview" className="max-w-full max-h-full object-contain" />
+              <img
+                src={result || preview}
+                alt="Preview"
+                className="max-w-full max-h-full object-contain"
+              />
               {isProcessing && (
                 <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
                   <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
                 </div>
               )}
             </div>
-            
+
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => fileInputRef.current?.click()}
                 className="text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
               >
                 Change Image
               </button>
               {result && (
-                <button 
+                <button
                   onClick={() => setResult(null)}
                   className="text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
                 >
@@ -90,7 +96,7 @@ export function ImageEditor() {
                 </button>
               )}
             </div>
-            
+
             <div className="flex flex-col gap-2 mt-2">
               <label className="text-sm font-medium text-slate-700">Edit Prompt</label>
               <textarea
@@ -119,13 +125,13 @@ export function ImageEditor() {
             </div>
           </div>
         )}
-        
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          onChange={handleImageChange} 
-          accept="image/*" 
-          className="hidden" 
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleImageChange}
+          accept="image/*"
+          className="hidden"
         />
       </div>
     </div>

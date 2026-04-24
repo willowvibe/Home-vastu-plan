@@ -26,10 +26,7 @@ async function runMigrations() {
     const executedNames = new Set(executed.map((m: any) => m.name));
 
     // Read migration files
-    const files = [
-      '001_create_users.sql',
-      '002_create_plans.sql',
-    ];
+    const files = ['001_create_users.sql', '002_create_plans.sql'];
 
     for (const file of files) {
       if (executedNames.has(file)) {

@@ -1,16 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Project, ProjectVersion, FloorPlan } from "../types";
-import { v4 as uuidv4 } from "uuid";
-import {
-  Folder,
-  FileText,
-  Plus,
-  Trash2,
-  X,
-  History,
-  Save,
-  GitCompare,
-} from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { Project, ProjectVersion, FloorPlan } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { Folder, Plus, Trash2, X, History, Save, GitCompare } from 'lucide-react';
 
 interface ProjectManagerProps {
   currentPlan: FloorPlan;
@@ -18,30 +9,28 @@ interface ProjectManagerProps {
   onClose: () => void;
 }
 
-export function ProjectManager({
-  currentPlan,
-  onLoadPlan,
-  onClose,
-}: ProjectManagerProps) {
+export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectManagerProps) {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectName, setNewProjectName] = useState('');
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [selectedVersionIds, setSelectedVersionIds] = useState<string[]>([]);
 
+  // Load projects from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem("vastu_projects");
+    const saved = localStorage.getItem('vastu_projects');
     if (saved) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setProjects(JSON.parse(saved));
       } catch (e) {
-        console.error("Failed to parse projects", e);
+        console.error('Failed to parse projects', e);
       }
     }
   }, []);
 
   const saveProjects = (newProjects: Project[]) => {
     setProjects(newProjects);
-    localStorage.setItem("vastu_projects", JSON.stringify(newProjects));
+    localStorage.setItem('vastu_projects', JSON.stringify(newProjects));
   };
 
   const handleCreateProject = () => {
@@ -55,7 +44,7 @@ export function ProjectManager({
       versions: [
         {
           id: uuidv4(),
-          name: "V1",
+          name: 'V1',
           timestamp: Date.now(),
           plan: currentPlan,
         },
@@ -63,7 +52,7 @@ export function ProjectManager({
     };
 
     saveProjects([newProject, ...projects]);
-    setNewProjectName("");
+    setNewProjectName('');
   };
 
   const handleSaveVersion = (projectId: string) => {
@@ -149,7 +138,7 @@ export function ProjectManager({
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  onKeyDown={(e) => e.key === "Enter" && handleCreateProject()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateProject()}
                 />
                 <button
                   onClick={handleCreateProject}
@@ -171,15 +160,15 @@ export function ProjectManager({
                   <div
                     key={project.id}
                     onClick={() => setActiveProjectId(project.id)}
-                    className={`p-3 rounded-lg cursor-pointer mb-1 flex items-center justify-between group transition-colors ${activeProjectId === project.id ? "bg-indigo-50 border border-indigo-100" : "hover:bg-slate-100 border border-transparent"}`}
+                    className={`p-3 rounded-lg cursor-pointer mb-1 flex items-center justify-between group transition-colors ${activeProjectId === project.id ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-slate-100 border border-transparent'}`}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
                       <Folder
-                        className={`w-4 h-4 shrink-0 ${activeProjectId === project.id ? "text-indigo-600" : "text-slate-400"}`}
+                        className={`w-4 h-4 shrink-0 ${activeProjectId === project.id ? 'text-indigo-600' : 'text-slate-400'}`}
                       />
                       <div className="truncate">
                         <div
-                          className={`text-sm font-medium truncate ${activeProjectId === project.id ? "text-indigo-900" : "text-slate-700"}`}
+                          className={`text-sm font-medium truncate ${activeProjectId === project.id ? 'text-indigo-900' : 'text-slate-700'}`}
                         >
                           {project.name}
                         </div>
@@ -235,9 +224,7 @@ export function ProjectManager({
                             </div>
                             <div>
                               <div className="font-medium text-slate-800">
-                                {idx === 0
-                                  ? "Latest Version"
-                                  : `Version ${version.name}`}
+                                {idx === 0 ? 'Latest Version' : `Version ${version.name}`}
                               </div>
                               <div className="text-xs text-slate-500">
                                 {new Date(version.timestamp).toLocaleString()}
@@ -252,26 +239,21 @@ export function ProjectManager({
                                 e.stopPropagation();
                                 if (selectedVersionIds.includes(version.id)) {
                                   setSelectedVersionIds(
-                                    selectedVersionIds.filter(
-                                      (id) => id !== version.id,
-                                    ),
+                                    selectedVersionIds.filter((id) => id !== version.id)
                                   );
                                 } else {
-                                  setSelectedVersionIds([
-                                    ...selectedVersionIds,
-                                    version.id,
-                                  ]);
+                                  setSelectedVersionIds([...selectedVersionIds, version.id]);
                                 }
                               }}
                               className={`p-1.5 rounded-lg transition-colors ${
                                 selectedVersionIds.includes(version.id)
-                                  ? "bg-indigo-100 text-indigo-700"
-                                  : "text-slate-400 hover:bg-slate-100"
+                                  ? 'bg-indigo-100 text-indigo-700'
+                                  : 'text-slate-400 hover:bg-slate-100'
                               }`}
                               title={
                                 selectedVersionIds.includes(version.id)
-                                  ? "Deselect for comparison"
-                                  : "Select for comparison"
+                                  ? 'Deselect for comparison'
+                                  : 'Select for comparison'
                               }
                             >
                               <GitCompare className="w-4 h-4" />
@@ -283,9 +265,7 @@ export function ProjectManager({
                               Load Plan
                             </button>
                             <button
-                              onClick={() =>
-                                handleDeleteVersion(activeProjectId, version.id)
-                              }
+                              onClick={() => handleDeleteVersion(activeProjectId, version.id)}
                               className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 border border-transparent hover:border-red-200 rounded-lg transition-colors"
                               title="Delete Version"
                             >
@@ -298,19 +278,15 @@ export function ProjectManager({
 
                   {selectedVersionIds.length >= 2 && (
                     <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-                      <h4 className="text-xs font-bold text-indigo-800 mb-2">
-                        Version Comparison
-                      </h4>
+                      <h4 className="text-xs font-bold text-indigo-800 mb-2">Version Comparison</h4>
                       <div className="space-y-2">
                         {projects
                           .find((p) => p.id === activeProjectId)
-                          ?.versions.filter((v) =>
-                            selectedVersionIds.includes(v.id),
-                          )
+                          ?.versions.filter((v) => selectedVersionIds.includes(v.id))
                           .map((v, i) => (
                             <div key={v.id} className="text-xs text-slate-700">
                               <span className="font-medium">
-                                {i === 0 ? "Version A" : "Version B"}:{" "}
+                                {i === 0 ? 'Version A' : 'Version B'}:{' '}
                               </span>
                               {v.plan.rooms.length} rooms
                             </div>
@@ -319,22 +295,15 @@ export function ProjectManager({
                       {(() => {
                         const comparedVersions = projects
                           .find((p) => p.id === activeProjectId)
-                          ?.versions.filter((v) =>
-                            selectedVersionIds.includes(v.id),
-                          );
+                          ?.versions.filter((v) => selectedVersionIds.includes(v.id));
                         if (comparedVersions && comparedVersions.length >= 2) {
-                          const diff = compareVersions(
-                            comparedVersions[0],
-                            comparedVersions[1],
-                          );
+                          const diff = compareVersions(comparedVersions[0], comparedVersions[1]);
                           return (
                             <div className="mt-2 pt-2 border-t border-indigo-200 text-xs">
-                              <p className="font-medium text-indigo-700 mb-1">
-                                Changes:
-                              </p>
+                              <p className="font-medium text-indigo-700 mb-1">Changes:</p>
                               <p className="text-slate-600">
                                 {diff.rooms === 0
-                                  ? "No change in room count"
+                                  ? 'No change in room count'
                                   : diff.rooms > 0
                                     ? `${diff.rooms} room(s) added`
                                     : `${Math.abs(diff.rooms)} room(s) removed`}

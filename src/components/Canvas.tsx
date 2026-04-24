@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Room as RoomType, FloorPlan, RoomLayer } from "../types";
-import { useCanvasDrag } from "../hooks/useCanvasDrag";
-import { Room } from "./Room";
-import { VastuGrid } from "./VastuGrid";
-import { Compass } from "./Compass";
-import { RulerOverlay } from "./RulerOverlay";
-import { RoadIndicator } from "./RoadIndicator";
+import React, { useState, useRef, useEffect } from 'react';
+import { Room as RoomType, FloorPlan, RoomLayer } from '../types';
+import { useCanvasDrag } from '../hooks/useCanvasDrag';
+import { Room } from './Room';
+import { VastuGrid } from './VastuGrid';
+import { Compass } from './Compass';
+import { RulerOverlay } from './RulerOverlay';
+import { RoadIndicator } from './RoadIndicator';
 
 interface CanvasProps {
   plan: FloorPlan;
@@ -48,7 +48,9 @@ export const Canvas: React.FC<CanvasProps> = ({
   // Reset measurement state when measuring mode is toggled on
   useEffect(() => {
     if (measuring) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMeasureStart(null);
+
       setMeasureEnd(null);
     }
   }, [measuring]);
@@ -78,7 +80,7 @@ export const Canvas: React.FC<CanvasProps> = ({
         width: plan.plotWidth * PIXELS_PER_FOOT,
         height: plan.plotHeight * PIXELS_PER_FOOT,
         backgroundImage:
-          "linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)",
+          'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)',
         backgroundSize: `${PIXELS_PER_FOOT}px ${PIXELS_PER_FOOT}px`,
       }}
       ref={canvasRef}
@@ -99,11 +101,7 @@ export const Canvas: React.FC<CanvasProps> = ({
         }
       }}
     >
-      <RulerOverlay
-        measuring={measuring}
-        measureStart={measureStart}
-        measureEnd={measureEnd}
-      />
+      <RulerOverlay measuring={measuring} measureStart={measureStart} measureEnd={measureEnd} />
 
       {/* Plot Dimensions */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 bg-slate-800 text-white text-xs px-2 py-1 rounded font-mono z-20 shadow-sm">

@@ -49,10 +49,9 @@ export async function login(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const result = await query(
-    'SELECT id, email, password_hash FROM users WHERE email = $1',
-    [email]
-  );
+  const result = await query('SELECT id, email, password_hash FROM users WHERE email = $1', [
+    email,
+  ]);
 
   if (result.rows.length === 0) {
     res.status(401).json({ error: 'Invalid credentials' });
@@ -109,6 +108,9 @@ export async function getProfile(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const result = await query('SELECT id, email, name, avatar_url, created_at FROM users WHERE id = $1', [userId]);
+  const result = await query(
+    'SELECT id, email, name, avatar_url, created_at FROM users WHERE id = $1',
+    [userId]
+  );
   res.json(result.rows[0]);
 }

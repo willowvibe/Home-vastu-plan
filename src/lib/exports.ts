@@ -1,17 +1,14 @@
-import { toPng } from "html-to-image";
-import LZString from "lz-string";
-import { FloorPlan } from "../types";
+import { toPng } from 'html-to-image';
+import LZString from 'lz-string';
+import { FloorPlan } from '../types';
 
-export async function exportToPNG(
-  canvasElement: HTMLElement,
-  filename: string,
-): Promise<void> {
+export async function exportToPNG(canvasElement: HTMLElement, filename: string): Promise<void> {
   const dataUrl = await toPng(canvasElement, {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     pixelRatio: 2,
   });
 
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.download = filename;
   link.href = dataUrl;
   link.click();
@@ -22,25 +19,23 @@ export function exportToJSON(plan: FloorPlan, filename: string, analysis?: strin
     ...plan,
     ...(analysis ? { analysis } : {}),
     exportedAt: new Date().toISOString(),
-    version: "2.0",
+    version: '2.0',
   };
   const jsonString = JSON.stringify(planData, null, 2);
   const maxSize = 2_000_000;
   if (jsonString.length > maxSize) {
     throw new Error(`Plan is too large to export. Exceeds ${maxSize} bytes.`);
   }
-  const blob = new Blob([jsonString], { type: "application/json" });
+  const blob = new Blob([jsonString], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.download = filename;
   link.href = url;
   link.click();
   URL.revokeObjectURL(url);
 }
 
-export function importJSONFile(
-  file: File,
-): Promise<{ plan: FloorPlan; analysis?: string } | null> {
+export function importJSONFile(file: File): Promise<{ plan: FloorPlan; analysis?: string } | null> {
   return new Promise((resolve, reject) => {
     const maxSize = 5_000_000;
     if (file.size > maxSize) {
@@ -58,20 +53,16 @@ export function importJSONFile(
         } else {
           resolve(null);
         }
-      } catch (error) {
-        reject(new Error("Failed to import floor plan. Invalid JSON format."));
+      } catch {
+        reject(new Error('Failed to import floor plan. Invalid JSON format.'));
       }
     };
-    reader.onerror = () => reject(new Error("Failed to read file."));
+    reader.onerror = () => reject(new Error('Failed to read file.'));
     reader.readAsText(file);
   });
 }
 
-export function exportToSVG(
-  plan: FloorPlan,
-  currentFloor: number,
-  showVastuGrid: boolean,
-): void {
+export function exportToSVG(plan: FloorPlan, currentFloor: number, showVastuGrid: boolean): void {
   const scale = 20;
   const rooms = plan.rooms
     .filter((r) => r.floor === currentFloor)
@@ -79,9 +70,9 @@ export function exportToSVG(
       (r) => `
     <rect x="${r.x * scale}" y="${r.y * scale}" width="${r.w * scale}" height="${r.h * scale}" fill="#f0fdf4" stroke="#65a30d" stroke-width="${((r.wallThickness || 9) / 12) * scale}" rx="2"/>
     <text x="${(r.x + r.w / 2) * scale}" y="${(r.y + r.h / 2) * scale}" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="12" fill="#1f2937">${r.type}</text>
-  `,
+  `
     )
-    .join("");
+    .join('');
 
   const vastuGrid = showVastuGrid
     ? Array.from({ length: 3 })
@@ -90,12 +81,12 @@ export function exportToSVG(
             .map(
               (_, col) => `
     <rect x="${((col * (plan.plotWidth - plan.setbacks.left - plan.setbacks.right)) / 3 + plan.setbacks.left) * scale}" y="${((row * (plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom)) / 3 + plan.setbacks.top) * scale}" width="${((plan.plotWidth - plan.setbacks.left - plan.setbacks.right) / 3) * scale}" height="${((plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom) / 3) * scale}" fill="none" stroke="#6366f1" stroke-width="0.5" stroke-dasharray="4,4"/>
-  `,
+  `
             )
-            .join(""),
+            .join('')
         )
-        .join("")
-    : "";
+        .join('')
+    : '';
 
   const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${plan.plotWidth * scale}" height="${plan.plotHeight * scale}" viewBox="0 0 ${plan.plotWidth * scale} ${plan.plotHeight * scale}">
   <rect width="100%" height="100%" fill="white"/>
@@ -114,9 +105,9 @@ export function exportToSVG(
   </g>
 </svg>`;
 
-  const blob = new Blob([svgContent], { type: "image/svg+xml" });
+  const blob = new Blob([svgContent], { type: 'image/svg+xml' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.download = `VastuPlan_Floor_${currentFloor}.svg`;
   link.href = url;
   link.click();
@@ -126,7 +117,7 @@ export function exportToSVG(
 export function generateShareLink(
   plan: FloorPlan,
   analysis: string | null,
-  mode: "view" | "comment",
+  mode: 'view' | 'comment'
 ): string {
   const planWithAnalysis = {
     ...plan,
@@ -136,7 +127,7 @@ export function generateShareLink(
   const maxSize = 1_000_000;
   if (jsonString.length > maxSize) {
     throw new Error(
-      `Plan is too large to share. Exceeds ${maxSize} bytes. Try removing some rooms or elements.`,
+      `Plan is too large to share. Exceeds ${maxSize} bytes. Try removing some rooms or elements.`
     );
   }
   const encoded = LZString.compressToEncodedURIComponent(jsonString);
@@ -149,7 +140,10 @@ export function printCanvas(printRef: HTMLElement | null): void {
   }
 }
 
-export function checkPlanSize(plan: FloorPlan, analysis: string | null): {
+export function checkPlanSize(
+  plan: FloorPlan,
+  analysis: string | null
+): {
   sizeKB: string;
   isLarge: boolean;
   maxSize: number;

@@ -1,27 +1,27 @@
 export type RoomType =
-  | "Bedroom"
-  | "Master Bedroom"
-  | "Kitchen"
-  | "Living Room"
-  | "Bathroom"
-  | "Pooja Room"
-  | "Dining"
-  | "Balcony"
-  | "Stairs"
-  | "Study"
-  | "Store"
-  | "Parking";
+  | 'Bedroom'
+  | 'Master Bedroom'
+  | 'Kitchen'
+  | 'Living Room'
+  | 'Bathroom'
+  | 'Pooja Room'
+  | 'Dining'
+  | 'Balcony'
+  | 'Stairs'
+  | 'Study'
+  | 'Store'
+  | 'Parking';
 
 // Room metadata and organization
 export type RoomCategory =
-  | "Living"
-  | "Sleeping"
-  | "Kitchen"
-  | "Bathroom"
-  | "Utility"
-  | "Special"
-  | "Parking"
-  | "Other";
+  | 'Living'
+  | 'Sleeping'
+  | 'Kitchen'
+  | 'Bathroom'
+  | 'Utility'
+  | 'Special'
+  | 'Parking'
+  | 'Other';
 
 export interface RoomTags {
   [key: string]: string | boolean | number;
@@ -79,8 +79,8 @@ export interface ChatMessage {
 }
 
 export interface PlanUpdateEvent {
-  type: "room" | "plan" | "element";
-  action: "add" | "update" | "delete" | "move";
+  type: 'room' | 'plan' | 'element';
+  action: 'add' | 'update' | 'delete' | 'move';
   data: any;
   timestamp: number;
   userId: string;
@@ -110,8 +110,8 @@ export interface FloorPlan {
   plotWidth: number; // e.g. 30
   plotHeight: number; // e.g. 40
   northAngle: number; // 0 = UP, 90 = RIGHT, etc.
-  roadDirection: "N" | "E" | "S" | "W";
-  unit: "ft" | "m";
+  roadDirection: 'N' | 'E' | 'S' | 'W';
+  unit: 'ft' | 'm';
   setbacks: {
     top: number;
     right: number;

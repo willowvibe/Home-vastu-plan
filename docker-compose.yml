@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - '80:80'
     restart: unless-stopped
 
   # Uncomment to run the collaboration server alongside the frontend

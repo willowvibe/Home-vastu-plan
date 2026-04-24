@@ -30,22 +30,26 @@ Please be respectful and constructive in all interactions.
 ## Development Setup
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/harishconti/Home-vastu-plan.git
 cd Home-vastu-plan
 ```
 
 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 3. Start the development server
+
 ```bash
 npm run dev
 ```
 
 4. Build for production
+
 ```bash
 npm run build
 ```
@@ -72,9 +76,9 @@ The server runs on port 3001 by default. Set `VITE_COLLAB_SERVER_URL` in your `.
 ## Branching Strategy
 
 - main - Production-ready code
-- feature-* - New features
-- fix-* - Bug fixes
-- docs-* - Documentation updates
+- feature-\* - New features
+- fix-\* - Bug fixes
+- docs-\* - Documentation updates
 
 ## Pull Request Process
 

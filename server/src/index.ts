@@ -316,7 +316,9 @@ const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
   console.log(`VastuPlan Collaboration Server running on port ${PORT}`);
   console.log(`Client URL: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
-  console.log(`Database URL: ${process.env.DATABASE_URL ? 'configured' : 'not configured (using in-memory)'}`);
+  console.log(
+    `Database URL: ${process.env.DATABASE_URL ? 'configured' : 'not configured (using in-memory)'}`
+  );
 });
 
 // Export for testing

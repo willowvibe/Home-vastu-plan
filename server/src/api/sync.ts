@@ -50,10 +50,10 @@ export async function syncChanges(req: Request, res: Response): Promise<void> {
   // Update plan data
   if (changes.length > 0) {
     const latestChange = changes[changes.length - 1];
-    await query(
-      'UPDATE plans SET data_json = $1, updated_at = NOW() WHERE id = $2',
-      [latestChange.data, planId]
-    );
+    await query('UPDATE plans SET data_json = $1, updated_at = NOW() WHERE id = $2', [
+      latestChange.data,
+      planId,
+    ]);
   }
 
   res.json({ synced: changes.length });

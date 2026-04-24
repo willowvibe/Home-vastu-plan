@@ -1,5 +1,15 @@
-import React, { useState } from "react";
-import { X, MousePointer, Move, Grid, Sparkles, Download, ChevronRight, ChevronLeft, Layers } from "lucide-react";
+import React, { useState } from 'react';
+import {
+  X,
+  MousePointer,
+  Move,
+  Grid,
+  Sparkles,
+  Download,
+  ChevronRight,
+  ChevronLeft,
+  Layers,
+} from 'lucide-react';
 
 interface OnboardingProps {
   onClose: () => void;
@@ -7,33 +17,39 @@ interface OnboardingProps {
 
 const STEPS = [
   {
-    title: "Welcome to VastuPlan 2D",
-    description: "Design floor plans with Vastu Shastra compliance. This quick tour will show you the basics.",
+    title: 'Welcome to VastuPlan 2D',
+    description:
+      'Design floor plans with Vastu Shastra compliance. This quick tour will show you the basics.',
     icon: Layers,
   },
   {
-    title: "Add Rooms",
-    description: "Click any room type in the left sidebar to add it to your canvas. Bedrooms, Kitchens, Living Rooms, and more.",
+    title: 'Add Rooms',
+    description:
+      'Click any room type in the left sidebar to add it to your canvas. Bedrooms, Kitchens, Living Rooms, and more.',
     icon: MousePointer,
   },
   {
-    title: "Drag & Resize",
-    description: "Drag rooms to position them. Use the blue corner handles to resize. Rooms snap against each other automatically.",
+    title: 'Drag & Resize',
+    description:
+      'Drag rooms to position them. Use the blue corner handles to resize. Rooms snap against each other automatically.',
     icon: Move,
   },
   {
-    title: "Vastu Grid",
-    description: "Toggle the Vastu Grid (G key) to see the 8 directional zones. Place rooms in their ideal zones for better scores.",
+    title: 'Vastu Grid',
+    description:
+      'Toggle the Vastu Grid (G key) to see the 8 directional zones. Place rooms in their ideal zones for better scores.',
     icon: Grid,
   },
   {
-    title: "AI Analysis",
-    description: "Click 'Analyze Floor Plan' to get AI-powered Vastu compliance feedback and construction tips.",
+    title: 'AI Analysis',
+    description:
+      "Click 'Analyze Floor Plan' to get AI-powered Vastu compliance feedback and construction tips.",
     icon: Sparkles,
   },
   {
-    title: "Export & Share",
-    description: "Export your design as PNG, PDF, SVG, or JSON. Share view-only links with clients or family.",
+    title: 'Export & Share',
+    description:
+      'Export your design as PNG, PDF, SVG, or JSON. Share view-only links with clients or family.',
     icon: Download,
   },
 ];
@@ -87,7 +103,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
                 key={i}
                 onClick={() => setStep(i)}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  i === step ? "bg-indigo-600" : "bg-slate-200 hover:bg-slate-300"
+                  i === step ? 'bg-indigo-600' : 'bg-slate-200 hover:bg-slate-300'
                 }`}
               />
             ))}
@@ -113,7 +129,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
                   <ChevronRight className="w-4 h-4" />
                 </>
               ) : (
-                "Get Started"
+                'Get Started'
               )}
             </button>
           </div>

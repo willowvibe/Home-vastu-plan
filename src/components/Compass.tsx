@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface CompassProps {
   northAngle: number;
@@ -54,4 +54,4 @@ export const Compass: React.FC<CompassProps> = React.memo(({ northAngle }) => {
     </div>
   );
 });
-Compass.displayName = "Compass";
+Compass.displayName = 'Compass';

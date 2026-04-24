@@ -51,39 +51,41 @@ NODE_ENV=development
 ## API Endpoints
 
 ### GET /health
+
 Returns server health status and room statistics.
 
 ### GET /room/:roomId
+
 Returns room information including active users.
 
 ## Socket.io Events
 
 ### Client → Server
 
-| Event | Data | Description |
-|-------|------|-------------|
-| `join-room` | `{ roomId: string, userName: string }` | Join a collaboration room |
-| `plan-update` | `PlanUpdateEvent` | Broadcast a plan change |
-| `plan-sync` | `FloorPlan` | Sync full plan state |
-| `cursor-move` | `{ x: number, y: number }` | Update cursor position |
-| `chat-message` | `string` | Send a chat message |
-| `undo-request` | - | Request undo action |
-| `redo-request` | - | Request redo action |
+| Event          | Data                                   | Description               |
+| -------------- | -------------------------------------- | ------------------------- |
+| `join-room`    | `{ roomId: string, userName: string }` | Join a collaboration room |
+| `plan-update`  | `PlanUpdateEvent`                      | Broadcast a plan change   |
+| `plan-sync`    | `FloorPlan`                            | Sync full plan state      |
+| `cursor-move`  | `{ x: number, y: number }`             | Update cursor position    |
+| `chat-message` | `string`                               | Send a chat message       |
+| `undo-request` | -                                      | Request undo action       |
+| `redo-request` | -                                      | Request redo action       |
 
 ### Server → Client
 
-| Event | Data | Description |
-|-------|------|-------------|
-| `room-joined` | `{ roomId, userId, users, plan, messages }` | Successfully joined room |
-| `user-joined` | `CollaborationUser` | New user joined the room |
-| `user-left` | `{ userId }` | User left the room |
-| `users-updated` | `CollaborationUser[]` | User list updated |
-| `plan-updated` | `PlanUpdateEvent` | Another user changed the plan |
-| `plan-synced` | `{ plan, timestamp, modifiedBy }` | Full plan was synced |
-| `cursor-moved` | `{ userId, userName, userColor, position }` | User cursor moved |
-| `chat-message` | `ChatMessage` | New chat message |
-| `undo-requested` | `{ userId, userName }` | Undo requested by user |
-| `redo-requested` | `{ userId, userName }` | Redo requested by user |
+| Event            | Data                                        | Description                   |
+| ---------------- | ------------------------------------------- | ----------------------------- |
+| `room-joined`    | `{ roomId, userId, users, plan, messages }` | Successfully joined room      |
+| `user-joined`    | `CollaborationUser`                         | New user joined the room      |
+| `user-left`      | `{ userId }`                                | User left the room            |
+| `users-updated`  | `CollaborationUser[]`                       | User list updated             |
+| `plan-updated`   | `PlanUpdateEvent`                           | Another user changed the plan |
+| `plan-synced`    | `{ plan, timestamp, modifiedBy }`           | Full plan was synced          |
+| `cursor-moved`   | `{ userId, userName, userColor, position }` | User cursor moved             |
+| `chat-message`   | `ChatMessage`                               | New chat message              |
+| `undo-requested` | `{ userId, userName }`                      | Undo requested by user        |
+| `redo-requested` | `{ userId, userName }`                      | Redo requested by user        |
 
 ## Architecture
 
@@ -100,18 +102,11 @@ server/
 The frontend uses the `useCollaboration` hook in `src/hooks/useCollaboration.ts` to connect to this server.
 
 ```tsx
-import { useCollaboration } from "./hooks/useCollaboration";
+import { useCollaboration } from './hooks/useCollaboration';
 
 function App() {
-  const {
-    isConnected,
-    joinRoom,
-    leaveRoom,
-    broadcastUpdate,
-    users,
-    messages,
-    sendMessage,
-  } = useCollaboration(plan, onPlanChange);
+  const { isConnected, joinRoom, leaveRoom, broadcastUpdate, users, messages, sendMessage } =
+    useCollaboration(plan, onPlanChange);
 
   return (
     <CollaborationPanel

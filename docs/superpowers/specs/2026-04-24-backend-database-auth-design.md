@@ -44,6 +44,7 @@ This stage implements a cloud backend for VastuPlan 2D, replacing the in-memory 
 ## Database Schema
 
 ### Users Table
+
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -57,6 +58,7 @@ CREATE TABLE users (
 ```
 
 ### Plans Table
+
 ```sql
 CREATE TABLE plans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -71,6 +73,7 @@ CREATE INDEX idx_plans_user ON plans(user_id);
 ```
 
 ### Plan Versions Table
+
 ```sql
 CREATE TABLE plan_versions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -83,6 +86,7 @@ CREATE TABLE plan_versions (
 ```
 
 ### Plan Shares Table
+
 ```sql
 CREATE TABLE plan_shares (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -96,6 +100,7 @@ CREATE INDEX idx_shares_uuid ON plan_shares(share_uuid);
 ```
 
 ### Sync Queue Table
+
 ```sql
 CREATE TABLE sync_queue (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -113,21 +118,24 @@ CREATE INDEX idx_sync_plan ON sync_queue(plan_id, synced);
 ## Authentication System
 
 ### JWT Tokens
+
 - **Access token:** 15 minutes expiry
 - **Refresh token:** 7 days expiry
 - Tokens stored in HTTP-only cookies
 
 ### Endpoints
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/auth/register` | Email/password registration |
-| POST | `/api/auth/login` | Login, returns JWT |
-| POST | `/api/auth/logout` | Revoke token |
-| POST | `/api/auth/refresh` | Refresh access token |
-| POST | `/api/auth/password/reset` | Request password reset |
-| POST | `/api/auth/password/change` | Change password (auth required) |
+
+| Method | Path                        | Description                     |
+| ------ | --------------------------- | ------------------------------- |
+| POST   | `/api/auth/register`        | Email/password registration     |
+| POST   | `/api/auth/login`           | Login, returns JWT              |
+| POST   | `/api/auth/logout`          | Revoke token                    |
+| POST   | `/api/auth/refresh`         | Refresh access token            |
+| POST   | `/api/auth/password/reset`  | Request password reset          |
+| POST   | `/api/auth/password/change` | Change password (auth required) |
 
 ### Google OAuth
+
 - Users can link Google account to existing account
 - Automatic user creation if email exists but no password
 
@@ -136,39 +144,44 @@ CREATE INDEX idx_sync_plan ON sync_queue(plan_id, synced);
 ## REST API Endpoints
 
 ### Plan Operations
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/plans` | User | List user's plans |
-| GET | `/api/plans/:id` | User or Public | Get plan by ID |
-| POST | `/api/plans` | User | Create new plan |
-| PUT | `/api/plans/:id` | User | Update plan |
-| DELETE | `/api/plans/:id` | User | Delete plan |
-| POST | `/api/plans/:id/share` | User | Create share link |
-| GET | `/api/share/:uuid` | Public | Get plan via share link |
+
+| Method | Path                   | Auth           | Description             |
+| ------ | ---------------------- | -------------- | ----------------------- |
+| GET    | `/api/plans`           | User           | List user's plans       |
+| GET    | `/api/plans/:id`       | User or Public | Get plan by ID          |
+| POST   | `/api/plans`           | User           | Create new plan         |
+| PUT    | `/api/plans/:id`       | User           | Update plan             |
+| DELETE | `/api/plans/:id`       | User           | Delete plan             |
+| POST   | `/api/plans/:id/share` | User           | Create share link       |
+| GET    | `/api/share/:uuid`     | Public         | Get plan via share link |
 
 ### Sync Operations
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | `/api/sync/queue` | User | Add change to sync queue |
-| POST | `/api/sync/batch` | User | Batch sync multiple changes |
-| GET | `/api/sync/status` | User | Get sync status |
+
+| Method | Path               | Auth | Description                 |
+| ------ | ------------------ | ---- | --------------------------- |
+| POST   | `/api/sync/queue`  | User | Add change to sync queue    |
+| POST   | `/api/sync/batch`  | User | Batch sync multiple changes |
+| GET    | `/api/sync/status` | User | Get sync status             |
 
 ---
 
 ## Offline-First Sync Strategy
 
 ### Local Storage
+
 - Plans stored in `localStorage` for immediate access
 - `sync_queue` tracks pending changes
 - Offline indicator in UI when changes unsynced
 
 ### Sync Flow
+
 1. User makes change → saved locally + queued
 2. Background sync attempts to push to server
 3. On success → remove from queue
 4. On failure → keep in queue, retry later
 
 ### Conflict Resolution
+
 - **Last-write-wins:** Server timestamp determines winner
 - Client notifies if local changes differ from server version
 
@@ -177,11 +190,14 @@ CREATE INDEX idx_sync_plan ON sync_queue(plan_id, synced);
 ## Share Link Behavior
 
 ### Public Access
+
 -Anyone with link can view plan (read-only)
+
 - No authentication required
 - URL format: `vastuplan.app/share/abc123`
 
 ### Share Management
+
 - Plan owner can revoke share link
 - Share links can expire (configurable)
 - Plan owner sees who accessed via analytics
@@ -229,15 +245,18 @@ frontend/
 ## Deployment
 
 ### Development
+
 - PostgreSQL running locally (Docker or native)
 - `DATABASE_URL=postgres://localhost:5432/vastuplan`
 
 ### Production
+
 - **Database:** Neon PostgreSQL or Railway.app
 - **API Server:** Railway.app or Cloud Run
 - **SSL/TLS:** Required for all connections
 
 ### Environment Variables
+
 ```env
 DATABASE_URL=postgres://...
 JWT_SECRET=your-secret-here
@@ -251,15 +270,18 @@ CLIENT_URL=https://vastuplan.app
 ## Testing Strategy
 
 ### Unit Tests
+
 - Database queries (Jest + pg-mock)
 - Auth middleware (token generation/verification)
 - Sync conflict resolution logic
 
 ### Integration Tests
+
 - Full API workflow (create plan → share → view)
 - Offline sync with simulated network failures
 
 ### E2E Tests (Playwright)
+
 - User registration and login flow
 - Plan creation and sync
 - Share link access

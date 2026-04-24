@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react";
-import { FloorPlan } from "../types";
-import { jsPDF } from "jspdf";
-import { toPng } from "html-to-image";
-import { FileText, X, Upload, Loader2, Download } from "lucide-react";
+import React, { useState, useRef } from 'react';
+import { FloorPlan } from '../types';
+import { jsPDF } from 'jspdf';
+import { toPng } from 'html-to-image';
+import { FileText, X, Upload, Loader2, Download } from 'lucide-react';
 
 interface PresentationExportProps {
   canvasRef: React.RefObject<HTMLDivElement>;
@@ -17,9 +17,9 @@ export function PresentationExport({
   currentFloor,
   onClose,
 }: PresentationExportProps) {
-  const [clientName, setClientName] = useState("");
-  const [projectName, setProjectName] = useState("");
-  const [consultantName, setConsultantName] = useState("");
+  const [clientName, setClientName] = useState('');
+  const [projectName, setProjectName] = useState('');
+  const [consultantName, setConsultantName] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,15 +42,15 @@ export function PresentationExport({
     try {
       // Capture canvas
       const imgData = await toPng(canvasRef.current, {
-        backgroundColor: "#ffffff",
+        backgroundColor: '#ffffff',
         pixelRatio: 2,
       });
 
       // Create PDF (Landscape, Letter size: 11 x 8.5 inches)
       const pdf = new jsPDF({
-        orientation: "landscape",
-        unit: "in",
-        format: "letter",
+        orientation: 'landscape',
+        unit: 'in',
+        format: 'letter',
       });
 
       // Draw Border
@@ -64,31 +64,23 @@ export function PresentationExport({
 
       // Add Logo
       if (logoUrl) {
-        pdf.addImage(logoUrl, "PNG", 7.6, 6.6, 1.2, 0.6);
+        pdf.addImage(logoUrl, 'PNG', 7.6, 6.6, 1.2, 0.6);
       }
 
       // Add Text to Title Block
       pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text(projectName || "Vastu Floor Plan", 7.6, 7.5);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(projectName || 'Vastu Floor Plan', 7.6, 7.5);
 
       pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(`Client: ${clientName || "N/A"}`, 7.6, 7.7);
-      pdf.text(`Consultant: ${consultantName || "N/A"}`, 7.6, 7.9);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Client: ${clientName || 'N/A'}`, 7.6, 7.7);
+      pdf.text(`Consultant: ${consultantName || 'N/A'}`, 7.6, 7.9);
 
       pdf.setFontSize(8);
       pdf.text(`Date: ${new Date().toLocaleDateString()}`, 7.6, 8.1);
-      pdf.text(
-        `Scale: 1" = ${plan.unit === "ft" ? "10 ft" : "3 m"} (Approx)`,
-        9.2,
-        8.1,
-      );
-      pdf.text(
-        `Floor: ${currentFloor === 0 ? "Ground" : `Floor ${currentFloor}`}`,
-        7.6,
-        7.3,
-      );
+      pdf.text(`Scale: 1" = ${plan.unit === 'ft' ? '10 ft' : '3 m'} (Approx)`, 9.2, 8.1);
+      pdf.text(`Floor: ${currentFloor === 0 ? 'Ground' : `Floor ${currentFloor}`}`, 7.6, 7.3);
 
       // Add the Floor Plan Image
       // We need to scale it to fit the remaining area (approx 7x7 inches)
@@ -100,14 +92,14 @@ export function PresentationExport({
       const xOffset = 0.4 + (7 - pdfWidth) / 2;
       const yOffset = 0.4 + (7.7 - pdfHeight) / 2;
 
-      pdf.addImage(imgData, "PNG", xOffset, yOffset, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, pdfWidth, pdfHeight);
 
       // Save PDF
-      pdf.save(`${clientName || "Project"}_VastuPlan.pdf`);
+      pdf.save(`${clientName || 'Project'}_VastuPlan.pdf`);
       onClose();
     } catch (error) {
-      console.error("PDF Export failed:", error);
-      alert("Failed to export PDF.");
+      console.error('PDF Export failed:', error);
+      alert('Failed to export PDF.');
     } finally {
       setIsExporting(false);
     }
@@ -131,9 +123,7 @@ export function PresentationExport({
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Project Name
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Project Name</label>
             <input
               type="text"
               value={projectName}
@@ -144,9 +134,7 @@ export function PresentationExport({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Client Name
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Client Name</label>
             <input
               type="text"
               value={clientName}
@@ -176,11 +164,7 @@ export function PresentationExport({
             <div className="flex items-center gap-4">
               {logoUrl ? (
                 <div className="relative w-16 h-16 border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
-                  <img
-                    src={logoUrl}
-                    alt="Logo"
-                    className="w-full h-full object-contain"
-                  />
+                  <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
                   <button
                     onClick={() => setLogoUrl(null)}
                     className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-bl-lg hover:bg-red-600"

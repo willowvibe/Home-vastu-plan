@@ -13,7 +13,10 @@ export interface AuthRequest extends Request {
   };
 }
 
-export function generateToken(userId: string, email: string): { accessToken: string; refreshToken: string } {
+export function generateToken(
+  userId: string,
+  email: string
+): { accessToken: string; refreshToken: string } {
   const options: SignOptions = { expiresIn: JWT_EXPIRY };
   const refreshOptions: SignOptions = { expiresIn: 7 * 24 * 60 * 60 }; // 7 days
 
@@ -66,11 +69,7 @@ export async function authenticate(
   next();
 }
 
-export function optionalAuthenticate(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void {
+export function optionalAuthenticate(req: AuthRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
 
   if (authHeader?.startsWith('Bearer ')) {

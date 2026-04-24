@@ -1,19 +1,10 @@
-import { Room, RoomType, FloorPlan } from "../types";
+import { Room, RoomType, FloorPlan } from '../types';
 
-export type Direction =
-  | "N"
-  | "NE"
-  | "E"
-  | "SE"
-  | "S"
-  | "SW"
-  | "W"
-  | "NW"
-  | "CENTER";
+export type Direction = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW' | 'CENTER';
 
 export interface VastuResult {
   score: number; // 0 to 100
-  status: "good" | "average" | "poor";
+  status: 'good' | 'average' | 'poor';
   idealDirections: Direction[];
   currentDirection: Direction;
   feedback: string;
@@ -24,64 +15,64 @@ const IDEAL_ZONES: Record<
   { best: Direction[]; neutral: Direction[]; avoid: Direction[] }
 > = {
   Bedroom: {
-    best: ["SW", "S", "W"],
-    neutral: ["NW", "N", "E"],
-    avoid: ["NE", "SE", "CENTER"],
+    best: ['SW', 'S', 'W'],
+    neutral: ['NW', 'N', 'E'],
+    avoid: ['NE', 'SE', 'CENTER'],
   },
-  "Master Bedroom": {
-    best: ["SW", "S", "W"],
-    neutral: ["NW", "N", "E"],
-    avoid: ["NE", "SE", "CENTER"],
+  'Master Bedroom': {
+    best: ['SW', 'S', 'W'],
+    neutral: ['NW', 'N', 'E'],
+    avoid: ['NE', 'SE', 'CENTER'],
   },
   Kitchen: {
-    best: ["SE"],
-    neutral: ["NW", "E", "S"],
-    avoid: ["NE", "SW", "N", "CENTER"],
+    best: ['SE'],
+    neutral: ['NW', 'E', 'S'],
+    avoid: ['NE', 'SW', 'N', 'CENTER'],
   },
-  "Living Room": {
-    best: ["N", "E", "NE", "NW"],
-    neutral: ["W", "S"],
-    avoid: ["SW", "SE", "CENTER"],
+  'Living Room': {
+    best: ['N', 'E', 'NE', 'NW'],
+    neutral: ['W', 'S'],
+    avoid: ['SW', 'SE', 'CENTER'],
   },
   Bathroom: {
-    best: ["NW", "W", "S"],
-    neutral: ["SE", "E"],
-    avoid: ["NE", "SW", "CENTER"],
+    best: ['NW', 'W', 'S'],
+    neutral: ['SE', 'E'],
+    avoid: ['NE', 'SW', 'CENTER'],
   },
-  "Pooja Room": {
-    best: ["NE", "E", "N"],
-    neutral: ["W"],
-    avoid: ["S", "SW", "SE", "NW", "CENTER"],
+  'Pooja Room': {
+    best: ['NE', 'E', 'N'],
+    neutral: ['W'],
+    avoid: ['S', 'SW', 'SE', 'NW', 'CENTER'],
   },
   Dining: {
-    best: ["W", "E", "N"],
-    neutral: ["S", "NW", "SE"],
-    avoid: ["SW", "NE", "CENTER"],
+    best: ['W', 'E', 'N'],
+    neutral: ['S', 'NW', 'SE'],
+    avoid: ['SW', 'NE', 'CENTER'],
   },
   Balcony: {
-    best: ["N", "E", "NE"],
-    neutral: ["NW"],
-    avoid: ["S", "SW", "W", "SE"],
+    best: ['N', 'E', 'NE'],
+    neutral: ['NW'],
+    avoid: ['S', 'SW', 'W', 'SE'],
   },
   Stairs: {
-    best: ["SW", "S", "W"],
-    neutral: ["SE", "NW"],
-    avoid: ["NE", "N", "E", "CENTER"],
+    best: ['SW', 'S', 'W'],
+    neutral: ['SE', 'NW'],
+    avoid: ['NE', 'N', 'E', 'CENTER'],
   },
   Study: {
-    best: ["NE", "N", "E", "W"],
-    neutral: ["NW"],
-    avoid: ["S", "SW", "SE", "CENTER"],
+    best: ['NE', 'N', 'E', 'W'],
+    neutral: ['NW'],
+    avoid: ['S', 'SW', 'SE', 'CENTER'],
   },
   Store: {
-    best: ["SW", "S", "W"],
-    neutral: ["NW"],
-    avoid: ["NE", "E", "N", "SE", "CENTER"],
+    best: ['SW', 'S', 'W'],
+    neutral: ['NW'],
+    avoid: ['NE', 'E', 'N', 'SE', 'CENTER'],
   },
   Parking: {
-    best: ["NW", "SE"],
-    neutral: ["N", "E"],
-    avoid: ["SW", "S", "W", "NE", "CENTER"],
+    best: ['NW', 'SE'],
+    neutral: ['N', 'E'],
+    avoid: ['SW', 'S', 'W', 'NE', 'CENTER'],
   },
 };
 
@@ -90,7 +81,7 @@ export function getDirection(
   y: number,
   cx: number,
   cy: number,
-  northAngle: number,
+  northAngle: number
 ): Direction {
   // Calculate angle from center
   const dx = x - cx;
@@ -100,7 +91,7 @@ export function getDirection(
   const dist = Math.sqrt(dx * dx + dy * dy);
   // If very close to center (e.g., within 15% of plot size), call it CENTER (Brahmasthan)
   if (dist < Math.min(cx, cy) * 0.3) {
-    return "CENTER";
+    return 'CENTER';
   }
 
   // Angle in degrees (0 is East, 90 is South, 180 is West, -90 is North in SVG coords)
@@ -120,16 +111,16 @@ export function getDirection(
   // Normalize to 0-360
   angle = ((angle % 360) + 360) % 360;
 
-  if (angle >= 337.5 || angle < 22.5) return "N";
-  if (angle >= 22.5 && angle < 67.5) return "NE";
-  if (angle >= 67.5 && angle < 112.5) return "E";
-  if (angle >= 112.5 && angle < 157.5) return "SE";
-  if (angle >= 157.5 && angle < 202.5) return "S";
-  if (angle >= 202.5 && angle < 247.5) return "SW";
-  if (angle >= 247.5 && angle < 292.5) return "W";
-  if (angle >= 292.5 && angle < 337.5) return "NW";
+  if (angle >= 337.5 || angle < 22.5) return 'N';
+  if (angle >= 22.5 && angle < 67.5) return 'NE';
+  if (angle >= 67.5 && angle < 112.5) return 'E';
+  if (angle >= 112.5 && angle < 157.5) return 'SE';
+  if (angle >= 157.5 && angle < 202.5) return 'S';
+  if (angle >= 202.5 && angle < 247.5) return 'SW';
+  if (angle >= 247.5 && angle < 292.5) return 'W';
+  if (angle >= 292.5 && angle < 337.5) return 'NW';
 
-  return "CENTER";
+  return 'CENTER';
 }
 
 export function analyzeRoomVastu(room: Room, plan: FloorPlan): VastuResult {
@@ -144,17 +135,17 @@ export function analyzeRoomVastu(room: Room, plan: FloorPlan): VastuResult {
   if (!rules) {
     return {
       score: 50,
-      status: "average",
+      status: 'average',
       idealDirections: [],
       currentDirection: dir,
-      feedback: "No specific rules.",
+      feedback: 'No specific rules.',
     };
   }
 
   if (rules.best.includes(dir)) {
     return {
       score: 100,
-      status: "good",
+      status: 'good',
       idealDirections: rules.best,
       currentDirection: dir,
       feedback: `Excellent placement. ${dir} is ideal for ${room.type}.`,
@@ -162,18 +153,18 @@ export function analyzeRoomVastu(room: Room, plan: FloorPlan): VastuResult {
   } else if (rules.neutral.includes(dir)) {
     return {
       score: 60,
-      status: "average",
+      status: 'average',
       idealDirections: rules.best,
       currentDirection: dir,
-      feedback: `Acceptable placement. ${dir} is okay, but ${rules.best.join("/")} is better.`,
+      feedback: `Acceptable placement. ${dir} is okay, but ${rules.best.join('/')} is better.`,
     };
   } else {
     return {
       score: 20,
-      status: "poor",
+      status: 'poor',
       idealDirections: rules.best,
       currentDirection: dir,
-      feedback: `Avoid ${dir} for ${room.type}. Move to ${rules.best.join("/")}.`,
+      feedback: `Avoid ${dir} for ${room.type}. Move to ${rules.best.join('/')}.`,
     };
   }
 }

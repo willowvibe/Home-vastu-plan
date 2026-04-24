@@ -1,5 +1,5 @@
-import React, { Component, ReactNode } from "react";
-import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import React, { Component, ReactNode } from 'react';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
   handleReset = () => {
@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleGoHome = () => {
-    window.location.href = "/";
+    window.location.href = '/';
   };
 
   render() {
@@ -40,11 +40,10 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
-            <h1 className="text-xl font-bold text-slate-900 mb-2">
-              Something went wrong
-            </h1>
+            <h1 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h1>
             <p className="text-sm text-slate-500 mb-6">
-              We apologize for the inconvenience. Your floor plan data is safely stored in your browser.
+              We apologize for the inconvenience. Your floor plan data is safely stored in your
+              browser.
             </p>
             {this.state.error && (
               <div className="bg-slate-100 rounded-lg p-3 mb-6 text-left">

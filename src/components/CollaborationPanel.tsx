@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
-import { CollaborationUser, ChatMessage } from "../types";
-import { X, Send, Users, MessageCircle, LogIn, LogOut, Radio } from "lucide-react";
+import React, { useState, useRef, useEffect } from 'react';
+import { CollaborationUser, ChatMessage } from '../types';
+import { X, Send, Users, MessageCircle, LogIn, LogOut, Radio } from 'lucide-react';
 
 interface CollaborationPanelProps {
   isConnected: boolean;
@@ -23,7 +23,7 @@ export function CollaborationPanel({
   isConnecting,
   roomId,
   userId,
-  userName,
+  userName: _userName,
   users,
   messages,
   error,
@@ -33,14 +33,14 @@ export function CollaborationPanel({
   leaveRoom,
   sendMessage,
 }: CollaborationPanelProps) {
-  const [inputRoomId, setInputRoomId] = useState("");
-  const [inputName, setInputName] = useState("");
-  const [messageText, setMessageText] = useState("");
+  const [inputRoomId, setInputRoomId] = useState('');
+  const [inputName, setInputName] = useState('');
+  const [messageText, setMessageText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleJoin = (e: React.FormEvent) => {
@@ -54,7 +54,7 @@ export function CollaborationPanel({
     e.preventDefault();
     if (messageText.trim()) {
       sendMessage(messageText.trim());
-      setMessageText("");
+      setMessageText('');
     }
   };
 
@@ -65,18 +65,14 @@ export function CollaborationPanel({
         onClick={() => setShowPanel(!showPanel)}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg transition-colors ${
           isConnected
-            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-            : "bg-slate-700 hover:bg-slate-800 text-white"
+            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            : 'bg-slate-700 hover:bg-slate-800 text-white'
         }`}
         title="Toggle Collaboration Panel"
       >
-        {isConnected ? (
-          <Radio className="w-4 h-4 animate-pulse" />
-        ) : (
-          <Users className="w-4 h-4" />
-        )}
+        {isConnected ? <Radio className="w-4 h-4 animate-pulse" /> : <Users className="w-4 h-4" />}
         <span className="text-sm font-medium">
-          {isConnected ? `Room: ${roomId}` : "Collaborate"}
+          {isConnected ? `Room: ${roomId}` : 'Collaborate'}
         </span>
         {users.length > 0 && (
           <span className="ml-1 bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full">
@@ -92,9 +88,7 @@ export function CollaborationPanel({
           <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4 text-slate-600" />
-              <h3 className="text-sm font-semibold text-slate-900">
-                Collaboration
-              </h3>
+              <h3 className="text-sm font-semibold text-slate-900">Collaboration</h3>
               {isConnected && (
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               )}
@@ -122,9 +116,7 @@ export function CollaborationPanel({
               </p>
               <form onSubmit={handleJoin} className="space-y-2">
                 <div>
-                  <label className="text-xs text-slate-500 block mb-1">
-                    Your Name
-                  </label>
+                  <label className="text-xs text-slate-500 block mb-1">Your Name</label>
                   <input
                     type="text"
                     value={inputName}
@@ -135,9 +127,7 @@ export function CollaborationPanel({
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-500 block mb-1">
-                    Room ID
-                  </label>
+                  <label className="text-xs text-slate-500 block mb-1">Room ID</label>
                   <input
                     type="text"
                     value={inputRoomId}
@@ -176,9 +166,7 @@ export function CollaborationPanel({
               {/* Users List */}
               <div className="px-4 py-2 border-b border-slate-200 bg-slate-50/50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-slate-600">
-                    Users ({users.length})
-                  </span>
+                  <span className="text-xs font-medium text-slate-600">Users ({users.length})</span>
                   <button
                     onClick={leaveRoom}
                     className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
@@ -217,14 +205,14 @@ export function CollaborationPanel({
                     <div
                       key={msg.id}
                       className={`flex flex-col ${
-                        msg.userId === userId ? "items-end" : "items-start"
+                        msg.userId === userId ? 'items-end' : 'items-start'
                       }`}
                     >
                       <div
                         className={`max-w-[85%] px-3 py-2 rounded-lg text-xs ${
                           msg.userId === userId
-                            ? "bg-indigo-100 text-indigo-900"
-                            : "bg-slate-100 text-slate-800"
+                            ? 'bg-indigo-100 text-indigo-900'
+                            : 'bg-slate-100 text-slate-800'
                         }`}
                       >
                         <div className="flex items-center gap-1.5 mb-0.5">
@@ -232,16 +220,14 @@ export function CollaborationPanel({
                             className="w-1.5 h-1.5 rounded-full"
                             style={{ backgroundColor: msg.userColor }}
                           />
-                          <span className="font-medium text-[10px] opacity-75">
-                            {msg.userName}
-                          </span>
+                          <span className="font-medium text-[10px] opacity-75">{msg.userName}</span>
                         </div>
                         <p className="break-words">{msg.text}</p>
                       </div>
                       <span className="text-[9px] text-slate-400 mt-0.5 px-1">
                         {new Date(msg.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </span>
                     </div>
@@ -251,10 +237,7 @@ export function CollaborationPanel({
               </div>
 
               {/* Message Input */}
-              <form
-                onSubmit={handleSend}
-                className="p-3 border-t border-slate-200 flex gap-2"
-              >
+              <form onSubmit={handleSend} className="p-3 border-t border-slate-200 flex gap-2">
                 <input
                   type="text"
                   value={messageText}

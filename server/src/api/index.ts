@@ -1,6 +1,14 @@
 import { Request, Response, Router } from 'express';
 import { register, login, logout, refreshToken, getProfile } from './auth.js';
-import { getPlans, getPlan, createPlan, updatePlan, deletePlan, createShare, getPlanByShare } from './plans.js';
+import {
+  getPlans,
+  getPlan,
+  createPlan,
+  updatePlan,
+  deletePlan,
+  createShare,
+  getPlanByShare,
+} from './plans.js';
 import { queueChange, syncChanges, getSyncStatus } from './sync.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 

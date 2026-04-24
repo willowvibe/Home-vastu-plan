@@ -25,8 +25,8 @@ export async function getPlan(req: Request, res: Response): Promise<void> {
   // Check if plan is public
   const publicPlan = await query(
     'SELECT plans.id, plans.name, plans.data_json, plans.is_public, plans.created_at, plans.updated_at, users.email as owner_email ' +
-    'FROM plans JOIN users ON plans.user_id = users.id ' +
-    'WHERE plans.id = $1 AND plans.is_public = true',
+      'FROM plans JOIN users ON plans.user_id = users.id ' +
+      'WHERE plans.id = $1 AND plans.is_public = true',
     [id]
   );
 
@@ -51,8 +51,8 @@ export async function getPlan(req: Request, res: Response): Promise<void> {
   // Check if user has access via share
   const sharedPlan = await query(
     'SELECT plans.id, plans.name, plans.data_json, plans.is_public, plans.created_at, plans.updated_at ' +
-    'FROM plans JOIN plan_shares ON plans.id = plan_shares.plan_id ' +
-    'WHERE plans.id = $1 AND plan_shares.share_uuid = $2',
+      'FROM plans JOIN plan_shares ON plans.id = plan_shares.plan_id ' +
+      'WHERE plans.id = $1 AND plan_shares.share_uuid = $2',
     [id, req.headers['x-share-uuid'] as string]
   );
 
@@ -175,8 +175,8 @@ export async function getPlanByShare(req: Request, res: Response): Promise<void>
 
   const result = await query(
     'SELECT plans.id, plans.name, plans.data_json, plans.is_public, plans.created_at, plans.updated_at, users.email as owner_email ' +
-    'FROM plans JOIN plan_shares ON plans.id = plan_shares.plan_id JOIN users ON plans.user_id = users.id ' +
-    'WHERE plan_shares.share_uuid = $1 AND (plan_shares.expires_at IS NULL OR plan_shares.expires_at > NOW())',
+      'FROM plans JOIN plan_shares ON plans.id = plan_shares.plan_id JOIN users ON plans.user_id = users.id ' +
+      'WHERE plan_shares.share_uuid = $1 AND (plan_shares.expires_at IS NULL OR plan_shares.expires_at > NOW())',
     [uuid]
   );
 

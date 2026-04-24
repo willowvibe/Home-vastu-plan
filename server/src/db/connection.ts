@@ -24,7 +24,11 @@ export async function query<T = any>(text: string, params?: any[]): Promise<{ ro
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log('Executed query', { text: text.substring(0, 50), duration, rowCount: res.rowCount });
+    console.log('Executed query', {
+      text: text.substring(0, 50),
+      duration,
+      rowCount: res.rowCount,
+    });
     return res;
   } catch (error) {
     console.error('Database query error:', { text, params, error });

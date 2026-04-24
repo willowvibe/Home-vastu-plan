@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { FloorPlan } from "../types";
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { FloorPlan } from '../types';
 
 const MAX_HISTORY_SIZE = 50;
-const AUTO_SAVE_KEY = "vastuplan_autosave";
+const AUTO_SAVE_KEY = 'vastuplan_autosave';
 
 function loadAutoSave(): FloorPlan | null {
   try {
@@ -22,21 +22,24 @@ export function useFloorPlan(initialPlan: FloorPlan) {
   const [history, setHistory] = useState<FloorPlan[]>([startPlan]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
-  // Use a ref to avoid stale closure issues in nested setState callbacks
+  // Use refs to avoid stale closure issues in nested setState callbacks
+  // Update refs via useEffect to avoid errors during render
   const historyIndexRef = useRef(historyIndex);
-  historyIndexRef.current = historyIndex;
-
   const historyRef = useRef(history);
-  historyRef.current = history;
 
-  const updatePlan = useCallback(
-    (newPlan: FloorPlan | ((prev: FloorPlan) => FloorPlan)) => {
-      setPlan((prev) =>
-        typeof newPlan === "function" ? (newPlan as (prev: FloorPlan) => FloorPlan)(prev) : newPlan,
-      );
-    },
-    [],
-  );
+  useEffect(() => {
+    historyIndexRef.current = historyIndex;
+  }, [historyIndex]);
+
+  useEffect(() => {
+    historyRef.current = history;
+  }, [history]);
+
+  const updatePlan = useCallback((newPlan: FloorPlan | ((prev: FloorPlan) => FloorPlan)) => {
+    setPlan((prev) =>
+      typeof newPlan === 'function' ? (newPlan as (prev: FloorPlan) => FloorPlan)(prev) : newPlan
+    );
+  }, []);
 
   const commitHistory = useCallback(() => {
     setPlan((currentPlan) => {

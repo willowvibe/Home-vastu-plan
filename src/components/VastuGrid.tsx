@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface VastuGridProps {
   plotWidth: number;
@@ -9,31 +9,31 @@ interface VastuGridProps {
 }
 
 const getVastuZone = (index: number, northAngle: number): string => {
-  if (index === 4) return "Brahmasthan";
+  if (index === 4) return 'Brahmasthan';
 
   const col = index % 3;
   const row = Math.floor(index / 3);
   const dx = col - 1;
   const dy = row - 1;
 
-  let cellAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+  const cellAngle = Math.atan2(dy, dx) * (180 / Math.PI);
   let compassAngle = (cellAngle + 90 - northAngle) % 360;
   if (compassAngle < 0) compassAngle += 360;
 
   const snapped = (Math.round(compassAngle / 45) * 45) % 360;
 
   const zones: Record<number, string> = {
-    0: "North",
-    45: "North-East",
-    90: "East",
-    135: "South-East",
-    180: "South",
-    225: "South-West",
-    270: "West",
-    315: "North-West",
+    0: 'North',
+    45: 'North-East',
+    90: 'East',
+    135: 'South-East',
+    180: 'South',
+    225: 'South-West',
+    270: 'West',
+    315: 'North-West',
   };
 
-  return zones[snapped] || "";
+  return zones[snapped] || '';
 };
 
 export const VastuGrid: React.FC<VastuGridProps> = React.memo(
@@ -72,6 +72,6 @@ export const VastuGrid: React.FC<VastuGridProps> = React.memo(
         </div>
       </div>
     );
-  },
+  }
 );
-VastuGrid.displayName = "VastuGrid";
+VastuGrid.displayName = 'VastuGrid';

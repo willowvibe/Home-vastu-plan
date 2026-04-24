@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface RulerOverlayProps {
   measuring: boolean;
@@ -11,10 +11,7 @@ export const RulerOverlay: React.FC<RulerOverlayProps> = React.memo(
     const distance =
       measureStart && measureEnd
         ? Math.round(
-            Math.sqrt(
-              (measureEnd.x - measureStart.x) ** 2 +
-                (measureEnd.y - measureStart.y) ** 2,
-            ),
+            Math.sqrt((measureEnd.x - measureStart.x) ** 2 + (measureEnd.y - measureStart.y) ** 2)
           )
         : null;
 
@@ -30,13 +27,11 @@ export const RulerOverlay: React.FC<RulerOverlayProps> = React.memo(
             <div className="text-[9px] font-bold text-slate-600 mb-1 uppercase tracking-wider">
               Measurement
             </div>
-            <div className="text-[10px] text-slate-800">
-              Distance: {distance}' ft
-            </div>
+            <div className="text-[10px] text-slate-800">Distance: {distance}' ft</div>
           </div>
         )}
       </>
     );
-  },
+  }
 );
-RulerOverlay.displayName = "RulerOverlay";
+RulerOverlay.displayName = 'RulerOverlay';

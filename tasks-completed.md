@@ -5,6 +5,7 @@ This document lists all tasks that have been completed.
 ## Completed Tasks (30/30)
 
 ### Critical Priority (5/5) - ✅ COMPLETED
+
 - Task 1: Room Element Rotation Bounds Constraint
 - Task 2: Wall Thickness Change Element Positions
 - Task 3: Missing GEMINI_API_KEY Validation
@@ -12,6 +13,7 @@ This document lists all tasks that have been completed.
 - Task 5: Undo/Redo History Bounds
 
 ### High Priority (7/7) - ✅ COMPLETED
+
 - Task 6: Share Link Not Working in View/Comment Mode
 - Task 7: PDF Export Missing Floor Number in Title Block
 - Task 8: No Minimum Maximum Zoom Limits
@@ -21,6 +23,7 @@ This document lists all tasks that have been completed.
 - Task 12: Element Deletion Does Not Save to History
 
 ### Medium Priority (10/10) - ✅ COMPLETED
+
 - Task 13: No Keyboard Shortcuts for Common Actions
 - Task 14: No Clear All for Current Floor
 - Task 15: No Element Duplication
@@ -33,6 +36,7 @@ This document lists all tasks that have been completed.
 - Task 23: Share Link Does Not Include AI Analysis
 
 ### Low Priority (8/8) - ✅ COMPLETED
+
 - Task 24: Better Error Messages for Large Plans
 - Task 25: No Export as SVG
 - Task 26: No Dark Mode
@@ -42,6 +46,7 @@ This document lists all tasks that have been completed.
 - Task 30: No Collaborative Editing
 
 ## Modularization Improvements (Post v2.0)
+
 - ✅ Canvas component split into: Room, RoomElement, VastuGrid, Compass, RulerOverlay, RoadIndicator
 - ✅ useCanvasDrag hook extracted from Canvas
 - ✅ useFloorPlan hook extracted from App.tsx (state, history, undo, redo)
@@ -53,6 +58,7 @@ This document lists all tasks that have been completed.
 - ✅ Room vastu analysis memoized with useMemo
 
 ## Bug Fixes (Post-Merge Cleanup)
+
 - ✅ **Redo button crash**: Fixed `history.length` ReferenceError in App.tsx (used `historyLength` from useFloorPlan)
 - ✅ **Zoom limits incorrect**: Fixed hardcoded 0.5-2.0 limits to 0.1-3.0 in App.tsx toolbar buttons
 - ✅ **Element rotation history**: Fixed double-click element rotation not saving to undo history (added `onUpdateRoomEnd` propagation through Canvas → Room)
@@ -61,13 +67,13 @@ This document lists all tasks that have been completed.
 
 ## Summary
 
-| Priority | Total | Completed | Percentage |
-|----------|-------|-----------|------------|
-| Critical | 5 | 5 | 100% |
-| High | 7 | 7 | 100% |
-| Medium | 10 | 10 | 100% |
-| Low | 8 | 8 | 100% |
-| **Total** | **30** | **30** | **100%** |
+| Priority  | Total  | Completed | Percentage |
+| --------- | ------ | --------- | ---------- |
+| Critical  | 5      | 5         | 100%       |
+| High      | 7      | 7         | 100%       |
+| Medium    | 10     | 10        | 100%       |
+| Low       | 8      | 8         | 100%       |
+| **Total** | **30** | **30**    | **100%**   |
 
 ## Notes
 
