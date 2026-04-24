@@ -3,6 +3,7 @@ import { FloorPlan } from '../types';
 import { jsPDF } from 'jspdf';
 import { toPng } from 'html-to-image';
 import { FileText, X, Upload, Loader2, Download } from 'lucide-react';
+import { addBreadcrumb } from '../services/sentry';
 
 interface PresentationExportProps {
   canvasRef: React.RefObject<HTMLDivElement>;
@@ -97,6 +98,8 @@ export function PresentationExport({
       // Save PDF
       pdf.save(`${clientName || 'Project'}_VastuPlan.pdf`);
       onClose();
+      // Sentry breadcrumb for PDF export
+      addBreadcrumb('PDF Exported', 'export', { floor: currentFloor });
     } catch (error) {
       console.error('PDF Export failed:', error);
       alert('Failed to export PDF.');
