@@ -25,23 +25,23 @@ export const useToast = () => {
   return context;
 };
 
-const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void }> = ({
+function _getIcon(type: ToastType) {
+  switch (type) {
+    case 'success':
+      return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
+    case 'error':
+      return <AlertCircle className="w-5 h-5 text-rose-500" />;
+    case 'warning':
+      return <AlertTriangle className="w-5 h-5 text-amber-500" />;
+    default:
+      return <Info className="w-5 h-5 text-indigo-500" />;
+  }
+}
+
+const _ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void }> = ({
   toasts,
   removeToast,
 }) => {
-  const getIcon = (type: ToastType) => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
-      case 'error':
-        return <AlertCircle className="w-5 h-5 text-rose-500" />;
-      case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-amber-500" />;
-      default:
-        return <Info className="w-5 h-5 text-indigo-500" />;
-    }
-  };
-
   return (
     <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
       {toasts.map((toast) => (
@@ -57,17 +57,7 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
                   : 'bg-white border-indigo-200'
           }`}
         >
-          <div className="mt-0.5 shrink-0">
-            {toast.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-            ) : toast.type === 'error' ? (
-              <AlertCircle className="w-5 h-5 text-rose-500" />
-            ) : toast.type === 'warning' ? (
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-            ) : (
-              <Info className="w-5 h-5 text-indigo-500" />
-            )}
-          </div>
+          <div className="mt-0.5 shrink-0">{_getIcon(toast.type)}</div>
           <div className="flex-1 min-w-0">
             <p
               className={`text-sm font-medium ${
@@ -122,7 +112,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ showToast, removeToast }}>
       {children}
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <_ToastContainer toasts={toasts} removeToast={removeToast} />
     </ToastContext.Provider>
   );
 };

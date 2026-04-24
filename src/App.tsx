@@ -58,6 +58,7 @@ import {
   PLAN_TEMPLATES,
   ROOM_ELEMENTS,
   COMMON_ELEMENTS,
+  ROOM_CATEGORIES,
 } from './constants/floorPlanConstants';
 
 export default function App() {
