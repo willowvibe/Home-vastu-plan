@@ -88,7 +88,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  let decoded;
+  let decoded: { sub: string };
   try {
     decoded = jwt.verify(refreshToken, process.env.JWT_SECRET || 'secret') as { sub: string };
   } catch (error) {
@@ -102,7 +102,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
 }
 
 export async function getProfile(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
 
   if (!userId) {
     res.status(401).json({ error: 'Unauthorized' });

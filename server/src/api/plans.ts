@@ -3,7 +3,7 @@ import { query } from '../db/connection.js';
 import { generateUUID } from '../utils/helpers.js';
 
 export async function getPlans(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
 
   if (!userId) {
     res.status(401).json({ error: 'Unauthorized' });
@@ -20,7 +20,7 @@ export async function getPlans(req: Request, res: Response): Promise<void> {
 
 export async function getPlan(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
 
   // Check if plan is public
   const publicPlan = await query(
@@ -65,7 +65,7 @@ export async function getPlan(req: Request, res: Response): Promise<void> {
 }
 
 export async function createPlan(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
   const { name, data } = req.body;
 
   if (!userId) {
@@ -87,7 +87,7 @@ export async function createPlan(req: Request, res: Response): Promise<void> {
 }
 
 export async function updatePlan(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
   const { id } = req.params;
   const { name, data, isPublic } = req.body;
 
@@ -117,7 +117,7 @@ export async function updatePlan(req: Request, res: Response): Promise<void> {
 }
 
 export async function deletePlan(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
   const { id } = req.params;
 
   if (!userId) {
@@ -141,7 +141,7 @@ export async function deletePlan(req: Request, res: Response): Promise<void> {
 }
 
 export async function createShare(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
   const { id } = req.params;
   const { permissions, expiresAt } = req.body;
 

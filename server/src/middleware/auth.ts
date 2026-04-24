@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { query } from '../db/connection.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_EXPIRY = process.env.JWT_EXPIRY || '15m';
+const JWT_EXPIRY = 15 * 60; // 15 minutes in seconds
 
 export interface AuthRequest extends Request {
   user?: {
@@ -14,17 +14,11 @@ export interface AuthRequest extends Request {
 }
 
 export function generateToken(userId: string, email: string): { accessToken: string; refreshToken: string } {
-  const accessToken = jwt.sign(
-    { sub: userId, email },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRY }
-  );
+  const options: SignOptions = { expiresIn: JWT_EXPIRY };
+  const refreshOptions: SignOptions = { expiresIn: 7 * 24 * 60 * 60 }; // 7 days
 
-  const refreshToken = jwt.sign(
-    { sub: userId },
-    JWT_SECRET,
-    { expiresIn: '7d' }
-  );
+  const accessToken = jwt.sign({ sub: userId, email }, JWT_SECRET, options);
+  const refreshToken = jwt.sign({ sub: userId }, JWT_SECRET, refreshOptions);
 
   return { accessToken, refreshToken };
 }

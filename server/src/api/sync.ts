@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { query } from '../db/connection.js';
 
 export async function queueChange(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
   const { planId, operation, data } = req.body;
 
   if (!userId) {
@@ -26,7 +26,7 @@ export async function queueChange(req: Request, res: Response): Promise<void> {
 }
 
 export async function syncChanges(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
   const { planId, changes } = req.body;
 
   if (!userId) {
@@ -60,7 +60,7 @@ export async function syncChanges(req: Request, res: Response): Promise<void> {
 }
 
 export async function getSyncStatus(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+  const userId = (req as any).user?.id;
 
   if (!userId) {
     res.status(401).json({ error: 'Unauthorized' });
