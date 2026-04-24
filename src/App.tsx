@@ -7,6 +7,7 @@ import { analyzeFloorPlan } from './services/gemini';
 import { analyzeRoomVastu, calculateOverallVastuScore } from './services/vastu';
 import { setUser, addBreadcrumb } from './services/sentry';
 import { trackEvent, EVENTS, EVENT_METADATA } from './services/analytics';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import {
   Layers,
   Plus,
@@ -1717,6 +1718,9 @@ export default function App() {
           }}
         />
       )}
+
+      {/* Offline Indicator - shows when network is unavailable */}
+      <OfflineIndicator />
 
       {/* Print Modal - hidden on screen, visible when printing */}
       <div className="hidden print:block fixed inset-0 bg-white p-8">
