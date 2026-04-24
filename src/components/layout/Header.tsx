@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, FolderOpen, Sun, Moon } from 'lucide-react';
+import { Layers, FolderOpen, Sun, Moon, HelpCircle } from 'lucide-react';
 import { FloorPlan } from '../../types';
 
 interface HeaderProps {
@@ -12,6 +12,7 @@ interface HeaderProps {
   vastuScore: number;
   darkMode: boolean;
   setDarkMode: (value: boolean) => void;
+  setShowShortcutHelp?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -24,21 +25,36 @@ export const Header: React.FC<HeaderProps> = ({
   vastuScore,
   darkMode,
   setDarkMode,
+  setShowShortcutHelp,
 }) => {
+  const getVastuColor = (score: number) => {
+    if (score >= 80) return 'text-emerald-600';
+    if (score >= 50) return 'text-amber-600';
+    return 'text-red-600';
+  };
+
+  const getVastuBadgeColor = (score: number, isDark: boolean) => {
+    if (score >= 80)
+      return isDark ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-50 border-emerald-200';
+    if (score >= 50)
+      return isDark ? 'bg-amber-900/30 border-amber-700' : 'bg-amber-50 border-amber-200';
+    return isDark ? 'bg-red-900/30 border-red-700' : 'bg-red-50 border-red-200';
+  };
+
   return (
     <header
-      className={`border-b px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between sticky top-0 z-20 gap-3 md:gap-0 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+      className={`border-b px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between sticky top-0 z-20 gap-3 md:gap-0 transition-colors duration-200 ${darkMode ? 'bg-slate-800/95 border-slate-700 backdrop-blur-sm' : 'bg-white/95 border-slate-200 backdrop-blur-sm'}`}
     >
       <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
         <div className="flex items-center gap-3">
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${darkMode ? 'bg-indigo-600' : 'bg-indigo-600'}`}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-105 ${darkMode ? 'bg-indigo-600 shadow-indigo-900/50' : 'bg-indigo-600 shadow-indigo-200'}`}
           >
             <Layers className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1
-              className={`text-xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}
+              className={`text-xl font-bold tracking-tight transition-colors ${darkMode ? 'text-white' : 'text-slate-900'}`}
             >
               VastuPlan 2D
             </h1>
@@ -51,18 +67,19 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Mobile Vastu Score */}
         {plan.rooms.length > 0 && (
           <div
-            className={`md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg border ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-slate-50 border-slate-200'}`}
+            className={`md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${getVastuBadgeColor(vastuScore, darkMode)}`}
           >
-            <div
-              className={`text-sm font-bold ${vastuScore >= 80 ? 'text-emerald-600' : vastuScore >= 50 ? 'text-amber-600' : 'text-red-600'}`}
+            <div className={`text-sm font-bold ${getVastuColor(vastuScore)}`}>{vastuScore}/100</div>
+            <span
+              className={`text-[10px] uppercase ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
             >
-              {vastuScore}/100
-            </div>
+              Score
+            </span>
           </div>
         )}
       </div>
 
-      <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto justify-between md:justify-end">
+      <div className="flex items-center gap-3 md:gap-6 w-full md:w-auto justify-between md:justify-end">
         {appMode !== 'edit' && (
           <div
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${darkMode ? 'bg-amber-900/30 border-amber-700' : 'bg-amber-50 border-amber-200'}`}
@@ -75,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
             {appMode === 'view' && (
               <button
                 onClick={() => setAppMode('edit')}
-                className="ml-2 text-xs text-indigo-600 hover:underline"
+                className="ml-2 text-xs text-indigo-600 hover:underline transition-colors"
               >
                 Edit Copy
               </button>
@@ -84,44 +101,55 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {plan.rooms.length > 0 && (
-          <div className="hidden md:flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-            <div className="text-xs font-medium text-slate-500">Vastu Score</div>
+          <div
+            className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${getVastuBadgeColor(vastuScore, darkMode)}`}
+          >
             <div
-              className={`text-sm font-bold ${vastuScore >= 80 ? 'text-emerald-600' : vastuScore >= 50 ? 'text-amber-600' : 'text-red-600'}`}
+              className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
             >
-              {vastuScore}/100
+              Vastu Score
             </div>
+            <div className={`text-sm font-bold ${getVastuColor(vastuScore)}`}>{vastuScore}/100</div>
           </div>
         )}
 
         <button
           onClick={() => setDarkMode(!darkMode)}
-          className={`p-2 rounded-lg border transition-colors ${darkMode ? 'bg-slate-800 border-slate-600 text-amber-400 hover:bg-slate-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+          className={`p-2 rounded-lg border transition-all duration-300 hover:scale-105 hover:shadow-sm ${darkMode ? 'bg-slate-800 border-slate-600 text-amber-400 hover:bg-slate-700 hover:border-amber-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}
           title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           aria-label={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
-        <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
+        <button
+          onClick={() => setShowShortcutHelp?.()}
+          className={`p-2 rounded-lg border transition-colors ${darkMode ? 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+          title="Keyboard Shortcuts (?)"
+          aria-label="Keyboard Shortcuts"
+        >
+          <HelpCircle className="w-4 h-4" />
+        </button>
+
+        <div className="flex bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-lg w-full md:w-auto backdrop-blur-sm shadow-sm">
           <button
             onClick={() => setShowProjectManager(true)}
-            className="px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 hover:text-indigo-600 transition-colors flex items-center gap-2"
+            className="px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-slate-700 transition-all flex items-center gap-2"
             title="Projects & Versions"
           >
             <FolderOpen className="w-4 h-4" />
             <span className="hidden md:inline">Projects</span>
           </button>
-          <div className="w-px h-6 bg-slate-300 mx-1 self-center"></div>
+          <div className="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-1 self-center"></div>
           <button
             onClick={() => setActiveTab('design')}
-            className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'design' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'design' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'}`}
           >
             Floor Plan
           </button>
           <button
             onClick={() => setActiveTab('image')}
-            className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'image' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'image' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'}`}
           >
             AI Image Editor
           </button>
