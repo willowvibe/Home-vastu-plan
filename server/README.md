@@ -17,12 +17,15 @@ Real-time collaboration backend for VastuPlan 2D floor plan designer.
 
 - Node.js 18+
 - npm or yarn
+- Neon PostgreSQL database (free tier available)
 
 ### Installation
 
 ```bash
 cd server
 npm install
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
 ### Running the Server
@@ -46,6 +49,47 @@ Create a `.env` file in the `server/` directory:
 PORT=3001
 CLIENT_URL=http://localhost:3000
 NODE_ENV=development
+DATABASE_URL=postgresql://user:pass@localhost:5432/vastuplan
+JWT_SECRET=your-secret-key-here
+```
+
+## Production Deployment
+
+### Deploy to Render
+
+1. Create a new Web Service on [Render](https://render.com)
+2. Connect your GitHub repository
+3. Set the build command: `cd server && npm install && npm run build`
+4. Set the start command: `cd server && npm start`
+5. Add environment variables from `.env.example`
+6. Add the `DATABASE_URL` with your Neon PostgreSQL connection string
+7. Deploy
+
+### Deploy to Railway
+
+1. Create a new project on [Railway](https://railway.app)
+2. Connect your GitHub repository
+3. Add the `DATABASE_URL` with your Neon PostgreSQL connection string
+4. Add the `JWT_SECRET` environment variable
+5. Deploy
+
+## Database Setup
+
+The server uses Neon PostgreSQL for persistent storage.
+
+### Create a Neon Database
+
+1. Go to [Neon](https://neon.tech)
+2. Sign up and create a new project
+3. Copy the connection string (includes SSL configuration)
+4. Add it to your `.env` as `DATABASE_URL`
+
+### Run Migrations
+
+```bash
+cd server
+npm run db:migrate  # Create tables
+npm run db:push   # Push schema changes
 ```
 
 ## API Endpoints

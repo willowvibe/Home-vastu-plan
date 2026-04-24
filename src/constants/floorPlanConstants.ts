@@ -1,4 +1,20 @@
-import { FloorPlan, RoomType } from '../types';
+import { FloorPlan, RoomType, RoomCategory } from '../types';
+
+// Room category mapping for filtering
+export const ROOM_CATEGORIES: Record<string, RoomCategory> = {
+  Bedroom: 'Sleeping',
+  'Master Bedroom': 'Sleeping',
+  Kitchen: 'Kitchen',
+  'Living Room': 'Living',
+  Bathroom: 'Bathroom',
+  'Pooja Room': 'Special',
+  Dining: 'Living',
+  Balcony: 'Other',
+  Stairs: 'Other',
+  Study: 'Sleeping',
+  Store: 'Utility',
+  Parking: 'Parking',
+};
 
 export const ROOM_TYPES: { type: RoomType; w: number; h: number }[] = [
   { type: 'Bedroom', w: 12, h: 12 },
