@@ -14,6 +14,7 @@ export default tseslint.config(
       'playwright.config.ts',
       'vitest.config.ts',
       'src/test',
+      'src/services/sw.ts',
     ],
   },
   {

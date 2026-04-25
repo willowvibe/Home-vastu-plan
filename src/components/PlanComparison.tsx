@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X, Compare, Download } from 'lucide-react';
+import { X, Download, Activity } from 'lucide-react';
 import { FloorPlan, Room } from '../types';
 import { Canvas } from './Canvas';
 
@@ -76,7 +76,7 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }
     return (
       <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
-          <Compare className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+          <Activity className="w-12 h-12 text-slate-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-slate-800 mb-2">No Plans to Compare</h2>
           <p className="text-slate-500 mb-6">
             At least two plans are needed for comparison. Save your plan or load a previous version.
@@ -99,7 +99,7 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }
         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <Compare className="w-5 h-5 text-indigo-600" />
+              <Activity className="w-5 h-5 text-indigo-600" />
               Plan Comparison
             </h2>
             <p className="text-sm text-slate-500 mt-1">
