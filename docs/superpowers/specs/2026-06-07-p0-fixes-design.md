@@ -46,20 +46,24 @@ P0 fixes are **local edits**. They must not grow `App.tsx` further (already 1,83
 ### B-5 — view/comment mode does not lock canvas/keyboard
 
 **Files:**
+
 - `src/hooks/useKeyboardShortcuts.ts` — add `appMode: AppMode` to options, early-return at the top of `handleKeyDown` when not `edit`.
 - `src/hooks/useCanvasDrag.ts` — same: accept `appMode`, early-return in `onMouseDown` / `onTouchStart` when not `edit`.
 - `src/components/Canvas.tsx` — accept new `appMode: AppMode` prop, forward to `useCanvasDrag`. Backwards-compatible default of `'edit'`.
 - `src/App.tsx` — pass `appMode` to `<Canvas appMode={appMode}>`. In every mutating handler (`addRoom`, `updateRoom`, `deleteRoom`, `duplicateRoom`, `rotateRoom`, the element add/update/rotate/delete handlers, the AI analysis trigger, the Sentry `setUser`/`addBreadcrumb` initialization effect), add `if (appMode !== 'edit') return;` at the top.
 
 **Mode semantics:**
+
 - `edit` — full UI.
 - `view` — read-only. No clicks, no keyboard, no drag.
 - `comment` — read-only for rooms. Comment placement UI doesn't exist in the client today (server has `chat-message` but no client surface), so in practice `comment === view` in 0.1.0. When comment UI lands, the comment placement handler will be the only handler exempt from the `appMode !== 'edit'` gate.
 
 **AppMode type:** Currently the string union is duplicated in `App.tsx:118`, `Header.tsx`, and `useKeyboardShortcuts.ts`. Per Q-1, extract to `src/types.ts`:
+
 ```ts
 export type AppMode = 'edit' | 'view' | 'comment';
 ```
+
 This is a small ancillary change. Mark as in-scope here because every fix in B-5 references `AppMode`.
 
 ### B-10 — shared-link URL never cleared → refresh silently reverts edits
@@ -118,7 +122,7 @@ This is "share-once" semantics. Matches how Notion / Figma handle shared URLs.
 
 **File:** `src/App.tsx:219` and any other call sites
 
-**Current behavior:** `App.tsx:219` calls `(window as any).showToast?.(\`Added ${type} room\`, 'success')`. The global is never assigned; the `?.` makes it a silent no-op. The `ToastProvider` is mounted at `App.tsx:609-1837` and exposes a real `useToast()` hook.
+**Current behavior:** `App.tsx:219` calls `(window as any).showToast?.(\`Added ${type} room\`, 'success')`. The global is never assigned; the `?.`makes it a silent no-op. The`ToastProvider`is mounted at`App.tsx:609-1837`and exposes a real`useToast()` hook.
 
 **Fix:** Add `useToast()` to `App.tsx` and replace the call with `showToast(\`Added ${type} room\`, 'success')`. Grep for any other `(window as any).showToast` and replace those too.
 
@@ -129,6 +133,7 @@ This is "share-once" semantics. Matches how Notion / Figma handle shared URLs.
 **Current behavior:** `handleLogoUpload` (lines 28-37) accepts whatever the user selects and reads it as a data URL. The `accept` attribute is "image/png, image/jpeg" but a determined user can bypass that and upload a non-image (PDF, HTML, executable). The data URL is then passed to `pdf.addImage(logoUrl, 'PNG', ...)` which embeds it in the PDF.
 
 **Fix:** Add a magic-byte sniffer:
+
 ```ts
 async function isPngOrJpeg(file: File): Promise<boolean> {
   if (file.size > 5_000_000) return false;
@@ -139,29 +144,31 @@ async function isPngOrJpeg(file: File): Promise<boolean> {
   return isPng || isJpeg;
 }
 ```
+
 In `handleLogoUpload`: if the check returns false, show a `useToast` rejection ("Logo must be a PNG or JPEG under 5 MB") and don't update `logoUrl`. The new toast hook is in scope because S-10 also added it.
 
 ---
 
 ## 3. Files touched
 
-| File                                           | Bugs addressed |
-| ---------------------------------------------- | -------------- |
-| `src/App.tsx`                                  | B-5, B-10, S-10 |
-| `src/hooks/useCollaboration.ts`                | B-1, B-2 |
-| `src/hooks/useKeyboardShortcuts.ts`            | B-5 |
-| `src/hooks/useCanvasDrag.ts`                   | B-5 |
-| `src/components/Canvas.tsx`                    | B-5 (prop passthrough) |
-| `src/components/OfflineIndicator.tsx`          | B-11 |
-| `src/components/PresentationExport.tsx`        | S-15 |
-| `src/services/analytics.ts`                    | S-5 |
-| `src/services/sentry.ts`                       | S-7 |
-| `src/types.ts`                                 | Q-1 (AppMode extraction, in-scope of B-5) |
-| `.env.example`                                 | S-5 |
-| `CLAUDE.md`                                    | S-5 (note in §2 "Dev commands" pointing to the env-var rename) |
-| `memory/dev-commands.md`                        | S-5 (env-var table rename: `REACT_APP_*` → `VITE_*`) |
+| File                                    | Bugs addressed                                                 |
+| --------------------------------------- | -------------------------------------------------------------- |
+| `src/App.tsx`                           | B-5, B-10, S-10                                                |
+| `src/hooks/useCollaboration.ts`         | B-1, B-2                                                       |
+| `src/hooks/useKeyboardShortcuts.ts`     | B-5                                                            |
+| `src/hooks/useCanvasDrag.ts`            | B-5                                                            |
+| `src/components/Canvas.tsx`             | B-5 (prop passthrough)                                         |
+| `src/components/OfflineIndicator.tsx`   | B-11                                                           |
+| `src/components/PresentationExport.tsx` | S-15                                                           |
+| `src/services/analytics.ts`             | S-5                                                            |
+| `src/services/sentry.ts`                | S-7                                                            |
+| `src/types.ts`                          | Q-1 (AppMode extraction, in-scope of B-5)                      |
+| `.env.example`                          | S-5                                                            |
+| `CLAUDE.md`                             | S-5 (note in §2 "Dev commands" pointing to the env-var rename) |
+| `memory/dev-commands.md`                | S-5 (env-var table rename: `REACT_APP_*` → `VITE_*`)           |
 
 **New test files:**
+
 - `src/hooks/useCollaboration.test.ts` — B-1, B-2
 - `src/hooks/useKeyboardShortcuts.test.ts` — B-5
 - `src/hooks/useCanvasDrag.test.ts` — B-5
@@ -184,20 +191,21 @@ In `handleLogoUpload`: if the check returns false, show a `useToast` rejection (
 
 ## 5. Risks and mitigations
 
-| Risk | Mitigation |
-| --- | --- |
-| B-1 + B-2 changes touch a dead hook. If a future commit wires it in, the new behavior is what they want. | Document in commit message that the hook is currently unused; the fixes are correctness-only. |
-| B-5 mode locking could break the existing E2E test if the test runs in a non-`edit` mode. | E2E tests don't set `?mode=`, so they default to `edit`. Verify with `npm run test:e2e` after the fix. |
-| B-10 URL strip could confuse a user who shares a URL, the recipient refreshes, and the URL no longer contains `?plan=`. The recipient's localStorage now has the plan. | Acceptable. The point of B-10 is to prevent silent edit loss. If the recipient wants to re-share, they can re-generate the share link from the menu. |
-| S-5 env-var rename breaks any deployed env that was setting `REACT_APP_ANALYTICS_*`. | `.env.example` will be updated. Deploy notes will mention the rename. There is no production deploy of this app yet (per the repo's alpha status), so the blast radius is small. |
-| S-7 init-flag races: `setUser` called from a fast-mounting React effect while `initSentry` is still running. | `initSentry` is synchronous in this codebase. The effect in `App.tsx:140-150` runs after mount, and `initSentry` is called from `main.tsx` before `App` mounts. No race. |
-| S-15 magic-byte check could false-positive on a non-image that happens to start with `89 50 4E 47`. | PNG magic is `89 50 4E 47 0D 0A 1A 0A` (8 bytes). The check above stops at byte 4. Acceptable trade-off: the only other file formats starting with `89 P` are extremely unlikely. A 4-byte check is the standard for client-side image validation. If we want byte 5-8 too, we add it; not in this PR. |
+| Risk                                                                                                                                                                   | Mitigation                                                                                                                                                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| B-1 + B-2 changes touch a dead hook. If a future commit wires it in, the new behavior is what they want.                                                               | Document in commit message that the hook is currently unused; the fixes are correctness-only.                                                                                                                                                                                                          |
+| B-5 mode locking could break the existing E2E test if the test runs in a non-`edit` mode.                                                                              | E2E tests don't set `?mode=`, so they default to `edit`. Verify with `npm run test:e2e` after the fix.                                                                                                                                                                                                 |
+| B-10 URL strip could confuse a user who shares a URL, the recipient refreshes, and the URL no longer contains `?plan=`. The recipient's localStorage now has the plan. | Acceptable. The point of B-10 is to prevent silent edit loss. If the recipient wants to re-share, they can re-generate the share link from the menu.                                                                                                                                                   |
+| S-5 env-var rename breaks any deployed env that was setting `REACT_APP_ANALYTICS_*`.                                                                                   | `.env.example` will be updated. Deploy notes will mention the rename. There is no production deploy of this app yet (per the repo's alpha status), so the blast radius is small.                                                                                                                       |
+| S-7 init-flag races: `setUser` called from a fast-mounting React effect while `initSentry` is still running.                                                           | `initSentry` is synchronous in this codebase. The effect in `App.tsx:140-150` runs after mount, and `initSentry` is called from `main.tsx` before `App` mounts. No race.                                                                                                                               |
+| S-15 magic-byte check could false-positive on a non-image that happens to start with `89 50 4E 47`.                                                                    | PNG magic is `89 50 4E 47 0D 0A 1A 0A` (8 bytes). The check above stops at byte 4. Acceptable trade-off: the only other file formats starting with `89 P` are extremely unlikely. A 4-byte check is the standard for client-side image validation. If we want byte 5-8 too, we add it; not in this PR. |
 
 ---
 
 ## 6. Validation
 
 Before opening the PR:
+
 - `npm run lint` — must pass.
 - `npm test` — all unit tests pass; new tests in this PR cover the 9 fixes.
 - `npm run test:e2e` — all 7 existing Playwright tests pass; the new B-10 test passes.
