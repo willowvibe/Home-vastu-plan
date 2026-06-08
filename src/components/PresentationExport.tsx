@@ -4,12 +4,31 @@ import { jsPDF } from 'jspdf';
 import { toPng } from 'html-to-image';
 import { FileText, X, Upload, Loader2, Download } from 'lucide-react';
 import { addBreadcrumb } from '../services/sentry';
+import { useToast } from './Toast';
 
 interface PresentationExportProps {
   canvasRef: React.RefObject<HTMLDivElement>;
   plan: FloorPlan;
   currentFloor: number;
   onClose: () => void;
+}
+
+// S-15: validate logo MIME via magic-byte sniff (PNG or JPEG) and a 5 MB
+// cap. The <input accept="image/png, image/jpeg"> attribute is a UI
+// hint, not a security control — a determined user can pick any file
+// from the OS picker. Reading the first 8 bytes is the only reliable
+// check.
+async function isPngOrJpeg(file: File): Promise<boolean> {
+  if (file.size > 5_000_000) return false;
+  try {
+    const head = await file.slice(0, 8).arrayBuffer();
+    const bytes = new Uint8Array(head);
+    const isPng = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+    const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
+    return isPng || isJpeg;
+  } catch {
+    return false;
+  }
 }
 
 export function PresentationExport({
@@ -24,16 +43,22 @@ export function PresentationExport({
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showToast } = useToast();
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setLogoUrl(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    const ok = await isPngOrJpeg(file);
+    if (!ok) {
+      showToast('Logo must be a PNG or JPEG under 5 MB', 'error');
+      e.target.value = ''; // reset so the same file can be re-selected
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setLogoUrl(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleExportPDF = async () => {
