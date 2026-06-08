@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Room as RoomType, FloorPlan, RoomLayer } from '../types';
+import { Room as RoomType, FloorPlan, RoomLayer, AppMode } from '../types';
 import { useCanvasDrag } from '../hooks/useCanvasDrag';
 import { Room } from './Room';
 import { VastuGrid } from './VastuGrid';
@@ -20,6 +20,7 @@ interface CanvasProps {
   onSelectRoom: (roomId: string | null, isShiftKey?: boolean) => void;
   selectedRoomIds: string[];
   layers?: RoomLayer[];
+  appMode?: AppMode;
 }
 
 export const Canvas: React.FC<CanvasProps> = ({
@@ -35,6 +36,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   onSelectRoom,
   selectedRoomIds,
   layers,
+  appMode = 'edit',
 }) => {
   const PIXELS_PER_FOOT = 20 * zoom;
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -63,6 +65,7 @@ export const Canvas: React.FC<CanvasProps> = ({
     canvasRef,
     onUpdateRoom,
     onUpdateRoomEnd,
+    appMode,
   });
 
   const floorRooms = plan.rooms.filter((r) => {
