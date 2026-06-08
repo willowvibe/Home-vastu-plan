@@ -7,6 +7,16 @@ interface SentryConfig {
   release?: string;
 }
 
+// S-7: track whether initSentry successfully initialized the SDK. Public
+// methods (setUser, addBreadcrumb, etc.) early-return when this is false,
+// so dev-mode code that calls them is a no-op instead of throwing on
+// an uninitialized SDK.
+let initialized = false;
+
+export function isSentryInitialized(): boolean {
+  return initialized;
+}
+
 export function initSentry(config: SentryConfig = {}) {
   const {
     dsn = process.env.SENTRY_DSN,
@@ -44,6 +54,8 @@ export function initSentry(config: SentryConfig = {}) {
     },
   });
 
+  initialized = true;
+
   console.log('Sentry initialized', {
     environment,
     release,
@@ -52,6 +64,7 @@ export function initSentry(config: SentryConfig = {}) {
 }
 
 export function captureError(error: Error | string, context?: Record<string, unknown>) {
+  if (!isSentryInitialized()) return;
   if (process.env.NODE_ENV === 'development') {
     console.error('Error captured (Sentry disabled in dev):', error);
     return;
@@ -68,6 +81,7 @@ export function captureError(error: Error | string, context?: Record<string, unk
 }
 
 export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info') {
+  if (!isSentryInitialized()) return;
   if (process.env.NODE_ENV === 'development') {
     console.log(`[Sentry] ${level}: ${message}`);
     return;
@@ -77,6 +91,7 @@ export function captureMessage(message: string, level: Sentry.SeverityLevel = 'i
 }
 
 export function setUser(id: string, email?: string, name?: string) {
+  if (!isSentryInitialized()) return;
   Sentry.setUser({
     id,
     email,
@@ -85,14 +100,17 @@ export function setUser(id: string, email?: string, name?: string) {
 }
 
 export function clearUser() {
+  if (!isSentryInitialized()) return;
   Sentry.setUser(null);
 }
 
 export function setTag(key: string, value: string) {
+  if (!isSentryInitialized()) return;
   Sentry.setTag(key, value);
 }
 
 export function addBreadcrumb(message: string, category?: string, data?: Record<string, unknown>) {
+  if (!isSentryInitialized()) return;
   Sentry.addBreadcrumb({
     message,
     category: category || 'custom',
