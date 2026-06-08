@@ -137,3 +137,10 @@ export interface Project {
   updatedAt: number;
   versions: ProjectVersion[];
 }
+
+// App-wide mode for the editor surface.
+//   edit   — full mutation (drag, delete, keyboard, AI analyze).
+//   view   — read-only canvas; no input events are honored.
+//   comment— read-only canvas today; comment-placement UI is the only
+//            handler that will be exempt from the appMode !== 'edit' gate.
+export type AppMode = 'edit' | 'view' | 'comment';
