@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import LZString from 'lz-string';
 
 // Skip onboarding modal by setting localStorage before page loads
 async function skipOnboarding(page: import('@playwright/test').Page) {
@@ -140,4 +141,51 @@ test('can export plan as PDF', async ({ page }) => {
   // Verify export completed (modal closes)
   // Check that canvas container is still present
   await page.waitForSelector('div[data-testid="canvas-container"]', { timeout: 5000 });
+});
+
+test('shared link URL is stripped after first load (B-10)', async ({ page }) => {
+  await skipOnboarding(page);
+  // Wait for the app to be ready.
+  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+
+  // Build a minimal shared plan payload the same way the app does:
+  // JSON.stringify a floor plan, then LZString-compress to a URI component.
+  const plan = {
+    rooms: [{ id: 'r1', type: 'Bedroom', x: 5, y: 5, w: 10, h: 10, floor: 0, wallThickness: 9 }],
+    plotWidth: 30,
+    plotHeight: 40,
+    setbacks: { top: 0, bottom: 0, left: 0, right: 0 },
+    unit: 'ft',
+    northAngle: 0,
+    layers: [],
+    roadDirection: 'N',
+  };
+  const json = JSON.stringify(plan);
+  const encoded = LZString.compressToEncodedURIComponent(json);
+
+  await page.goto(`/?plan=${encoded}&mode=view`);
+
+  // After the app loads the shared plan, the URL should have been
+  // stripped to just "/" by history.replaceState in the shared-link loader.
+  await page.waitForFunction(() => window.location.search === '', null, { timeout: 5000 });
+  expect(page.url()).toMatch(/\/$|\/\?$/);
+
+  // Now navigate to a state with no shared plan and add a room.
+  await page.goto('/');
+  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.getByRole('button', { name: "Bedroom 12'x12'" }).click();
+
+  // Refresh — the added room should still be there (autosave to localStorage).
+  // The default floor plan already includes a 10'x10' room, so the total
+  // built-up after adding our 12'x12' bedroom is 244 sq ft (144 + 100).
+  // We assert on the built-up area which is visible in the left sidebar,
+  // rather than the right "Room Properties" panel which only appears for a
+  // selected room (selection isn't persisted across reloads).
+  await page.reload();
+  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.waitForFunction(
+    () => /Built-up[\s\S]*244\s*sq\s*ft/.test(document.body.textContent || ''),
+    null,
+    { timeout: 5000 }
+  );
 });
