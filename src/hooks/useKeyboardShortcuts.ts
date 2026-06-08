@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { trackEvent, EVENTS } from '../services/analytics';
+import { AppMode } from '../types';
 
 interface UseKeyboardShortcutsOptions {
   undo: () => void;
@@ -12,6 +13,7 @@ interface UseKeyboardShortcutsOptions {
   onZoomOut?: () => void;
   onShowShortcuts?: () => void;
   hasSelection: boolean;
+  appMode: AppMode;
 }
 
 export function useKeyboardShortcuts({
@@ -25,9 +27,12 @@ export function useKeyboardShortcuts({
   onZoomOut,
   onShowShortcuts,
   hasSelection,
+  appMode,
 }: UseKeyboardShortcutsOptions) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // B-5: lock all keyboard shortcuts in non-edit modes.
+      if (appMode !== 'edit') return;
       // Ignore shortcuts when user is typing in an input field
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
@@ -93,6 +98,7 @@ export function useKeyboardShortcuts({
       onZoomOut,
       onShowShortcuts,
       hasSelection,
+      appMode,
     ]
   );
 
