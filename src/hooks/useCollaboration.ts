@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { FloorPlan } from '../types';
-import { CollaborationUser, ChatMessage, PlanUpdateEvent } from '../types';
+import { FloorPlan, CollaborationUser, ChatMessage, PlanUpdateEvent } from '../types';
 
 const SERVER_URL = import.meta.env.VITE_COLLAB_SERVER_URL || 'http://localhost:3001';
 
@@ -23,41 +22,63 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
   const pendingUpdatesRef = useRef<PlanUpdateEvent[]>([]);
   const isLocalUpdateRef = useRef(false);
 
-  // Apply a remote update to the plan - declared before useEffect to avoid reference errors
+  // Refs that always point at the latest plan / userId, so socket callbacks
+  // and `applyRemoteUpdate` never read from a stale closure. Kept in sync
+  // by the two effects below — these are the ONLY effects that depend on
+  // `plan` and `userId`. (Fixes B-1 and B-2.)
+  const planRef = useRef(plan);
+  const userIdRef = useRef<string | null>(userId);
+
+  useEffect(() => {
+    planRef.current = plan;
+  }, [plan]);
+
+  useEffect(() => {
+    userIdRef.current = userId;
+  }, [userId]);
+
+  // Apply a remote update using a FUNCTIONAL onPlanChange so we never
+  // read `plan` from closure. This eliminates B-2 by construction.
   const applyRemoteUpdate = useCallback(
     (update: PlanUpdateEvent) => {
-      switch (update.type) {
-        case 'room':
-          if (update.action === 'add') {
-            onPlanChange({
-              ...plan,
-              rooms: [...plan.rooms, update.data],
-            });
-          } else if (update.action === 'update') {
-            onPlanChange({
-              ...plan,
-              rooms: plan.rooms.map((r) =>
-                r.id === update.data.id ? { ...r, ...update.data } : r
-              ),
-            });
-          } else if (update.action === 'delete') {
-            onPlanChange({
-              ...plan,
-              rooms: plan.rooms.filter((r) => r.id !== update.data.id),
-            });
-          }
-          break;
-        case 'plan':
-          if (update.action === 'update') {
-            onPlanChange({ ...plan, ...update.data });
-          }
-          break;
-      }
+      const next = (prev: FloorPlan): FloorPlan => {
+        switch (update.type) {
+          case 'room':
+            if (update.action === 'add') {
+              return { ...prev, rooms: [...prev.rooms, update.data] };
+            }
+            if (update.action === 'update') {
+              return {
+                ...prev,
+                rooms: prev.rooms.map((r) =>
+                  r.id === update.data.id ? { ...r, ...update.data } : r
+                ),
+              };
+            }
+            if (update.action === 'delete') {
+              return {
+                ...prev,
+                rooms: prev.rooms.filter((r) => r.id !== update.data.id),
+              };
+            }
+            return prev;
+          case 'plan':
+            if (update.action === 'update') {
+              return { ...prev, ...update.data };
+            }
+            return prev;
+          default:
+            return prev;
+        }
+      };
+      onPlanChange(next as unknown as FloorPlan);
     },
-    [plan, onPlanChange]
+    [onPlanChange]
   );
 
-  // Initialize socket connection
+  // Initialize socket connection ONCE. Subscribes once, cleans up on unmount.
+  // Deps are stable: applyRemoteUpdate is stable because onPlanChange is
+  // stable (useFloorPlan's setPlan has [] deps). So this effect runs once.
   useEffect(() => {
     const socket = io(SERVER_URL, {
       transports: ['websocket', 'polling'],
@@ -86,7 +107,6 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
       setIsConnected(false);
     });
 
-    // Room joined event
     socket.on(
       'room-joined',
       (data: {
@@ -102,17 +122,14 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
         setUsers(data.users);
         setMessages(data.messages);
 
-        // If server has a plan, merge with current (server wins for remote rooms)
         if (data.plan && Object.keys(data.plan).length > 0) {
           onPlanChange(data.plan);
         } else {
-          // Sync current plan to server
-          socket.emit('plan-sync', plan);
+          socket.emit('plan-sync', planRef.current);
         }
       }
     );
 
-    // User joined
     socket.on('user-joined', (user: CollaborationUser) => {
       setUsers((prev) => {
         if (prev.find((u) => u.id === user.id)) return prev;
@@ -120,7 +137,6 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
       });
     });
 
-    // User left
     socket.on('user-left', (data: { userId: string }) => {
       setUsers((prev) => prev.filter((u) => u.id !== data.userId));
       setCursorPositions((prev) => {
@@ -130,39 +146,28 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
       });
     });
 
-    // Users updated
     socket.on('users-updated', (users: CollaborationUser[]) => {
       setUsers(users);
     });
 
-    // Plan updated by another user
     socket.on('plan-updated', (update: PlanUpdateEvent & { userName: string }) => {
       if (isLocalUpdateRef.current) return;
-
-      // Apply the update to the plan
       pendingUpdatesRef.current.push(update);
-
-      // Debounce applying updates
       requestAnimationFrame(() => {
         const updates = [...pendingUpdatesRef.current];
         pendingUpdatesRef.current = [];
-
-        updates.forEach((u) => {
-          applyRemoteUpdate(u);
-        });
+        updates.forEach((u) => applyRemoteUpdate(u));
       });
     });
 
-    // Full plan sync
     socket.on(
       'plan-synced',
       (data: { plan: FloorPlan; timestamp: number; modifiedBy?: string }) => {
-        if (data.modifiedBy === userId) return;
+        if (data.modifiedBy === userIdRef.current) return;
         onPlanChange(data.plan);
       }
     );
 
-    // Cursor moved
     socket.on(
       'cursor-moved',
       (data: {
@@ -183,7 +188,6 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
       }
     );
 
-    // Chat message
     socket.on('chat-message', (message: ChatMessage) => {
       setMessages((prev) => [...prev.slice(-99), message]);
     });
@@ -191,17 +195,14 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
     return () => {
       socket.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plan, onPlanChange, userId]);
+  }, [applyRemoteUpdate, onPlanChange]);
 
-  // Join a room
   const joinRoom = useCallback(
     (roomId: string, name: string) => {
       if (!socketRef.current || !isConnected) {
         setError('Not connected to server');
         return;
       }
-
       setIsConnecting(true);
       setError(null);
       setUserName(name);
@@ -210,7 +211,6 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
     [isConnected]
   );
 
-  // Leave room
   const leaveRoom = useCallback(() => {
     if (socketRef.current) {
       socketRef.current.disconnect();
@@ -223,51 +223,41 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
     setCursorPositions({});
   }, []);
 
-  // Broadcast plan update
   const broadcastUpdate = useCallback(
     (update: Omit<PlanUpdateEvent, 'timestamp' | 'userId'>) => {
       if (!socketRef.current || !roomId) return;
-
       isLocalUpdateRef.current = true;
-
       socketRef.current.emit('plan-update', {
         ...update,
         timestamp: Date.now(),
-        userId,
+        userId: userIdRef.current,
       });
-
       setTimeout(() => {
         isLocalUpdateRef.current = false;
       }, 100);
     },
-    [roomId, userId]
+    [roomId]
   );
 
-  // Sync full plan
   const syncPlan = useCallback(
     (newPlan: FloorPlan) => {
       if (!socketRef.current || !roomId) return;
-
       socketRef.current.emit('plan-sync', newPlan);
     },
     [roomId]
   );
 
-  // Broadcast cursor position
   const broadcastCursor = useCallback(
     (x: number, y: number) => {
       if (!socketRef.current || !roomId) return;
-
       socketRef.current.emit('cursor-move', { x, y });
     },
     [roomId]
   );
 
-  // Send chat message
   const sendMessage = useCallback(
     (text: string) => {
       if (!socketRef.current || !roomId) return;
-
       socketRef.current.emit('chat-message', text);
     },
     [roomId]

@@ -7,9 +7,9 @@ interface AnalyticsConfig {
 }
 
 const config: AnalyticsConfig = {
-  enabled: process.env.REACT_APP_ANALYTICS_ENABLED !== 'false',
-  domain: process.env.REACT_APP_ANALYTICS_DOMAIN || 'vastuplan.app',
-  apiHost: process.env.REACT_APP_ANALYTICS_API_HOST || 'https://plausible.io',
+  enabled: import.meta.env.VITE_ANALYTICS_ENABLED !== 'false',
+  domain: import.meta.env.VITE_ANALYTICS_DOMAIN || 'vastuplan.app',
+  apiHost: import.meta.env.VITE_ANALYTICS_API_HOST || 'https://plausible.io',
 };
 
 function getTracker() {
