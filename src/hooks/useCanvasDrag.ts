@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Room, FloorPlan } from '../types';
+import { Room, FloorPlan, AppMode } from '../types';
 
 interface UseCanvasDragOptions {
   plan: FloorPlan;
@@ -9,6 +9,7 @@ interface UseCanvasDragOptions {
   canvasRef: React.RefObject<HTMLDivElement | null>;
   onUpdateRoom: (id: string, updates: Partial<Room>) => void;
   onUpdateRoomEnd?: () => void;
+  appMode: AppMode;
 }
 
 export function useCanvasDrag({
@@ -19,6 +20,7 @@ export function useCanvasDrag({
   canvasRef,
   onUpdateRoom,
   onUpdateRoomEnd,
+  appMode,
 }: UseCanvasDragOptions) {
   const [draggingRoom, setDraggingRoom] = useState<string | null>(null);
   const [resizingRoom, setResizingRoom] = useState<string | null>(null);
@@ -34,6 +36,9 @@ export function useCanvasDrag({
   // Update refs via useEffect to avoid refs accessed during render
   const planRef = useRef(plan);
   const callbacksRef = useRef({ onUpdateRoom, onUpdateRoomEnd });
+  // B-5: mirror appMode in a ref so global pointermove/pointerup listeners
+  // can also gate themselves on a mid-drag mode toggle.
+  const appModeRef = useRef(appMode);
   const stateRef = useRef({
     draggingRoom,
     resizingRoom,
@@ -50,6 +55,10 @@ export function useCanvasDrag({
   useEffect(() => {
     callbacksRef.current = { onUpdateRoom, onUpdateRoomEnd };
   }, [onUpdateRoom, onUpdateRoomEnd]);
+
+  useEffect(() => {
+    appModeRef.current = appMode;
+  }, [appMode]);
 
   useEffect(() => {
     stateRef.current = {
@@ -69,6 +78,8 @@ export function useCanvasDrag({
       type: 'drag' | 'resize',
       handle?: 'se' | 'sw' | 'ne' | 'nw'
     ) => {
+      // B-5: lock pointer drag in non-edit modes.
+      if (appModeRef.current !== 'edit') return;
       e.stopPropagation();
       if (type === 'drag') {
         setDraggingRoom(room.id);
@@ -86,6 +97,8 @@ export function useCanvasDrag({
 
   const handleElementPointerDown = useCallback(
     (e: React.PointerEvent, room: Room, element: Room['elements'][0]) => {
+      // B-5: lock element drag in non-edit modes.
+      if (appModeRef.current !== 'edit') return;
       e.stopPropagation();
       setDraggingElement({ roomId: room.id, elementId: element.id });
 
