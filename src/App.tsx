@@ -62,17 +62,8 @@ import {
 } from './constants/floorPlanConstants';
 
 export default function App() {
-  const {
-    plan,
-    setPlan,
-    updatePlan,
-    commitHistory,
-    undo,
-    redo,
-    resetPlan,
-    historyIndex,
-    historyLength,
-  } = useFloorPlan(INITIAL_PLAN);
+  const { plan, updatePlan, commitHistory, undo, redo, resetPlan, historyIndex, historyLength } =
+    useFloorPlan(INITIAL_PLAN);
 
   const [currentFloor, setCurrentFloor] = useState(0);
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
@@ -1016,8 +1007,14 @@ export default function App() {
                         `Are you sure you want to clear all rooms on ${currentFloor === 0 ? 'Ground' : currentFloor === 1 ? 'First' : 'Second'} floor?`
                       )
                     ) {
-                      const newRooms = plan.rooms.filter((r) => r.floor !== currentFloor);
-                      setPlan({ ...plan, rooms: newRooms });
+                      // Functional update — avoids a stale-closure read of
+                      // `plan` if another setPlan queued in the same tick
+                      // (e.g., commitHistory) would otherwise be overwritten.
+                      // Routes through updatePlan so history stays consistent.
+                      updatePlan((prev) => ({
+                        ...prev,
+                        rooms: prev.rooms.filter((r) => r.floor !== currentFloor),
+                      }));
                       commitHistory();
                       setSelectedRoomIds([]);
                     }
@@ -1744,7 +1741,7 @@ export default function App() {
                     />
                   </div>
                 ) : analysis ? (
-                  <div className="prose prose-sm prose-slate max-w-none flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
+                  <div className="prose prose-sm prose-slate dark:prose-invert max-w-none flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
                     <ReactMarkdown>{analysis}</ReactMarkdown>
                   </div>
                 ) : (
