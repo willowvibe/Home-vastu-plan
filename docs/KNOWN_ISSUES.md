@@ -42,14 +42,14 @@ _All P0 items from the 2026-06-07 sweep are resolved. The next P0 will be filed 
 
 ## 🟠 P1 — Fix this sprint (robustness)
 
-| ID   | Title                                                                            | File(s)                                             | Effort |
-| ---- | -------------------------------------------------------------------------------- | --------------------------------------------------- | ------ |
-| B-8  | Shift+click advertised but does nothing (no marquee select)                      | `src/components/Canvas.tsx:87-103`, `Header.tsx:94` | 2 h    |
-| B-9  | PDF export doesn't aspect-fit tall plots — image overflows page                  | `src/components/PresentationExport.tsx:88-96`       | 1 h    |
-| B-13 | `Room` `vastu` useMemo depends on whole `plan` → re-runs on every drag tick      | `src/components/Room.tsx:47`                        | 1 h    |
-| S-2  | Three `useEffect` dep arrays ignored (collaboration, App share loader)           | `src/hooks/useCollaboration.ts:194`, `App.tsx:178`  | 1 h    |
-| S-9  | `useCanvasDrag` element placement uses full wall thickness for shared-wall rooms | `src/hooks/useCanvasDrag.ts:91-105`                 | 1 h    |
-| S-17 | `Onboarding` modal lacks `aria-modal` and focus trap                             | `src/components/Onboarding.tsx:75`                  | 1 h    |
+| ID   | Title                                                                            | File(s)                                                                            | Effort |
+| ---- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------ |
+| B-8  | Shift+click advertised but does nothing (no marquee select)                      | `src/components/Canvas.tsx:87-103`, `Header.tsx:94`                                | 2 h    |
+| B-9  | PDF export doesn't aspect-fit tall plots — image overflows page                  | `src/components/PresentationExport.tsx:88-96`                                      | 1 h    |
+| B-13 | `Room` `vastu` useMemo depends on whole `plan` → re-runs on every drag tick      | `src/components/Room.tsx:47` 🟡 In progress (fix/b-13-room-vastu-memo, 2026-06-11) | 1 h    |
+| S-2  | Three `useEffect` dep arrays ignored (collaboration, App share loader)           | `src/hooks/useCollaboration.ts:194`, `App.tsx:178`                                 | 1 h    |
+| S-9  | `useCanvasDrag` element placement uses full wall thickness for shared-wall rooms | `src/hooks/useCanvasDrag.ts:91-105`                                                | 1 h    |
+| S-17 | `Onboarding` modal lacks `aria-modal` and focus trap                             | `src/components/Onboarding.tsx:75`                                                 | 1 h    |
 
 **Subtotal:** ~7 h
 
