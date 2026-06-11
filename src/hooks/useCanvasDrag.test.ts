@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { useCanvasDrag } from './useCanvasDrag';
+import { useCanvasDrag, getEffectiveWalls } from './useCanvasDrag';
+import type { Room } from '../types';
 
 const PLAN = {
   rooms: [
@@ -75,5 +76,94 @@ describe('useCanvasDrag (B-5: no drag in non-edit mode)', () => {
     });
     // In edit mode, draggingRoom is set to the room id.
     expect(result.current.draggingRoom).toBe('r1');
+  });
+});
+
+describe('getEffectiveWalls (S-9: shared walls)', () => {
+  // 9 inch wall = 0.75 ft. Shared side gets 0.375 ft.
+  const WALL = 0.75;
+  const SHARED = WALL / 2;
+
+  const r1: Room = {
+    id: 'r1',
+    type: 'Bedroom',
+    x: 0,
+    y: 0,
+    w: 10,
+    h: 10,
+    floor: 0,
+    wallThickness: 9,
+  };
+
+  it('returns full wall on every side when the room is alone', () => {
+    expect(getEffectiveWalls(r1, [])).toEqual({
+      top: WALL,
+      right: WALL,
+      bottom: WALL,
+      left: WALL,
+    });
+  });
+
+  it('halves the right wall when a room abuts on the right', () => {
+    // A second room whose left edge sits exactly at r1's right edge.
+    const neighbor: Room = {
+      id: 'r2',
+      type: 'Bedroom',
+      x: 10,
+      y: 0,
+      w: 10,
+      h: 10,
+      floor: 0,
+      wallThickness: 9,
+    };
+    const walls = getEffectiveWalls(r1, [neighbor]);
+    expect(walls.right).toBeCloseTo(SHARED);
+    expect(walls.left).toBeCloseTo(WALL);
+    expect(walls.top).toBeCloseTo(WALL);
+    expect(walls.bottom).toBeCloseTo(WALL);
+  });
+
+  it('halves both walls when rooms are flush on top and bottom', () => {
+    const top: Room = {
+      id: 't',
+      type: 'Bedroom',
+      x: 0,
+      y: -10,
+      w: 10,
+      h: 10,
+      floor: 0,
+      wallThickness: 9,
+    };
+    const bottom: Room = {
+      id: 'b',
+      type: 'Bedroom',
+      x: 0,
+      y: 10,
+      w: 10,
+      h: 10,
+      floor: 0,
+      wallThickness: 9,
+    };
+    const walls = getEffectiveWalls(r1, [top, bottom]);
+    expect(walls.top).toBeCloseTo(SHARED);
+    expect(walls.bottom).toBeCloseTo(SHARED);
+    expect(walls.left).toBeCloseTo(WALL);
+    expect(walls.right).toBeCloseTo(WALL);
+  });
+
+  it('ignores other rooms that are not flush on any side', () => {
+    // Same floor, but offset 1 ft in both axes (no shared wall).
+    const farNeighbor: Room = {
+      id: 'f',
+      type: 'Bedroom',
+      x: 12,
+      y: 0,
+      w: 5,
+      h: 5,
+      floor: 0,
+      wallThickness: 9,
+    };
+    const walls = getEffectiveWalls(r1, [farNeighbor]);
+    expect(walls).toEqual({ top: WALL, right: WALL, bottom: WALL, left: WALL });
   });
 });
