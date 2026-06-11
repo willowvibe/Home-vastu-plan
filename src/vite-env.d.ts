@@ -2,7 +2,12 @@
 
 interface ImportMetaEnv {
   readonly VITE_COLLAB_SERVER_URL: string;
-  // Add other environment variables here as needed
+  // Q-25: gemini.ts reads VITE_GEMINI_API_KEY via import.meta.env.
+  readonly VITE_GEMINI_API_KEY?: string;
+  readonly DEV: boolean;
+  readonly PROD: boolean;
+  readonly MODE: string;
+  readonly SSR: boolean;
 }
 
 interface ImportMeta {
