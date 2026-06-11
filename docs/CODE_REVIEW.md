@@ -8,7 +8,11 @@
 
 > **P0 sweep — RESOLVED 2026-06-08 in PR #28:** B-1, B-2, B-5, B-10, B-11, S-5, S-7, S-10, S-15 all fixed. See the [✅ Resolved in PR #28](#-resolved-in-pr-28) section at the bottom of this document for per-bug commit refs, and `CHANGELOG.md` for the user-facing change log.
 >
-> **P1 quick-wins — RESOLVED 2026-06-09 in branch `fix/p1-quick-wins` (pending merge):** B-3, B-7, S-16, B-17 all fixed. See the [✅ Resolved in P1 quick-wins](#-resolved-in-p1-quick-wins) section at the bottom of this document.
+> **P1 quick-wins — RESOLVED 2026-06-09 in PR #39:** B-3, B-7, S-16, B-17 all fixed. See the [✅ Resolved in P1 quick-wins](#-resolved-in-p1-quick-wins) section at the bottom of this document.
+>
+> **P1 batch #2 — RESOLVED 2026-06-11 in PR #43:** S-2, S-9, S-17, S-21, Q-10 all fixed. See the [✅ Resolved in P1 batch #2](#-resolved-in-p1-batch-2) section at the bottom of this document.
+>
+> **P2 hygiene batch — RESOLVED 2026-06-11 in PR #44:** S-22, Q-5, Q-6, Q-7+Q-14, Q-15, Q-20, Q-25 all fixed (plus the missed S-21 doc row). See the [✅ Resolved in P2 hygiene batch](#-resolved-in-p2-hygiene-batch) section at the bottom of this document.
 
 ---
 
@@ -560,12 +564,16 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
+> **State as of 2026-06-11 (post PR #44):** All 9 P0s and 9 of 10 P1s are resolved. The remaining P1 is B-8 (shift+click marquee, design call needed). P2 has 10 items totaling ~33 h. P3 is ongoing.
+
 | Bucket                   | Items                                              | Suggested owner track | Effort    |
 | ------------------------ | -------------------------------------------------- | --------------------- | --------- |
 | **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_              | —                     | —         |
 | **P1 — Fix this sprint** | B-8                                                | robustness            | 2 h       |
 | **P2 — Refactor**        | S-1, S-3, S-4, S-8, S-12, Q-1, Q-2, Q-3, Q-9, Q-12 | health                | 1-2 weeks |
 | **P3 — Polish**          | All Q and G items                                  | DX / features         | ongoing   |
+
+**Suggested next batch (≤ 1 day, low-risk):** S-8 (geometry constants, 1 h), S-12 (catch `unknown`, 2 h), Q-9 (share `PlanUpdateEvent` between client + server, 2 h), Q-12 (split `src/lib/exports.ts` into 5 files, 3 h), S-3 (`setPlan` → `updatePlan` API surface, 2 h). Total: ~10 h. Sets the stage for the bigger S-1 (`App.tsx` split, 8-12 h) and Q-1/Q-2/Q-3 (test coverage for the three complex hooks, 13 h).
 
 **Where to start:** S-1 (split `App.tsx` — 8-12 h, the single biggest structural win) or Q-1/Q-2/Q-3 (test coverage for the three complex hooks, 13 h combined).
 
@@ -597,7 +605,7 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 
 ## ✅ Resolved in P1 quick-wins
 
-> The 2026-06-09 P1 quick-wins batch fixed 4 P1 items in branch `fix/p1-quick-wins` (pending PR). The per-bug entries in §2 / §3 are kept for traceability. Test coverage added in 2 of the 4 cases.
+> The 2026-06-09 P1 quick-wins batch fixed 4 P1 items in branch `fix/p1-quick-wins` and shipped in PR #39 (merge commit `1694af7`). The per-bug entries in §2 / §3 are kept for traceability. Test coverage added in 2 of the 4 cases.
 
 | ID   | Title                                                         | Per-bug entry | Tests | Notes                                                                                             |
 | ---- | ------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------- |
@@ -610,9 +618,25 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 
 ---
 
+## ✅ Resolved in P1 batch #2
+
+> The 2026-06-11 P1 batch #2 fixed 5 P1 items (S-2, S-9, S-17, S-21) and 1 P2 item (Q-10) in branch `fix/p1-batch-2` and shipped in PR #43 (merge commit `36b67ca`). The per-bug entries in §2 / §3 are kept for traceability.
+
+| ID   | Title                                                                            | Per-bug entry | Tests | Notes                                                                                                                                                                                                                     |
+| ---- | -------------------------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-2  | Three `useEffect` dep arrays ignored (collaboration, App share loader)           | §3 S-2        | +1    | Resolved-by-design. The two remaining disables (App.tsx:182, Room.tsx:56) are load-bearing; a structural test in `useCollaboration.test.ts` pins the disable count to ≤ 2.                                                |
+| S-9  | `useCanvasDrag` element placement uses full wall thickness for shared-wall rooms | §3 S-9        | +4    | New `getEffectiveWalls(room, otherRooms)` helper in `useCanvasDrag.ts`; element-drag uses per-side effective walls (shared = `wallFt/2`).                                                                                 |
+| S-17 | `Onboarding` modal lacks `aria-modal` and focus trap                             | §3 S-17       | +3    | Full WAI-ARIA dialog: `role` / `aria-modal` / `aria-labelledby` (via `useId`), Esc-to-close, Tab/Shift+Tab focus trap, focus restore on close. Onboarding test extended to 4 cases.                                       |
+| S-21 | Pick one of Sentry.ErrorBoundary vs custom ErrorBoundary (nested)                | §3 S-21       | —     | Dropped `Sentry.ErrorBoundary` in `main.tsx`; the custom `ErrorBoundary` already calls `captureError` in `componentDidCatch`, so the Sentry wrapper was double-reporting. Doc row was missed in PR #43; closed in PR #44. |
+| Q-10 | Extract `AppMode` type to a single source of truth                               | §4 Q-10       | —     | `Header.tsx` now imports `AppMode` from `src/types.ts` (was the last offender; `src/types.ts:146` was already the source of truth from the P0 sweep).                                                                     |
+
+**Validation:** `npm run lint` ✅ (0 errors), `npm test` (51/51, +8 new) ✅, `npm run build` ✅.
+
+---
+
 ## ✅ Resolved in P2 hygiene batch
 
-> The 2026-06-11 P2/P3 hygiene batch fixed 7 P2/P3 items in branch `fix/p2-hygiene-batch`. The per-bug entries in §2 / §3 are kept for traceability. No test coverage changes beyond the +4 S-22 hash tests; the rest are config, type, and tooling.
+> The 2026-06-11 P2/P3 hygiene batch fixed 7 P2/P3 items in branch `fix/p2-hygiene-batch` and shipped in PR #44 (merge commit `bf2c214`). The per-bug entries in §2 / §3 are kept for traceability. No test coverage changes beyond the +4 S-22 hash tests; the rest are config, type, and tooling.
 
 | ID   | Title                                                                              | Per-bug entry | Tests | Notes                                                                                                                                                                                                         |
 | ---- | ---------------------------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

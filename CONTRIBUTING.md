@@ -32,13 +32,14 @@ Please be respectful and constructive in all interactions.
 1. Clone the repository
 
 ```bash
-git clone https://github.com/harishconti/Home-vastu-plan.git
+git clone https://github.com/willowvibe/Home-vastu-plan.git
 cd Home-vastu-plan
 ```
 
-2. Install dependencies
+2. Install dependencies (Node ≥ 20, see `.nvmrc`)
 
 ```bash
+nvm use    # or ensure your Node version matches .nvmrc
 npm install
 ```
 
@@ -52,6 +53,14 @@ npm run dev
 
 ```bash
 npm run build
+```
+
+### Tests
+
+```bash
+npm test            # unit + integration (Vitest)
+npm run test:e2e    # E2E (Playwright; needs `npx playwright install` first)
+npm run lint        # tsc + eslint + prettier
 ```
 
 ### Collaboration Server (Optional)

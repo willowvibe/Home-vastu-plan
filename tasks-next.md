@@ -6,6 +6,10 @@ This document lists the next priority tasks for VastuPlan 2D, focused on product
 
 ---
 
+> **Note (2026-06-11):** This document is a historical snapshot of the "next set" plan filed after the original 30-task list. Many of the items here (E2E, Sentry, Plausible, CI/CD, testing infrastructure) have been completed in the meantime. **For the active backlog, see [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md) §6.** The original entries below are kept as a reference of what was considered "next" at the time.
+
+---
+
 ## High Priority - Production Readiness
 
 ### 1. Add Unit and Integration Tests - ✅ COMPLETED
@@ -14,6 +18,7 @@ This document lists the next priority tasks for VastuPlan 2D, focused on product
 **Completed:** ~6 hours
 
 **Description:**
+
 Set up a proper testing infrastructure with Vitest and React Testing Library to ensure code quality and prevent regressions.
 
 **Completed:**
@@ -24,7 +29,7 @@ Set up a proper testing infrastructure with Vitest and React Testing Library to 
 - Created test setup with `jsdom` configuration
 - Added tests for `src/services/vastu.ts` (analyzeRoomVastu, calculateOverallVastuScore, getDirection)
 
-**Remaining Test Goals:**
+**Remaining Test Goals (still active, see CODE_REVIEW Q-1 / Q-2 / Q-3):**
 
 - Hook tests: `useFloorPlan` - history management, undo/redo, persistence
 - Hook tests: `useCanvasDrag` - drag/resize logic, collision detection
@@ -33,212 +38,79 @@ Set up a proper testing infrastructure with Vitest and React Testing Library to 
 
 ---
 
-### 2. Add E2E Tests with Playwright
+### 2. Add E2E Tests with Playwright ✅ COMPLETED (happy-path baseline)
 
 **Priority:** High  
-**Estimated Effort:** 10-15 hours
+**Status:** 7 happy-path tests passing. E2E is not yet run in CI (see CODE_REVIEW Q-4).
 
 **Description:**
-Create end-to-end tests covering critical user workflows to ensure the app works as expected in real-world scenarios.
 
-**Tasks:**
+Create end-to-end tests covering critical user workflows.
 
-- Install Playwright and configure for the project
-- Create E2E test setup with proper base URLs and timeouts
-- Write tests for:
-  - **Plan Creation Flow:**
-    - User creates a new plan
-    - User adds rooms to the canvas
-    - User saves the plan to localStorage
-  - **Room Management Flow:**
-    - User drags and resizes rooms
-    - User adds elements to rooms
-    - User rotates elements
-    - User deletes rooms/elements
-    - Undo/Redo functionality
-  - **Sharing Flow:**
-    - User generates a share link
-    - User shares plan in view mode
-    - User shares plan in comment mode
-  - **Export Flow:**
-    - User exports to PNG
-    - User exports to SVG
-    - User exports to PDF
-  - **Multi-Floor Flow:**
-    - User switches between floors
-    - User adds rooms to different floors
-    - User manages floor visibility
+**Tasks (still active):**
 
-**Test Locations:**
+- Add `npx playwright install` to CI and run E2E in `.github/workflows/ci.yml`
+- Extend coverage to negative paths and multi-step flows
+- Cover drag, resize, rotate, undo/redo, share link roundtrip, multi-floor
 
-- `tests/e2e/plan-creation.spec.ts`
-- `tests/e2e/room-management.spec.ts`
-- `tests/e2e/sharing.spec.ts`
-- `tests/e2e/export.spec.ts`
-- `tests/e2e/multi-floor.spec.ts`
+**Test locations:** `tests/e2e/`
 
 ---
 
-### 3. Add Error Tracking with Sentry
+### 3. Add Error Tracking with Sentry ✅ COMPLETED
 
 **Priority:** High  
-**Estimated Effort:** 2-3 hours
+**Status:** `@sentry/react` initialized in production only via `src/services/sentry.ts`. `isSentryInitialized()` guards (S-7) prevent dev-time warnings.
 
-**Description:**
-Integrate Sentry to monitor production errors and track application stability.
+**Tasks (still active):**
 
-**Tasks:**
-
-- Install `@sentry/react` and `@sentry/tracing`
-- Initialize Sentry in `main.tsx` with DSN from environment
-- Add React integration for better error boundaries
-- Configure release tracking
-- Add user context to errors (anonymous ID)
-- Set up environment-based configuration (enabled in prod only)
-- Test error capture locally with Sentry development mode
-
-**Environment Variables Needed:**
-
-```env
-SENTRY_DSN=your-sentry-dsn-here
-SENTRY_ENVIRONMENT=development|staging|production
-```
-
-**Files to Modify:**
-
-- `src/main.tsx` - Sentry initialization
-- `src/services/environment.ts` - Environment config
-- `.env.example` - Add Sentry variables
+- Rotate the Sentry DSN secret in the deploy environment
+- Add a release-tracking step in CI
 
 ---
 
-### 4. Add Analytics with Plausible or PostHog
+### 4. Add Analytics with Plausible or PostHog ✅ COMPLETED
 
 **Priority:** Medium  
-**Estimated Effort:** 3-4 hours
-
-**Description:**
-Implement analytics to track feature usage and understand user behavior.
-
-**Tasks:**
-
-- Choose analytics provider (Plausible for privacy-first, PostHog for product analytics)
-- Install analytics SDK
-- Initialize on app load with user anonymization
-- Track key events:
-  - `plan_created` - New plan creation
-  - `room_added` - Room added with type
-  - `room_deleted` - Room deleted
-  - `element_added` - Element added
-  - `room_dragged` - Room moved
-  - `room_resized` - Room resized
-  - `element_rotated` - Element rotated
-  - `plan_exported` - Export action with format
-  - `share_created` - Share link generated
-  - `ai_analyzed` - AI analysis triggered
-- Add opt-out mechanism for privacy
-- Configure data retention policies
-
-**Files to Modify:**
-
-- `src/services/analytics.ts` - New service file
-- `src/main.tsx` - Initialize analytics
-- `src/App.tsx` - Track events
-- `.env.example` - Add analytics variables
+**Status:** `plausible-tracker` integrated. Reads `VITE_ANALYTICS_*` env vars (S-5). `.env.example` documented.
 
 ---
 
 ### 5. Deploy Collaboration Server
 
 **Priority:** Medium  
-**Estimated Effort:** 4-6 hours
+**Status:** 🔲 Not deployed. The `server/` package has no `lint` script (CODE_REVIEW S-24) and is not built/tested in CI (S-25).
 
-**Description:**
-Deploy the Node.js collaboration server to a hosting provider.
+**Tasks (still active):**
 
-**Tasks:**
-
-- Choose hosting provider (Railway, Cloud Run, or Render)
-- Set up CI/CD for server deployment
+- Add `lint` + `test` scripts to `server/package.json`
+- Add a CI job for `server/`
+- Choose a hosting provider (Railway / Cloud Run / Render)
 - Configure production database (Neon PostgreSQL)
-- Set up environment variables for production:
-  - `DATABASE_URL`
-  - `JWT_SECRET`
-  - `CLIENT_URL`
-- Configure SSL/TLS
-- Set up health check endpoint
-- Configure CORS for production domain
-- Set up monitoring/alerting
-- Document deployment process in `server/README.md`
-
-**Files to Update:**
-
-- `server/package.json` - Add production scripts
-- `.github/workflows/server-deploy.yml` - New workflow
-- `server/.env.example` - Production configuration
 
 ---
 
 ## Medium Priority - Infrastructure Improvements
 
-### 6. Improve PWA Support and Service Worker
+### 6. Improve PWA Support and Service Worker ✅ COMPLETED
 
 **Priority:** Medium  
-**Estimated Effort:** 4-6 hours
-
-**Description:**
-Enhance PWA capabilities with better offline support and installability.
-
-**Tasks:**
-
-- Update `public/manifest.json`:
-  - Add shorter name (12 chars max)
-  - Add orientation settings
-  - Add display override for installability
-  - Add icons for all required sizes (192, 512 px)
-- Create service worker with workbox or custom implementation:
-  - Cache static assets (HTML, CSS, JS, fonts)
-  - Cache plan templates
-  - Implement cache-first strategy for assets
-  - Implement network-first strategy for API calls
-  - Add push notification support (optional)
-- Add "Add to Home Screen" prompt
-- Implement offline indicator UI
-- Test offline functionality with Chrome DevTools
-
-**Files to Modify:**
-
-- `public/manifest.json`
-- `src/main.tsx` - Service worker registration
-- `src/components/OfflineIndicator.tsx` - New component
+**Status:** Per-deploy `CACHE_NAME` SHA-256 (S-22), bundled to `dist/sw.js`, registered in production. Latent prod-only SW-registration bug fixed in PR #44.
 
 ---
 
 ### 7. Add CI/CD Pipeline Improvements
 
 **Priority:** Medium  
-**Estimated Effort:** 3-4 hours
+**Status:** Partial. Snyk step was removed (no `SNYK_TOKEN` secret; see `ci-snyk-removed` memory). E2E still not in CI. Coverage threshold gate added (Q-5) but at low floor.
 
-**Description:**
-Enhance the existing CI pipeline with additional checks and deployment automation.
+**Tasks (still active):**
 
-**Tasks:**
-
-- Add build cache for faster builds
-- Add test reporting to GitHub
-- Add coverage threshold checks (min 70%)
-- Add security scanning (npm audit, Snyk)
-- Add dependency update automation (Dependabot)
-- Add staging environment deployment
-- Add pull request templates
-- Add issue templates for bugs/features
-
-**Files to Modify:**
-
-- `.github/workflows/ci.yml` - Add checks
-- `.github/dependabot.yml` - New file
-- `.github/PULL_REQUEST_TEMPLATE.md` - New file
-- `.github/ISSUE_TEMPLATE/` - New directory with templates
+- Add E2E to CI (see task 2)
+- Add coverage reporting to PRs (Codecov / coveralls)
+- Add Dependabot for automated dependency PRs
+- Add PR / issue templates
+- Tighten the coverage threshold as the test suite grows
 
 ---
 
@@ -247,71 +119,32 @@ Enhance the existing CI pipeline with additional checks and deployment automatio
 ### 8. Add Keyboard Shortcut Help Enhancement
 
 **Priority:** Low  
-**Estimated Effort:** 1-2 hours
-
-**Description:**
-Improve the keyboard shortcut help modal with better organization and search.
-
-**Tasks:**
-
-- Categorize shortcuts by function:
-  - Navigation
-  - Room Management
-  - Element Management
-  - View Controls
-  - Export
-- Add search/filter for shortcuts
-- Show key combination in sidebar
-- Add keyboard shortcut to open help (`?` or `Ctrl+/`)
+**Status:** Basic help modal exists (`src/components/ShortcutHelp.tsx`). Search / categorization not implemented.
 
 ---
 
 ### 9. Add Room Tag Filtering
 
 **Priority:** Low  
-**Estimated Effort:** 3-4 hours
-
-**Description:**
-Allow filtering rooms by tags in the sidebar.
-
-**Tasks:**
-
-- Add tag filtering to room list
-- Add tag-based search
-- Show tag count per room
-- Quick filter buttons for common tags
+**Status:** Layers (task 19) ship; tag filtering in the sidebar list is not implemented.
 
 ---
 
 ### 10. Add Plan Comparison Tool
 
 **Priority:** Low  
-**Estimated Effort:** 6-8 hours
-
-**Description:**
-Create a visual diff tool to compare two plans side by side.
-
-**Tasks:**
-
-- Load two plans from history or project versions
-- Show side-by-side or merged view
-- Highlight differences:
-  - Added rooms (green outline)
-  - Removed rooms (red outline)
-  - Moved rooms (arrows)
-  - Resized rooms (dashed lines)
-- Export comparison report
+**Status:** Basic `PlanComparison` component exists for version diff. Visual side-by-side not implemented.
 
 ---
 
 ## Summary
 
-| Priority  | Tasks  | Estimated Hours | Status          |
-| --------- | ------ | --------------- | --------------- |
-| High      | 5      | 30 hours        | 🔲 Not Started  |
-| Medium    | 3      | 15 hours        | 🔲 Not Started  |
-| Low       | 3      | 15 hours        | 🔲 Not Started  |
-| **Total** | **11** | **60 hours**    | **0% Complete** |
+| Priority  | Tasks  | Estimated Hours | Status            |
+| --------- | ------ | --------------- | ----------------- |
+| High      | 5      | 30 hours        | 🟡 3/5 complete   |
+| Medium    | 3      | 15 hours        | 🟡 1/3 complete   |
+| Low       | 3      | 15 hours        | 🔲 Not started    |
+| **Total** | **11** | **60 hours**    | **~40% Complete** |
 
 ---
 

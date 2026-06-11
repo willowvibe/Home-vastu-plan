@@ -1,13 +1,13 @@
 # Known Issues & Improvements
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
-> **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md`.
-> **Last updated:** 2026-06-09
+> **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
+> **Last updated:** 2026-06-11 (post PR #44)
 
 ## Quick links
 
 - Full review: [docs/CODE_REVIEW.md](./CODE_REVIEW.md)
-- Architecture: [docs/ARCHITECTURE.md](./ARCHITECTURE.md)
+- Changelog: [CHANGELOG.md](../CHANGELOG.md)
 - E2E status: [memory/e2e-tests-completed.md](../memory/e2e-tests-completed.md)
 
 ---
@@ -78,16 +78,16 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ---
 
-## ✅ Recently Resolved (P1 batch)
+## ✅ Recently Resolved (P1 batch #1 — P1 quick-wins)
 
-> The first P1 batch shipped in this branch (`fix/p1-quick-wins`). 4 of the 10 P1 items are fixed. Per-bug commit refs:
+> The first P1 batch shipped in PR #39 (merge commit `1694af7`) on 2026-06-09. 4 of the 10 P1 items are fixed. Per-bug commit refs:
 
-| ID   | Title                                                    | Fix commit   | Notes                                                                                |
-| ---- | -------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------ |
-| B-3  | "Clear floor" uses captured `plan` instead of functional | _on this PR_ | `updatePlan((prev) => ...)` + drops the now-unused `setPlan` import.                 |
-| B-7  | Ruler distance label hard-coded to `' ft`                | _on this PR_ | `RulerOverlay` accepts `unit`; converts ft→m at 0.3048. Also fixes B-14 (half-foot). |
-| S-16 | `ProjectManager` `localStorage.setItem` not in try/catch | _on this PR_ | Wraps setItem; toast for `QuotaExceededError` (and any other DOMException).          |
-| B-17 | Dark mode + `prose-slate` produces white-on-white panel  | _on this PR_ | `dark:prose-invert` on the analysis panel container.                                 |
+| ID   | Title                                                    | Fix commit | Notes                                                                                |
+| ---- | -------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------ |
+| B-3  | "Clear floor" uses captured `plan` instead of functional | `db30f60`  | `updatePlan((prev) => ...)` + drops the now-unused `setPlan` import.                 |
+| B-7  | Ruler distance label hard-coded to `' ft`                | `3f115f1`  | `RulerOverlay` accepts `unit`; converts ft→m at 0.3048. Also fixes B-14 (half-foot). |
+| S-16 | `ProjectManager` `localStorage.setItem` not in try/catch | `9b54d86`  | Wraps setItem; toast for `QuotaExceededError` (and any other DOMException).          |
+| B-17 | Dark mode + `prose-slate` produces white-on-white panel  | `db30f60`  | `dark:prose-invert` on the analysis panel container.                                 |
 
 **No regressions** in `npm run lint`, `npm test` (33/33, +8 new), or `npm run build`.
 
@@ -95,7 +95,7 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## ✅ Recently Resolved (P1 batch #2)
 
-> The second P1 batch shipped on branch `fix/p1-batch-2`. 5 of the remaining 6 P1 items and 1 P2 item are fixed. Per-bug commit refs:
+> The second P1 batch shipped in PR #43 (merge commit `36b67ca`) on 2026-06-11. 5 of the remaining 6 P1 items and 1 P2 item are fixed. Per-bug commit refs:
 
 | ID   | Title                                                                            | Fix commit | Notes                                                                                                                              |
 | ---- | -------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -111,7 +111,7 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## ✅ Recently Resolved (P2 hygiene batch)
 
-> The P2/P3 hygiene batch shipped on branch `fix/p2-hygiene-batch`. 7 P2/P3 items fixed: S-22 (proper CACHE_NAME bump), Q-5 (coverage thresholds), Q-6 (allowJs), Q-7+Q-14 (re-include sw.ts + setup.ts in tsc), Q-15 (drop 3 unused deps), Q-20 (Node engine), Q-25 (VITE_GEMINI_API_KEY). Also resolves the missed S-21 row from the P1 batch #2 docs (the code change shipped then; the doc row was missed). Per-bug commit refs:
+> The P2/P3 hygiene batch shipped in PR #44 (merge commit `bf2c214`) on 2026-06-11. 7 P2/P3 items fixed: S-22 (proper CACHE_NAME bump), Q-5 (coverage thresholds), Q-6 (allowJs), Q-7+Q-14 (re-include sw.ts + setup.ts in tsc), Q-15 (drop 3 unused deps), Q-20 (Node engine), Q-25 (VITE_GEMINI_API_KEY). Also resolves the missed S-21 row from the P1 batch #2 docs (the code change shipped then; the doc row was missed). Per-bug commit refs:
 
 | ID   | Title                                                                              | Fix commit | Notes                                                                                                                                                                                                                                                            |
 | ---- | ---------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -131,14 +131,18 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-| Bucket | Items | Effort  | Status                                |
-| ------ | ----- | ------- | ------------------------------------- |
-| P0     | 0     | —       | ✅ All resolved (PR #28)              |
-| P1     | 1     | ~2 h    | 🟡 5 resolved (#43), 1 remaining      |
-| P2     | 10    | ~33 h   | 🟡 8 resolved (this PR), 10 remaining |
-| P3     | many  | ongoing | 🔲 Not started                        |
+> **State as of 2026-06-11 (post PR #44).** All 9 P0s and 9 of 10 P1s resolved. P1: only B-8 remains. P2: 10 items / ~33 h.
 
-See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P1 batch #2)](#-recently-resolved-p1-batch-2) above for the P1 batch #2 fixes, and [✅ Recently Resolved (P2 hygiene batch)](#-recently-resolved-p2-hygiene-batch) above for this PR.
+| Bucket | Items | Effort  | Status                                  |
+| ------ | ----- | ------- | --------------------------------------- |
+| P0     | 0     | —       | ✅ All resolved (PR #28)                |
+| P1     | 1     | ~2 h    | 🟡 5 resolved (#43), 1 remaining (B-8)  |
+| P2     | 10    | ~33 h   | 🟡 6 resolved (#43 + #44), 10 remaining |
+| P3     | many  | ongoing | 🔲 Not started                          |
+
+See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P1 batch #2)](#-recently-resolved-p1-batch-2) above for the P1 batch #2 fixes, and [✅ Recently Resolved (P2 hygiene batch)](#-recently-resolved-p2-hygiene-batch) above for the P2 hygiene batch.
+
+**Suggested next batch (≤ 1 day, low-risk):** S-8 (geometry constants, 1 h), S-12 (catch `unknown`, 2 h), Q-9 (share `PlanUpdateEvent` between client + server, 2 h), Q-12 (split `src/lib/exports.ts`, 3 h), S-3 (`setPlan` → `updatePlan` API, 2 h). Total: ~10 h. Sets the stage for S-1 (`App.tsx` split, 8-12 h) and Q-1/Q-2/Q-3 (test coverage for the three complex hooks, 13 h).
 
 ---
 

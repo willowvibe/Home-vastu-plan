@@ -1,6 +1,8 @@
 # VastuPlan 2D
 
-VastuPlan 2D is a modern, interactive web application designed to help users create, visualize, and analyze floor plans based on traditional Indian Vastu Shastra principles. Built with React and Tailwind CSS, it offers a seamless drag-and-drop interface combined with intelligent AI-driven analysis. This version includes bug fixes and usability improvements including keyboard navigation, multi-floor management, and enhanced export options.
+> **0.1.0 (alpha)** — see [`CHANGELOG.md`](./CHANGELOG.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md) for the current state and the active backlog.
+
+VastuPlan 2D is a modern, interactive web application designed to help users create, visualize, and analyze floor plans based on traditional Indian Vastu Shastra principles. Built with React 19 and Tailwind CSS v4, it offers a seamless drag-and-drop interface combined with intelligent AI-driven analysis. This release includes bug fixes and usability improvements including keyboard navigation, multi-floor management, and enhanced export options.
 
 ## 🌟 Key Features
 
@@ -53,11 +55,15 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
 
 ## 🛠️ Technical Stack
 
-- **Frontend Framework**: React 18
-- **Styling**: Tailwind CSS
+- **Frontend Framework**: React 19 + TypeScript (strict)
+- **Build Tool**: Vite 6
+- **Styling**: Tailwind CSS v4 (`@tailwindcss/vite`)
 - **Icons**: Lucide React
 - **AI Integration**: `@google/genai` (Gemini 2.5 Flash for text analysis, Imagen for image generation)
-- **Utilities**: `html2canvas` for exporting, `uuid` for unique identification.
+- **Utilities**: `html-to-image` for PNG/SVG export, `jsPDF` for PDF export, `lz-string` for URL-compressed plan sharing, `uuid` for unique identification.
+- **Backend (optional)**: Node + Express + Socket.io collaboration server in [`server/`](./server/README.md)
+- **Tooling**: Vitest + React Testing Library for unit/integration, Playwright for E2E, ESLint + Prettier, Sentry (prod), Plausible (analytics)
+- **Runtime requirement**: Node.js >= 20 (see [`.nvmrc`](./.nvmrc))
 
 ## 🚀 How to Use
 
@@ -84,9 +90,9 @@ The app uses a coordinate system relative to the center of the buildable area. I
 
 For example, a Kitchen placed in the South-East zone will receive a high score, while a Kitchen in the North-East will receive a lower score and a warning, adhering to traditional Vastu guidelines.
 
-## 🆕 New Features (v2.0)
+## 🆕 What's in 0.1.0 (alpha)
 
-This version includes significant bug fixes and usability improvements:
+This alpha release includes the full feature set advertised in earlier preview builds, plus the bug fixes and hygiene changes from the 2026-06-08 / 2026-06-09 / 2026-06-11 batches (see [`CHANGELOG.md`](./CHANGELOG.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md)). Highlights:
 
 ### Keyboard & Accessibility
 
@@ -120,3 +126,22 @@ This version includes significant bug fixes and usability improvements:
 - Fixed wall thickness changes not adjusting element positions
 - Fixed share links not including AI analysis results
 - Fixed large plan handling with size validation and clear error messages
+
+## ♿ Accessibility
+
+- Skip link to main canvas for keyboard users
+- `tabIndex` and `aria-label` on interactive elements
+- Focus-visible outlines
+- `aria-modal` + focus trap + Esc-to-close on dialogs (Onboarding, Project Manager, etc.)
+- View / comment modes lock the canvas and keyboard shortcuts so the app is read-only
+- Honor `prefers-reduced-motion` (no decorative animations in core flows)
+
+## 🧪 Internals (for contributors)
+
+- **State**: `useFloorPlan` owns plan + history (bounded, undo/redo, localStorage autosave with `loadedAt` race guard)
+- **Drag/resize**: `useCanvasDrag` — shared-wall aware element placement, snap-to-grid, sub-foot precision
+- **Collaboration**: `useCollaboration` Socket.io client, stable socket effect (no reconnect storm), functional `onPlanChange`
+- **PWA**: service worker with per-deploy `CACHE_NAME` (bumped by SHA-256 of `index.html`), bundled to `dist/sw.js`
+- **Tests**: 55 unit/integration (Vitest) + 7 happy-path E2E (Playwright). Coverage gate in `vitest.config.ts`.
+- **CI**: lint + tsc + prettier + vitest + build + `npm audit` (see [`.github/workflows/ci.yml`](./.github/workflows/ci.yml))
+- **Backlog**: see [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md)
