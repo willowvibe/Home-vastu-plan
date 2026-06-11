@@ -18,21 +18,12 @@ interface UseCanvasDragOptions {
 // Room.tsx:isShared so the two stay in sync.
 const TOLERANCE = 0.1;
 
-function isSideShared(
-  room: Room,
-  other: Room,
-  side: 'top' | 'right' | 'bottom' | 'left'
-): boolean {
-  const overlapsX =
-    room.x < other.x + other.w - TOLERANCE && room.x + room.w > other.x + TOLERANCE;
-  const overlapsY =
-    room.y < other.y + other.h - TOLERANCE && room.y + room.h > other.y + TOLERANCE;
-  if (side === 'top')
-    return Math.abs(room.y - (other.y + other.h)) < TOLERANCE && overlapsX;
-  if (side === 'bottom')
-    return Math.abs(room.y + room.h - other.y) < TOLERANCE && overlapsX;
-  if (side === 'left')
-    return Math.abs(room.x - (other.x + other.w)) < TOLERANCE && overlapsY;
+function isSideShared(room: Room, other: Room, side: 'top' | 'right' | 'bottom' | 'left'): boolean {
+  const overlapsX = room.x < other.x + other.w - TOLERANCE && room.x + room.w > other.x + TOLERANCE;
+  const overlapsY = room.y < other.y + other.h - TOLERANCE && room.y + room.h > other.y + TOLERANCE;
+  if (side === 'top') return Math.abs(room.y - (other.y + other.h)) < TOLERANCE && overlapsX;
+  if (side === 'bottom') return Math.abs(room.y + room.h - other.y) < TOLERANCE && overlapsX;
+  if (side === 'left') return Math.abs(room.x - (other.x + other.w)) < TOLERANCE && overlapsY;
   return Math.abs(room.x + room.w - other.x) < TOLERANCE && overlapsY;
 }
 
