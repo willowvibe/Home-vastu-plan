@@ -1,4 +1,11 @@
-const CACHE_NAME = 'vastuplan-v1';
+// S-22: CACHE_NAME is injected by vite.config.ts as a per-deploy hash of
+// index.html (see buildHash.ts). New deploys → new CACHE_NAME → activate
+// handler prunes the old cache, clients fetch the new assets on next reload.
+// Falls back to 'vastuplan-dev' for `npm run dev` and for environments that
+// don't run Vite's define (e.g. a bare `tsc` build of the SW).
+declare const __VASTUPLAN_CACHE_NAME__: string | undefined;
+const CACHE_NAME: string =
+  typeof __VASTUPLAN_CACHE_NAME__ !== 'undefined' ? __VASTUPLAN_CACHE_NAME__ : 'vastuplan-dev';
 const ASSETS_TO_CACHE = ['/', '/index.html', '/favicon.svg', '/manifest.json'];
 
 // Install event - cache static assets

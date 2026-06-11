@@ -1,3 +1,7 @@
+// S-22: per-deploy cache name injected by vite.config.ts (see buildHash.ts).
+// Falls back to 'vastuplan-dev' in sw.ts when this is undefined (dev mode).
+declare const __VASTUPLAN_CACHE_NAME__: string | undefined;
+
 interface ServiceWorkerGlobalScope {
   caches: CacheStorage;
   registration: ServiceWorkerRegistration;
