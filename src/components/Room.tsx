@@ -44,7 +44,18 @@ export const Room: React.FC<RoomProps> = React.memo(
     onUpdateRoom,
     onUpdateRoomEnd,
   }) => {
-    const vastu = useMemo(() => analyzeRoomVastu(room, plan as any), [room, plan]);
+    // B-13: depend on the plan primitives that analyzeRoomVastu actually
+    // reads (plotWidth, plotHeight, northAngle), not the whole `plan` ref.
+    // `updatePlan` allocates a new `plan` on every drag tick, so the prior
+    // dep re-ran analyzeRoomVastu once per Room per frame even when nothing
+    // vastu-affecting had changed. The eslint-disable on the dep array is
+    // intentional and tracked in KNOWN_ISSUES §B-13; remove if the dep ever
+    // needs to widen.
+    const vastu = useMemo(
+      () => analyzeRoomVastu(room, plan as any),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [room, plan.plotWidth, plan.plotHeight, plan.northAngle]
+    );
     const vastuColor =
       vastu.status === 'good'
         ? 'bg-emerald-100/80 border-emerald-400'
