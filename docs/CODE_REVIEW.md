@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect PRs #28, #39, #43, #44, and the P2 refactor batch on `fix/p2-refactor-batch` (5 items: S-8, S-12, Q-9, Q-12, S-3).
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect PRs #28, #39, #43, #44, #45, and the test-coverage batch on `fix/q-2-q-3-hook-tests` (2 items: Q-2, Q-3).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -14,7 +14,9 @@
 >
 > **P2 hygiene batch — RESOLVED 2026-06-11 in PR #44:** S-22, Q-5, Q-6, Q-7+Q-14, Q-15, Q-20, Q-25 all fixed (plus the missed S-21 doc row). See the [✅ Resolved in P2 hygiene batch](#-resolved-in-p2-hygiene-batch) section at the bottom of this document.
 >
-> **P2 refactor batch — RESOLVED 2026-06-11 on `fix/p2-refactor-batch` (5 commits, awaiting PR):** S-8, S-12, Q-9, Q-12, S-3 all fixed. See the [✅ Resolved in P2 refactor batch](#-resolved-in-p2-refactor-batch) section at the bottom of this document.
+> **P2 refactor batch — RESOLVED 2026-06-11 in PR #45:** S-8, S-12, Q-9, Q-12, S-3 all fixed. See the [✅ Resolved in P2 refactor batch](#-resolved-in-p2-refactor-batch) section at the bottom of this document.
+>
+> **Test-coverage batch — RESOLVED 2026-06-11 on `fix/q-2-q-3-hook-tests` (awaiting PR):** Q-2, Q-3 all fixed. See the [✅ Resolved in test-coverage batch](#-resolved-in-test-coverage-batch) section at the bottom of this document.
 
 ---
 
@@ -438,6 +440,8 @@ This hook handles 100% of drag, resize, and rotation math. A refactor without te
 
 ### Q-2. No tests for `useFloorPlan` history management
 
+> **Resolved 2026-06-11 on `fix/q-2-q-3-hook-tests`** (test-coverage batch, awaiting PR). 15 behavioural tests added in `src/hooks/useFloorPlan.test.ts` covering: the `commitHistory` identical-state guard, the `MAX_HISTORY_SIZE` cap, undo/redo at the head and the tail, the "new commit after undo truncates the redo branch" invariant, `resetPlan`, and the functional-form `updatePlan`.
+
 Boundary cases:
 
 - `commitHistory` with identical state (no-op) — covered indirectly, but no assertion
@@ -445,6 +449,8 @@ Boundary cases:
 - `undo` at the head and tail
 
 ### Q-3. No tests for `useCollaboration` socket lifecycle
+
+> **Resolved 2026-06-11 on `fix/q-2-q-3-hook-tests`** (test-coverage batch, awaiting PR). 20 new tests added in `src/hooks/useCollaboration.test.ts` covering: the B-1 stable-deps effect, the B-2 functional `onPlanChange` setter, the S-12 `getErrorMessage` error-narrowing path (Error / string / number fallbacks), the room-joined plan-sync fallback, the local-echo guard on `plan-updated`, the `plan-synced` echo guard, `joinRoom` / `leaveRoom` / `broadcastUpdate` public-API behaviour, and the unmount cleanup.
 
 The most fragile part of the system and the least tested. Mock socket.io-client.
 
@@ -566,18 +572,16 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-11 (post PR #44):** All 9 P0s and 9 of 10 P1s are resolved. The remaining P1 is B-8 (shift+click marquee, design call needed). P2 has 10 items totaling ~33 h. P3 is ongoing.
+> **State as of 2026-06-11 (post PR #45 + test-coverage batch, awaiting PR):** All 9 P0s and 9 of 10 P1s are resolved. The remaining P1 is B-8 (shift+click marquee, design call needed). P2 has 3 items totaling ~18 h. P3 is ongoing.
 
-| Bucket                   | Items                                 | Suggested owner track | Effort    |
-| ------------------------ | ------------------------------------- | --------------------- | --------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_ | —                     | —         |
-| **P1 — Fix this sprint** | B-8                                   | robustness            | 2 h       |
-| **P2 — Refactor**        | S-1, S-4, Q-1, Q-2, Q-3               | health                | 1-2 weeks |
-| **P3 — Polish**          | All Q and G items                     | DX / features         | ongoing   |
+| Bucket                   | Items                                 | Suggested owner track | Effort  |
+| ------------------------ | ------------------------------------- | --------------------- | ------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_ | —                     | —       |
+| **P1 — Fix this sprint** | B-8                                   | robustness            | 2 h     |
+| **P2 — Refactor**        | S-1, S-4, Q-1                         | health                | ~18 h   |
+| **P3 — Polish**          | All Q and G items                     | DX / features         | ongoing |
 
-**Suggested next batch (≤ 1 day, low-risk):** S-8 (geometry constants, 1 h), S-12 (catch `unknown`, 2 h), Q-9 (share `PlanUpdateEvent` between client + server, 2 h), Q-12 (split `src/lib/exports.ts` into 5 files, 3 h), S-3 (`setPlan` → `updatePlan` API surface, 2 h). Total: ~10 h. Sets the stage for the bigger S-1 (`App.tsx` split, 8-12 h) and Q-1/Q-2/Q-3 (test coverage for the three complex hooks, 13 h).
-
-**Where to start:** S-1 (split `App.tsx` — 8-12 h, the single biggest structural win) or Q-1/Q-2/Q-3 (test coverage for the three complex hooks, 13 h combined).
+**Suggested next batch (≤ 1 day, low-risk):** None of the remaining P2 items are < 1 day. The smallest is **Q-1** (Vitest coverage for `useCanvasDrag`, ~6 h) — the most fragile hook in the system that still has no unit tests. The biggest follow-up is **S-1** (`App.tsx` split, 8-12 h) — coordinate with the user before starting since a 1,000+-line diff benefits from its own branch.
 
 ---
 
@@ -658,7 +662,7 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 
 ## ✅ Resolved in P2 refactor batch
 
-> The 2026-06-11 P2 refactor batch fixed 5 P2 items in branch `fix/p2-refactor-batch` (commits `c40e621`..`f45745b`, awaiting PR). The per-bug entries in §2 / §3 are kept for traceability. Test count grew from 55 to 97 (+42), mostly from pinning the new constants/helpers to regression tests.
+> The 2026-06-11 P2 refactor batch fixed 5 P2 items in branch `fix/p2-refactor-batch` (commits `c40e621`..`f45745b`) and shipped in PR #45. The per-bug entries in §2 / §3 are kept for traceability. Test count grew from 55 to 97 (+42), mostly from pinning the new constants/helpers to regression tests.
 
 | ID   | Title                                                                                              | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                           |
 | ---- | -------------------------------------------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -669,6 +673,19 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 | S-3  | `setPlan` is exposed from `useFloorPlan` and called directly with non-functional form              | §3 S-3        | +4    | `setPlan` removed from the public return of `useFloorPlan`. Internal `setPlan` retained (used by `undo` / `redo` / `resetPlan` / `commitHistory` — those know the exact target value). `useFloorPlan.test.ts` pins the public-API shape so a future re-exposure fails CI.                                                       |
 
 **Validation:** `npm run lint` ✅ (0 errors, 36 warnings — 35 pre-existing any uses, 1 react-refresh; 0 new), `npm test` (97/97, +42 new) ✅, `npm run build` ✅, `server tsc --noEmit` ✅. No behaviour changes; the entire diff is mechanical refactor + test pinning.
+
+---
+
+## ✅ Resolved in test-coverage batch
+
+> The 2026-06-11 test-coverage batch fixed 2 P2 items in branch `fix/q-2-q-3-hook-tests` (awaiting PR). The per-bug entries in §4 are kept for traceability. Test count grew from 97 to 128 (+31) — both hooks are now covered by behavioural tests that pin every public-API contract and the key B-1 / B-2 / S-2 / S-12 invariants.
+
+| ID  | Title                                            | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --- | ------------------------------------------------ | ------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-2 | No tests for `useFloorPlan` history management   | §4 Q-2        | +15   | Behavioural tests in `useFloorPlan.test.ts` covering: `commitHistory` with identical state (no-op), `commitHistory` past `MAX_HISTORY_SIZE` (50), `undo` at the head and the tail, `redo` past the head, the "new commit after undo truncates the redo branch" invariant, `resetPlan` clearing the history stack, and the functional-form `updatePlan((prev) => ...)` reading the latest state. The 4 pre-existing S-3 structural tests are retained.                                                                                                                 |
+| Q-3 | No tests for `useCollaboration` socket lifecycle | §4 Q-3        | +20   | Behavioural tests in `useCollaboration.test.ts` covering: the connect / disconnect state transitions, the B-1 stable-deps effect, the B-2 functional `onPlanChange` setter, the S-12 `getErrorMessage` error-narrowing path (Error / string / number fallbacks), the `room-joined` plan-sync fallback when the server returns an empty plan, the local-echo guard on `plan-updated` (the `isLocalUpdateRef`), the `plan-synced` echo guard (`modifiedBy === our userId`), `joinRoom` / `leaveRoom` / `broadcastUpdate` public-API behaviour, and the unmount cleanup. |
+
+**Validation:** `npm test` (128/128, +31 new) ✅, `npm run lint` ✅ (0 new warnings), `npm run build` ✅. The 3 pre-existing B-1 / B-2 / S-2 tests in `useCollaboration.test.ts` are retained unchanged. No source-code changes; the entire diff is test additions.
 
 ---
 
