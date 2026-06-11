@@ -10,10 +10,16 @@ import './index.css';
 initSentry();
 
 // Register service worker for PWA
+// S-22: register /sw.js (the bundled output of src/services/sw.ts) in
+// production builds. In dev mode, Vite serves the source at
+// /src/services/sw.ts via the dev server, so we use that path. The previous
+// hard-coded /src/services/sw.ts was broken in production (the file didn't
+// exist in dist/), so the SW never actually shipped to users.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    const swPath = import.meta.env.DEV ? '/src/services/sw.ts' : '/sw.js';
     navigator.serviceWorker
-      .register('/src/services/sw.ts')
+      .register(swPath)
       .then((registration) => {
         console.log('ServiceWorker registered:', registration.scope);
       })

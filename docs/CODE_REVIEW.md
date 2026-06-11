@@ -560,14 +560,14 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-| Bucket                   | Items                                          | Suggested owner track | Effort    |
-| ------------------------ | ---------------------------------------------- | --------------------- | --------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_          | —                     | —         |
-| **P1 — Fix this sprint** | B-8, B-9, B-13, S-2, S-9, S-17                 | robustness            | 3-5 days  |
-| **P2 — Refactor**        | S-1, S-3, S-8, S-12, S-21, S-22, Q-1, Q-2, Q-3 | health                | 1-2 weeks |
-| **P3 — Polish**          | All Q and G items                              | DX / features         | ongoing   |
+| Bucket                   | Items                                              | Suggested owner track | Effort    |
+| ------------------------ | -------------------------------------------------- | --------------------- | --------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_              | —                     | —         |
+| **P1 — Fix this sprint** | B-8                                                | robustness            | 2 h       |
+| **P2 — Refactor**        | S-1, S-3, S-4, S-8, S-12, Q-1, Q-2, Q-3, Q-9, Q-12 | health                | 1-2 weeks |
+| **P3 — Polish**          | All Q and G items                                  | DX / features         | ongoing   |
 
-**Where to start:** B-3 (clear-floor stale closure) and B-13 (`Room` `vastu` memo dep on whole `plan` — biggest perf cost in the app) are the two highest-impact remaining items. B-13 will land inside a wider `App.tsx` perf pass (see S-1).
+**Where to start:** S-1 (split `App.tsx` — 8-12 h, the single biggest structural win) or Q-1/Q-2/Q-3 (test coverage for the three complex hooks, 13 h combined).
 
 ---
 
@@ -607,6 +607,26 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 | B-17 | `prose-slate` is not dark-aware → white-on-white in dark mode | §2 B-17       | —     | `dark:prose-invert` on the analysis panel container in `App.tsx`.                                 |
 
 **Validation:** `npm run lint` ✅ (1 pre-existing Toast warning unchanged), `npm test` (33/33, +8 new) ✅, `npm run build` ✅. E2E was not re-run locally; the changed code paths are not covered by the existing e2e suite.
+
+---
+
+## ✅ Resolved in P2 hygiene batch
+
+> The 2026-06-11 P2/P3 hygiene batch fixed 7 P2/P3 items in branch `fix/p2-hygiene-batch`. The per-bug entries in §2 / §3 are kept for traceability. No test coverage changes beyond the +4 S-22 hash tests; the rest are config, type, and tooling.
+
+| ID   | Title                                                                              | Per-bug entry | Tests | Notes                                                                                                                                                                                                         |
+| ---- | ---------------------------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-21 | Sentry.ErrorBoundary + custom ErrorBoundary are nested                             | §3 S-21       | —     | Code change shipped in the P1 batch #2 (`a8ab03f`); this PR closes the doc row that was missed.                                                                                                               |
+| S-22 | `sw.ts` CACHE_NAME hard-coded to `vastuplan-v1`; no bump strategy                  | §3 S-22       | +4    | Per-deploy SHA-256 of `index.html` injected via Vite `define` → `__VASTUPLAN_CACHE_NAME__`. Also fixes a latent bug: the SW was never bundled in production — only served from dev — so users never got a SW. |
+| Q-5  | No vitest config for coverage thresholds; CI doesn't fail on regression            | §4 Q-5        | —     | v8 provider, text+html reporter, thresholds set just below the current measured coverage.                                                                                                                     |
+| Q-6  | `tsconfig.json` has `allowJs: true` but no `.js` files in `src/`                   | §4 Q-6        | —     | Dropped the unused option.                                                                                                                                                                                    |
+| Q-7  | `tsconfig.json` excludes `src/services/sw.ts` from type-checking                   | §4 Q-7        | —     | Re-included. SW typed properly now (addEventListener overloads pick up ExtendableEvent/FetchEvent).                                                                                                           |
+| Q-14 | `tsconfig.json` lists `src/test/setup.ts` in `exclude` but `vitest.config` uses it | §4 Q-14       | —     | Re-included; added `types: ["vitest/globals"]` so `vi`, `afterEach`, `expect.extend` are typed.                                                                                                               |
+| Q-15 | `package.json` has `motion` + `autoprefixer` but no usage in source                | §4 Q-15       | —     | Also dropped `@sentry/tracing`. 12 packages removed from `node_modules`.                                                                                                                                      |
+| Q-20 | `package.json` doesn't declare Node engine version                                 | §4 Q-20       | —     | `engines.node: ">=20.0.0"` + `.nvmrc` (20).                                                                                                                                                                   |
+| Q-25 | `gemini.ts` reads `process.env.GEMINI_API_KEY` instead of Vite's `import.meta.env` | §4 Q-25       | —     | Flipped precedence to `import.meta.env.VITE_GEMINI_API_KEY`; type-augmented in `vite-env.d.ts`.                                                                                                               |
+
+**Validation:** `npm run lint` ✅ (0 errors, 2 pre-existing warnings), `npm test` (55/55, +4 new) ✅, `npm run build` ✅, `npm run test:coverage` ✅ (passes new thresholds). The new coverage gate (Q-5) will fail CI if coverage regresses below the current floor.
 
 ---
 

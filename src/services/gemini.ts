@@ -5,13 +5,17 @@ let ai: GoogleGenAI | null = null;
 
 function getAI(): GoogleGenAI {
   if (!ai) {
-    // Vite injects env vars via define; fall back to import.meta.env for standard Vite usage
+    // Q-25: prefer import.meta.env.VITE_GEMINI_API_KEY (Vite's standard
+    // client-side env var). Fall back to process.env.GEMINI_API_KEY (set via
+    // Vite's `define` in vite.config.ts) and then to a non-prefixed
+    // VITE_GEMINI_API_KEY on process.env (older convention) for compat.
     const key =
+      import.meta.env.VITE_GEMINI_API_KEY ||
       (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) ||
-      (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEMINI_API_KEY);
+      (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY);
     if (!key) {
       throw new Error(
-        'GEMINI_API_KEY not configured. Please set it in your environment or .env file.'
+        'VITE_GEMINI_API_KEY not configured. Set it in your .env file (see .env.example).'
       );
     }
     ai = new GoogleGenAI({ apiKey: key });
