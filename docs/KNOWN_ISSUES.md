@@ -2,7 +2,7 @@
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
 > **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md`.
-> **Last updated:** 2026-06-09
+> **Last updated:** 2026-06-11
 
 ## Quick links
 
@@ -57,13 +57,12 @@ _All P0 items from the 2026-06-07 sweep are resolved. The next P0 will be filed 
 | S-4  | Add property tests for Vastu ideal-direction matrix                              | `src/services/vastu.ts`               | 4 h    |
 | S-8  | Move geometry constants (TOLERANCE, wall defaults) to `constants/geometry.ts`    | multiple                              | 1 h    |
 | S-12 | Replace `catch (error: any)` with `catch (error: unknown)` + type narrowing      | multiple                              | 2 h    |
-| Q-1  | Add Vitest tests for `useCanvasDrag`                                             | `src/hooks/useCanvasDrag.ts`          | 6 h    |
 | Q-2  | Add Vitest tests for `useFloorPlan` history                                      | `src/hooks/useFloorPlan.ts`           | 3 h    |
 | Q-3  | Add Vitest tests for `useCollaboration` socket lifecycle                         | `src/hooks/useCollaboration.ts`       | 4 h    |
 | Q-9  | Share `PlanUpdateEvent` type between client and server                           | `src/types.ts`, `server/src/index.ts` | 2 h    |
 | Q-12 | Split `src/lib/exports.ts` (158 lines, 5 concerns) into 5 files                  | `src/lib/exports.ts`                  | 3 h    |
 
-**Subtotal:** ~33 h
+**Subtotal:** ~27 h
 
 ---
 
@@ -129,18 +128,30 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ---
 
-## Triage (mirroring `CODE_REVIEW.md` §6)
+## ✅ Recently Resolved (Test coverage batch — Q-1)
 
-| Bucket | Items | Effort  | Status                                |
-| ------ | ----- | ------- | ------------------------------------- |
-| P0     | 0     | —       | ✅ All resolved (PR #28)              |
-| P1     | 1     | ~2 h    | 🟡 5 resolved (#43), 1 remaining      |
-| P2     | 10    | ~33 h   | 🟡 8 resolved (this PR), 10 remaining |
-| P3     | many  | ongoing | 🔲 Not started                        |
+> The 2026-06-11 test-coverage batch (Q-1) shipped on branch `fix/q-1-use-canvas-drag-tests` (pending PR). 1 P2 item fixed (Q-1: `useCanvasDrag` behavioural tests). The remaining P2 hooks-test work (Q-2, Q-3) is still on the backlog. Per-bug commit refs:
 
-See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P1 batch #2)](#-recently-resolved-p1-batch-2) above for the P1 batch #2 fixes, and [✅ Recently Resolved (P2 hygiene batch)](#-recently-resolved-p2-hygiene-batch) above for this PR.
+| ID  | Title                                | Fix commit | Notes                                                                                                                                                                                                                                                                                                                                                                                             |
+| --- | ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-1 | Add Vitest tests for `useCanvasDrag` | `3a1c0c9`  | Three new describe blocks: room drag (snap-to-grid 1ft / 0.1ft, plot-bounds clamp, same-floor collision clamp x/y, other-floor rooms ignored, pointerup lifecycle), room resize (SE/SW handles, 2ft min, plot clamp, pointerup), element drag (`draggingElement` state, half-foot rounding, inner-room clamp, Door opening overhang, pointerup). The 4 pre-existing B-5 + S-9 tests are retained. |
+
+**No regressions** in `npm run lint` (0 errors, 2 pre-existing warnings unchanged), `npm test` (78/78, +23 new), or `npm run build`.
 
 ---
+
+## Triage (mirroring `CODE_REVIEW.md` §6)
+
+| Bucket | Items | Effort  | Status                           |
+| ------ | ----- | ------- | -------------------------------- |
+| P0     | 0     | —       | ✅ All resolved (PR #28)         |
+| P1     | 1     | ~2 h    | 🟡 5 resolved (#43), 1 remaining |
+| P2     | 9     | ~27 h   | 🟡 1 resolved (Q-1), 9 remaining |
+| P3     | many  | ongoing | 🔲 Not started                   |
+
+See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P1 batch #2)](#-recently-resolved-p1-batch-2) above for the P1 batch #2 fixes, [✅ Recently Resolved (P2 hygiene batch)](#-recently-resolved-p2-hygiene-batch) above for that batch, and [✅ Recently Resolved (Test coverage batch — Q-1)](#-recently-resolved-test-coverage-batch--q-1) above for Q-1.
+
+**Suggested next batch:** **Q-2 + Q-3** (remaining untested complex hooks, 7 h combined) or **S-3 + S-8 + S-12** (the smallest structural refactor trio, 5 h combined).
 
 ## How to use this document
 

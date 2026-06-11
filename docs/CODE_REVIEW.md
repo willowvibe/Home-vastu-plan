@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-09 to reflect PR #28 (P0 sweep) and the P1 quick-wins batch.
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect the test-coverage batch (Q-1: `useCanvasDrag` behavioural tests).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -9,6 +9,10 @@
 > **P0 sweep — RESOLVED 2026-06-08 in PR #28:** B-1, B-2, B-5, B-10, B-11, S-5, S-7, S-10, S-15 all fixed. See the [✅ Resolved in PR #28](#-resolved-in-pr-28) section at the bottom of this document for per-bug commit refs, and `CHANGELOG.md` for the user-facing change log.
 >
 > **P1 quick-wins — RESOLVED 2026-06-09 in branch `fix/p1-quick-wins` (pending merge):** B-3, B-7, S-16, B-17 all fixed. See the [✅ Resolved in P1 quick-wins](#-resolved-in-p1-quick-wins) section at the bottom of this document.
+>
+> **P2 hygiene — RESOLVED 2026-06-11 in branch `fix/p2-hygiene-batch` (pending PR):** S-21, S-22, Q-5, Q-6, Q-7, Q-14, Q-15, Q-20, Q-25 fixed. See the [✅ Resolved in P2 hygiene batch](#-resolved-in-p2-hygiene-batch) section at the bottom of this document.
+>
+> **Test coverage (Q-1) — RESOLVED 2026-06-11 in branch `fix/q-1-use-canvas-drag-tests` (pending PR):** Q-1 (`useCanvasDrag` behavioural tests, +23 tests) fixed. See the [✅ Resolved in test-coverage batch (Q-1)](#-resolved-in-test-coverage-batch-q-1) section at the bottom of this document.
 
 ---
 
@@ -560,14 +564,14 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-| Bucket                   | Items                                              | Suggested owner track | Effort    |
-| ------------------------ | -------------------------------------------------- | --------------------- | --------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_              | —                     | —         |
-| **P1 — Fix this sprint** | B-8                                                | robustness            | 2 h       |
-| **P2 — Refactor**        | S-1, S-3, S-4, S-8, S-12, Q-1, Q-2, Q-3, Q-9, Q-12 | health                | 1-2 weeks |
-| **P3 — Polish**          | All Q and G items                                  | DX / features         | ongoing   |
+| Bucket                   | Items                                         | Suggested owner track | Effort    |
+| ------------------------ | --------------------------------------------- | --------------------- | --------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_         | —                     | —         |
+| **P1 — Fix this sprint** | B-8                                           | robustness            | 2 h       |
+| **P2 — Refactor**        | S-1, S-3, S-4, S-8, S-12, Q-2, Q-3, Q-9, Q-12 | health                | 1-2 weeks |
+| **P3 — Polish**          | All Q and G items                             | DX / features         | ongoing   |
 
-**Where to start:** S-1 (split `App.tsx` — 8-12 h, the single biggest structural win) or Q-1/Q-2/Q-3 (test coverage for the three complex hooks, 13 h combined).
+**Where to start:** S-1 (split `App.tsx` — 8-12 h, the single biggest structural win) or Q-2/Q-3 (test coverage for the remaining 2 complex hooks, 7 h combined).
 
 ---
 
@@ -627,6 +631,20 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 | Q-25 | `gemini.ts` reads `process.env.GEMINI_API_KEY` instead of Vite's `import.meta.env` | §4 Q-25       | —     | Flipped precedence to `import.meta.env.VITE_GEMINI_API_KEY`; type-augmented in `vite-env.d.ts`.                                                                                                               |
 
 **Validation:** `npm run lint` ✅ (0 errors, 2 pre-existing warnings), `npm test` (55/55, +4 new) ✅, `npm run build` ✅, `npm run test:coverage` ✅ (passes new thresholds). The new coverage gate (Q-5) will fail CI if coverage regresses below the current floor.
+
+---
+
+## ✅ Resolved in test-coverage batch (Q-1)
+
+> The 2026-06-11 test-coverage batch (Q-1) fixed the last untested complex hook in branch `fix/q-1-use-canvas-drag-tests` (pending PR). The per-bug entry in §4 is kept for traceability. Tests-only — no source-code or behaviour changes.
+
+| ID  | Title                                                            | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                                                                             |
+| --- | ---------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-1 | No tests for `useCanvasDrag` (the most complex non-trivial hook) | §4 Q-1        | +23   | Three new describe blocks: room drag (snap-to-grid 1ft / 0.1ft, plot-bounds clamp, same-floor collision clamp x/y, other-floor rooms ignored, pointerup lifecycle), room resize (SE/SW handles, 2ft min, plot clamp, pointerup), element drag (`draggingElement` state, half-foot rounding, inner-room clamp, Door opening overhang, pointerup). The 4 pre-existing B-5 + S-9 tests are retained. |
+
+**Validation:** `npm run lint` ✅ (0 errors, 2 pre-existing warnings unchanged), `npm test` (78/78, +23 new) ✅, `npm run build` ✅.
+
+**Subtle implementation note:** the `handlePointerMove` listener early-returns on `if (!canvasRef.current) return`, so every test that dispatches `pointermove` on `window` must use a non-null `canvasRef.current` with a real `getBoundingClientRect()` (otherwise the listener bails before calling `onUpdateRoom`). The test file's `canvasRef()` helper makes this ergonomic.
 
 ---
 
