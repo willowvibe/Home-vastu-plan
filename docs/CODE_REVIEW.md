@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-09 to reflect PR #28 (P0 sweep) and the P1 quick-wins batch.
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect PRs #28, #39, #43, #44, and the P2 refactor batch on `fix/p2-refactor-batch` (5 items: S-8, S-12, Q-9, Q-12, S-3).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -13,6 +13,8 @@
 > **P1 batch #2 — RESOLVED 2026-06-11 in PR #43:** S-2, S-9, S-17, S-21, Q-10 all fixed. See the [✅ Resolved in P1 batch #2](#-resolved-in-p1-batch-2) section at the bottom of this document.
 >
 > **P2 hygiene batch — RESOLVED 2026-06-11 in PR #44:** S-22, Q-5, Q-6, Q-7+Q-14, Q-15, Q-20, Q-25 all fixed (plus the missed S-21 doc row). See the [✅ Resolved in P2 hygiene batch](#-resolved-in-p2-hygiene-batch) section at the bottom of this document.
+>
+> **P2 refactor batch — RESOLVED 2026-06-11 on `fix/p2-refactor-batch` (5 commits, awaiting PR):** S-8, S-12, Q-9, Q-12, S-3 all fixed. See the [✅ Resolved in P2 refactor batch](#-resolved-in-p2-refactor-batch) section at the bottom of this document.
 
 ---
 
@@ -566,12 +568,12 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 > **State as of 2026-06-11 (post PR #44):** All 9 P0s and 9 of 10 P1s are resolved. The remaining P1 is B-8 (shift+click marquee, design call needed). P2 has 10 items totaling ~33 h. P3 is ongoing.
 
-| Bucket                   | Items                                              | Suggested owner track | Effort    |
-| ------------------------ | -------------------------------------------------- | --------------------- | --------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_              | —                     | —         |
-| **P1 — Fix this sprint** | B-8                                                | robustness            | 2 h       |
-| **P2 — Refactor**        | S-1, S-3, S-4, S-8, S-12, Q-1, Q-2, Q-3, Q-9, Q-12 | health                | 1-2 weeks |
-| **P3 — Polish**          | All Q and G items                                  | DX / features         | ongoing   |
+| Bucket                   | Items                                 | Suggested owner track | Effort    |
+| ------------------------ | ------------------------------------- | --------------------- | --------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_ | —                     | —         |
+| **P1 — Fix this sprint** | B-8                                   | robustness            | 2 h       |
+| **P2 — Refactor**        | S-1, S-4, Q-1, Q-2, Q-3               | health                | 1-2 weeks |
+| **P3 — Polish**          | All Q and G items                     | DX / features         | ongoing   |
 
 **Suggested next batch (≤ 1 day, low-risk):** S-8 (geometry constants, 1 h), S-12 (catch `unknown`, 2 h), Q-9 (share `PlanUpdateEvent` between client + server, 2 h), Q-12 (split `src/lib/exports.ts` into 5 files, 3 h), S-3 (`setPlan` → `updatePlan` API surface, 2 h). Total: ~10 h. Sets the stage for the bigger S-1 (`App.tsx` split, 8-12 h) and Q-1/Q-2/Q-3 (test coverage for the three complex hooks, 13 h).
 
@@ -651,6 +653,22 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 | Q-25 | `gemini.ts` reads `process.env.GEMINI_API_KEY` instead of Vite's `import.meta.env` | §4 Q-25       | —     | Flipped precedence to `import.meta.env.VITE_GEMINI_API_KEY`; type-augmented in `vite-env.d.ts`.                                                                                                               |
 
 **Validation:** `npm run lint` ✅ (0 errors, 2 pre-existing warnings), `npm test` (55/55, +4 new) ✅, `npm run build` ✅, `npm run test:coverage` ✅ (passes new thresholds). The new coverage gate (Q-5) will fail CI if coverage regresses below the current floor.
+
+---
+
+## ✅ Resolved in P2 refactor batch
+
+> The 2026-06-11 P2 refactor batch fixed 5 P2 items in branch `fix/p2-refactor-batch` (commits `c40e621`..`f45745b`, awaiting PR). The per-bug entries in §2 / §3 are kept for traceability. Test count grew from 55 to 97 (+42), mostly from pinning the new constants/helpers to regression tests.
+
+| ID   | Title                                                                                              | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                           |
+| ---- | -------------------------------------------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-8  | Hard-coded color/size magic numbers in `useCanvasDrag.ts`                                          | §3 S-8        | +17   | New `src/constants/geometry.ts` centralizes TOLERANCE_FT (0.1), INCHES_PER_FOOT (12), DEFAULT_WALL_THICKNESS_IN (9), SNAP_GRID_FT (1), SNAP_GRID_SUB_FT (0.1), MIN/MAX_ROOM_SIZE_FT, PIXELS_PER_FOOT, FT_PER_METER, etc. Replaced 14 hard-coded values across 4 callers.                                                        |
+| S-12 | `error: any` caught in `App.tsx` (handleShare, handleImportJSON, etc.)                             | §3 S-12       | +12   | New `getErrorMessage(error: unknown)` in `src/utils.ts` (12 tests). Switched 3 catch sites in App.tsx + 2 `err.message` sites in useCollaboration.ts. Lint rule `@typescript-eslint/no-explicit-any` flipped `off` → `warn` (with a follow-up comment to promote to `error` once the 30+ pre-existing any uses are cleaned up). |
+| Q-9  | `socket.io-client` is at the client but the server uses raw `socket.io`; no versioned API contract | §4 Q-9        | —     | New `src/types/shared.ts` is the single source of truth for `PlanUpdateEvent`. `data: any` → `data: unknown` (forced 3 narrow-back sites in useCollaboration.ts). Server's `tsconfig.json` widened to allow the import.                                                                                                         |
+| Q-12 | `src/lib/exports.ts` is `158` lines and mixes 5 concerns                                           | §4 Q-12       | +9    | Split into `exportPng.ts`, `exportSvg.ts`, `exportJson.ts`, `shareLink.ts`, `printPlan.ts`. The original `exports.ts` is now a 22-line back-compat barrel. Plus a `compressPlan` / `decompressPlan` pure-function pair in `shareLink.ts` (9 round-trip tests).                                                                  |
+| S-3  | `setPlan` is exposed from `useFloorPlan` and called directly with non-functional form              | §3 S-3        | +4    | `setPlan` removed from the public return of `useFloorPlan`. Internal `setPlan` retained (used by `undo` / `redo` / `resetPlan` / `commitHistory` — those know the exact target value). `useFloorPlan.test.ts` pins the public-API shape so a future re-exposure fails CI.                                                       |
+
+**Validation:** `npm run lint` ✅ (0 errors, 36 warnings — 35 pre-existing any uses, 1 react-refresh; 0 new), `npm test` (97/97, +42 new) ✅, `npm run build` ✅, `server tsc --noEmit` ✅. No behaviour changes; the entire diff is mechanical refactor + test pinning.
 
 ---
 

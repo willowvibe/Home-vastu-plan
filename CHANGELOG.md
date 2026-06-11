@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-> No unreleased changes yet. The 0.1.0 alpha captures everything: the original 2026-06-07 alpha plus the P0 sweep (PR #28), P1 quick-wins (PR #39), P1 batch #2 (PR #43), and P2 hygiene batch (PR #44). See the [0.1.0 entry](#010---2026-06-11--first-alpha-with-follow-up-fixes) below for the per-batch detail.
+> The 2026-06-11 P2 refactor batch ships 5 P2 items in branch `fix/p2-refactor-batch` (commits `c40e621`..`f45745b`, awaiting PR). All refactors; no user-facing behaviour change. Test count grew from 55 to 97 (+42). Per-item detail below.
 
 ## [0.1.0] - 2026-06-11 — First alpha (with follow-up fixes)
 
@@ -123,6 +123,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Q-15**: Dropped unused dependencies `motion`, `autoprefixer`, and `@sentry/tracing` (12 packages removed from `node_modules`).
 - **Q-20**: `engines.node: ">=20.0.0"` + `.nvmrc` (20).
 - **Q-25**: `gemini.ts` now prefers `import.meta.env.VITE_GEMINI_API_KEY`; `vite-env.d.ts` declares the type.
+
+### Fixed — 2026-06-11 (P2 refactor batch, on `fix/p2-refactor-batch`, awaiting PR)
+
+- **S-3**: `useFloorPlan` no longer exposes `setPlan` on its public return. Internal `setPlan` retained for the 4 history-aware callers (`undo` / `redo` / `resetPlan` / `commitHistory`). `useFloorPlan.test.ts` (4 tests) pins the public-API shape so a future re-exposure fails CI.
+- **S-8**: New `src/constants/geometry.ts` centralizes the TOLERANCE_FT, INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN, SNAP_GRID_FT / SUB_FT, MIN/MAX_ROOM_SIZE_FT, PIXELS_PER_FOOT, and FT_PER_METER constants. Replaced 14 hard-coded values across 4 callers (`App.tsx`, `useCanvasDrag.ts`, `Room.tsx`, `lib/exports.ts`). `geometry.test.ts` (17 tests) is the regression catcher.
+- **S-12**: New `getErrorMessage(error: unknown)` helper in `src/utils.ts` (12 tests) replaces the unsafe `error.message` access. Switched 3 `catch (error: any)` sites in `App.tsx` and 2 `err.message` sites in `useCollaboration.ts`. Lint rule `@typescript-eslint/no-explicit-any` flipped `off` → `warn` (promotion to `error` is a follow-up once the 30+ pre-existing `any` uses are cleaned up).
+- **Q-9**: New `src/types/shared.ts` is the single source of truth for the `PlanUpdateEvent` type shared between client and the collaboration server. `data: any` → `data: unknown` on both sides. The server's `tsconfig.json` was widened to allow the cross-package import.
+- **Q-12**: `src/lib/exports.ts` split into 5 per-concern modules: `exportPng.ts`, `exportSvg.ts`, `exportJson.ts`, `shareLink.ts`, `printPlan.ts`. The original `exports.ts` is now a 22-line back-compat barrel. Plus a `compressPlan` / `decompressPlan` pure-function pair in `shareLink.ts` (9 round-trip tests).
 
 ### Changed
 
