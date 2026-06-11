@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Project, ProjectVersion, FloorPlan } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { Folder, Plus, Trash2, X, History, Save, GitCompare } from 'lucide-react';
+import { useToast } from './Toast';
 
 interface ProjectManagerProps {
   currentPlan: FloorPlan;
@@ -10,6 +11,7 @@ interface ProjectManagerProps {
 }
 
 export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectManagerProps) {
+  const { showToast } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [newProjectName, setNewProjectName] = useState('');
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -28,9 +30,25 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
     }
   }, []);
 
+  // Persist to localStorage. QuotaExceededError can fire when the projects
+  // list is large (50+ versions × 200 rooms each) — surface a toast instead
+  // of letting the throw bubble into React's render loop.
   const saveProjects = (newProjects: Project[]) => {
     setProjects(newProjects);
-    localStorage.setItem('vastu_projects', JSON.stringify(newProjects));
+    try {
+      localStorage.setItem('vastu_projects', JSON.stringify(newProjects));
+    } catch (e) {
+      const isQuota =
+        e instanceof DOMException &&
+        // Most browsers: QuotaExceededError. Older Safari: code 22.
+        (e.name === 'QuotaExceededError' || e.code === 22);
+      showToast(
+        isQuota
+          ? 'Browser storage is full — could not save the project. Try deleting old projects or versions.'
+          : 'Could not save the project to local storage.',
+        'error'
+      );
+    }
   };
 
   const handleCreateProject = () => {

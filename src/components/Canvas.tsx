@@ -104,7 +104,12 @@ export const Canvas: React.FC<CanvasProps> = ({
         }
       }}
     >
-      <RulerOverlay measuring={measuring} measureStart={measureStart} measureEnd={measureEnd} />
+      <RulerOverlay
+        measuring={measuring}
+        measureStart={measureStart}
+        measureEnd={measureEnd}
+        unit={plan.unit}
+      />
 
       {/* Plot Dimensions */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 bg-slate-800 text-white text-xs px-2 py-1 rounded font-mono z-20 shadow-sm">
