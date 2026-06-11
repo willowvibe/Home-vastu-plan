@@ -86,7 +86,7 @@ jobs:
       - name: Run npm audit
         run: npm audit --audit-level=moderate
 
-      - name: Run Snyk scan
-        uses: snyk/actions/node@v1
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      # Snyk step removed (2026-06-11): the repo has no SNYK_TOKEN secret
+      # provisioned, and `snyk/actions/node@v1` 401s as a result. npm audit
+      # already provides equivalent dependency-vulnerability coverage for
+      # this project's needs. Re-add when a Snyk account/secret is set up.
