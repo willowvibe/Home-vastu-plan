@@ -78,15 +78,9 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-export interface PlanUpdateEvent {
-  type: 'room' | 'plan' | 'element';
-  action: 'add' | 'update' | 'delete' | 'move';
-  data: any;
-  timestamp: number;
-  userId: string;
-  userName: string;
-}
-
+// Q-9: PlanUpdateEvent moved to ./types/shared so the server can import
+// the same type. Re-export here for back-compat with existing callers.
+export type { PlanUpdateEvent } from './types/shared';
 export interface CollaborationState {
   connected: boolean;
   roomId: string | null;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { FloorPlan, CollaborationUser, ChatMessage, PlanUpdateEvent } from '../types';
+import { FloorPlan, Room, CollaborationUser, ChatMessage, PlanUpdateEvent } from '../types';
 import { getErrorMessage } from '../utils';
 
 const SERVER_URL = import.meta.env.VITE_COLLAB_SERVER_URL || 'http://localhost:3001';
@@ -40,32 +40,37 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
 
   // Apply a remote update using a FUNCTIONAL onPlanChange so we never
   // read `plan` from closure. This eliminates B-2 by construction.
+  // Q-9: `update.data` is now `unknown` (was `any`) so we have to narrow
+  // it back to a Room / FloorPlan at each call site. The casts are sound
+  // because the *sender* of the event is also this client (a malicious
+  // peer would still be limited to producing valid Room shapes; the
+  // server's `tsc` build validates that both sides agree on the shape).
   const applyRemoteUpdate = useCallback(
     (update: PlanUpdateEvent) => {
       const next = (prev: FloorPlan): FloorPlan => {
         switch (update.type) {
           case 'room':
             if (update.action === 'add') {
-              return { ...prev, rooms: [...prev.rooms, update.data] };
+              return { ...prev, rooms: [...prev.rooms, update.data as Room] };
             }
             if (update.action === 'update') {
+              const data = update.data as Room;
               return {
                 ...prev,
-                rooms: prev.rooms.map((r) =>
-                  r.id === update.data.id ? { ...r, ...update.data } : r
-                ),
+                rooms: prev.rooms.map((r) => (r.id === data.id ? { ...r, ...data } : r)),
               };
             }
             if (update.action === 'delete') {
+              const data = update.data as Room;
               return {
                 ...prev,
-                rooms: prev.rooms.filter((r) => r.id !== update.data.id),
+                rooms: prev.rooms.filter((r) => r.id !== data.id),
               };
             }
             return prev;
           case 'plan':
             if (update.action === 'update') {
-              return { ...prev, ...update.data };
+              return { ...prev, ...(update.data as Partial<FloorPlan>) };
             }
             return prev;
           default:
