@@ -8,8 +8,13 @@ const CACHE_NAME: string =
   typeof __VASTUPLAN_CACHE_NAME__ !== 'undefined' ? __VASTUPLAN_CACHE_NAME__ : 'vastuplan-dev';
 const ASSETS_TO_CACHE = ['/', '/index.html', '/favicon.svg', '/manifest.json'];
 
+// Q-7: cast `self` to ServiceWorkerGlobalScope so the addEventListener
+// overloads below pick up ExtendableEvent / FetchEvent instead of plain
+// Event. The DOM lib types `self` as Window & typeof globalThis.
+const sw = self as unknown as ServiceWorkerGlobalScope;
+
 // Install event - cache static assets
-self.addEventListener('install', (event) => {
+sw.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -18,7 +23,7 @@ self.addEventListener('install', (event) => {
 });
 
 // Activate event - cleanup old caches
-self.addEventListener('activate', (event) => {
+sw.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -29,7 +34,7 @@ self.addEventListener('activate', (event) => {
 });
 
 // Fetch event - serve from cache, fallback to network
-self.addEventListener('fetch', (event) => {
+sw.addEventListener('fetch', (event) => {
   // For API requests, use network-first strategy
   if (
     event.request.url.includes('/api/') ||
@@ -76,26 +81,30 @@ self.addEventListener('fetch', (event) => {
 });
 
 // Push notification support (optional)
-self.addEventListener('push', (event) => {
-  const data = event.data?.json() || { title: 'VastuPlan', body: 'New update available' };
+sw.addEventListener('push', (event) => {
+  const dataPromise: Promise<{ title: string; body: string }> = event.data
+    ? event.data.json()
+    : Promise.resolve({ title: 'VastuPlan', body: 'New update available' });
   event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/icons/icon-192.png',
-      tag: 'vastuplan-update',
-    })
+    dataPromise.then((data) =>
+      sw.registration.showNotification(data.title, {
+        body: data.body,
+        icon: '/icons/icon-192.png',
+        tag: 'vastuplan-update',
+      })
+    )
   );
 });
 
 // Notification click handler
-self.addEventListener('notificationclick', (event) => {
+sw.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeHidden: true }).then((clients) => {
+    sw.clients.matchAll({ type: 'window', includeHidden: true }).then((clients) => {
       if (clients.length > 0) {
         return clients[0].focus();
       }
-      return self.clients.openWindow('/');
+      return sw.clients.openWindow('/');
     })
   );
 });

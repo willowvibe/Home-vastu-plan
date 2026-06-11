@@ -10,11 +10,10 @@ export default tseslint.config(
       'dist',
       'node_modules',
       'server',
+      'coverage',
       'vite.config.ts',
       'playwright.config.ts',
       'vitest.config.ts',
-      'src/test',
-      'src/services/sw.ts',
     ],
   },
   {
