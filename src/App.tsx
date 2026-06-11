@@ -60,6 +60,7 @@ import {
   COMMON_ELEMENTS,
   ROOM_CATEGORIES,
 } from './constants/floorPlanConstants';
+import { INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from './constants/geometry';
 
 export default function App() {
   const { plan, updatePlan, commitHistory, undo, redo, resetPlan, historyIndex, historyLength } =
@@ -206,7 +207,7 @@ export default function App() {
       w: defaultW,
       h: defaultH,
       floor: currentFloor,
-      wallThickness: 9, // Default 9 inches
+      wallThickness: DEFAULT_WALL_THICKNESS_IN, // Default 9 inches
     };
     updatePlan((prev) => ({ ...prev, rooms: [...prev.rooms, newRoom] }));
     commitHistory();
@@ -237,7 +238,8 @@ export default function App() {
             updates.h !== undefined ||
             updates.wallThickness !== undefined
           ) {
-            const wallFt = (updatedRoom.wallThickness || 9) / 12;
+            const wallFt =
+              (updatedRoom.wallThickness || DEFAULT_WALL_THICKNESS_IN) / INCHES_PER_FOOT;
             const innerW = updatedRoom.w - 2 * wallFt;
             const innerH = updatedRoom.h - 2 * wallFt;
 
@@ -550,7 +552,7 @@ export default function App() {
       ...prev,
       rooms: prev.rooms.map((r) => {
         if (r.id === roomId) {
-          const wallFt = (r.wallThickness || 9) / 12;
+          const wallFt = (r.wallThickness || DEFAULT_WALL_THICKNESS_IN) / INCHES_PER_FOOT;
           const innerW = r.w - 2 * wallFt;
           const innerH = r.h - 2 * wallFt;
           const centerX = Math.max(0, (innerW - w) / 2);
@@ -1410,7 +1412,7 @@ export default function App() {
                             Wall Thickness
                           </label>
                           <select
-                            value={room.wallThickness || 9}
+                            value={room.wallThickness || DEFAULT_WALL_THICKNESS_IN}
                             onChange={(e) => {
                               updateRoom(room.id, {
                                 wallThickness: Number(e.target.value),

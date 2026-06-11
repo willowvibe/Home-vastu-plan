@@ -1,6 +1,7 @@
 import { toPng } from 'html-to-image';
 import LZString from 'lz-string';
 import { FloorPlan } from '../types';
+import { INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from '../constants/geometry';
 
 export async function exportToPNG(canvasElement: HTMLElement, filename: string): Promise<void> {
   const dataUrl = await toPng(canvasElement, {
@@ -68,7 +69,7 @@ export function exportToSVG(plan: FloorPlan, currentFloor: number, showVastuGrid
     .filter((r) => r.floor === currentFloor)
     .map(
       (r) => `
-    <rect x="${r.x * scale}" y="${r.y * scale}" width="${r.w * scale}" height="${r.h * scale}" fill="#f0fdf4" stroke="#65a30d" stroke-width="${((r.wallThickness || 9) / 12) * scale}" rx="2"/>
+    <rect x="${r.x * scale}" y="${r.y * scale}" width="${r.w * scale}" height="${r.h * scale}" fill="#f0fdf4" stroke="#65a30d" stroke-width="${((r.wallThickness || DEFAULT_WALL_THICKNESS_IN) / INCHES_PER_FOOT) * scale}" rx="2"/>
     <text x="${(r.x + r.w / 2) * scale}" y="${(r.y + r.h / 2) * scale}" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="12" fill="#1f2937">${r.type}</text>
   `
     )
