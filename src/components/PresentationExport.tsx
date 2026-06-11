@@ -5,6 +5,7 @@ import { toPng } from 'html-to-image';
 import { FileText, X, Upload, Loader2, Download } from 'lucide-react';
 import { addBreadcrumb } from '../services/sentry';
 import { useToast } from './Toast';
+import { fitInside } from '../lib/pdfFit';
 
 interface PresentationExportProps {
   canvasRef: React.RefObject<HTMLDivElement>;
@@ -109,10 +110,11 @@ export function PresentationExport({
       pdf.text(`Floor: ${currentFloor === 0 ? 'Ground' : `Floor ${currentFloor}`}`, 7.6, 7.3);
 
       // Add the Floor Plan Image
-      // We need to scale it to fit the remaining area (approx 7x7 inches)
+      // Scale it to fit the available 7 in × 7.7 in drawing area while
+      // preserving aspect ratio. B-9: previously only width was clamped,
+      // so tall plot images overflowed the page.
       const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = 7;
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const { w: pdfWidth, h: pdfHeight } = fitInside(imgProps.width, imgProps.height, 7, 7.7);
 
       // Center the image in the left area
       const xOffset = 0.4 + (7 - pdfWidth) / 2;
