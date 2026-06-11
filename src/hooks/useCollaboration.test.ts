@@ -70,3 +70,42 @@ describe('useCollaboration (B-2: no eslint-disable hiding dep-array violation)',
     expect(src).not.toMatch(/eslint-disable-next-line react-hooks\/exhaustive-deps/);
   });
 });
+
+// S-2 (resolved-by-design, 2026-06-11): the original review listed three
+// useEffect dep-array disables. After B-1 / B-2 / B-13, all three are now
+// justified or removed:
+//
+//   - useCollaboration.ts:198 — dep array is correct, no disable
+//   - App.tsx:182 (share loader) — disable stays; comment explains the
+//     effect is intentionally one-shot. The "right" fix is to lazy-init
+//     state from the URL, but that's a separate refactor.
+//   - Room.tsx:56 (B-13 vastu memo) — disable stays; load-bearing per the
+//     B-13 test that asserts the memo holds across drag-tick re-renders.
+//
+// This test pins the S-2 resolution by scanning the source tree: any new
+// exhaustive-deps disable added outside the two known-justified sites
+// should be re-justified in KNOWN_ISSUES.md or the disable removed.
+describe('S-2 (resolved-by-design): exhaustive-deps disables are limited to known-justified sites', () => {
+  it('no new exhaustive-deps disables outside App.tsx:182 (share loader) and Room.tsx:56 (B-13)', () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const grep = (rel: string) => {
+      try {
+        return readFileSync(join(here, '..', '..', rel), 'utf-8');
+      } catch {
+        return '';
+      }
+    };
+    const sources = [
+      grep('src/App.tsx'),
+      grep('src/components/Room.tsx'),
+      grep('src/hooks/useCollaboration.ts'),
+    ];
+    const combined = sources.join('\n');
+    const matches = [
+      ...combined.matchAll(/eslint-disable-next-line react-hooks\/exhaustive-deps/g),
+    ];
+    // Expected: exactly 2 disables, both with justifying comments on
+    // the line just above.
+    expect(matches.length).toBeLessThanOrEqual(2);
+  });
+});

@@ -12,6 +12,40 @@ interface UseCanvasDragOptions {
   appMode: AppMode;
 }
 
+// S-9: when a room shares a wall with a neighbor, the wall thickness on
+// the shared side is halved (the wall is "absorbed" by the room-to-room
+// interface, not double-drawn). TOLERANCE matches the overlap math in
+// Room.tsx:isShared so the two stay in sync.
+const TOLERANCE = 0.1;
+
+function isSideShared(room: Room, other: Room, side: 'top' | 'right' | 'bottom' | 'left'): boolean {
+  const overlapsX = room.x < other.x + other.w - TOLERANCE && room.x + room.w > other.x + TOLERANCE;
+  const overlapsY = room.y < other.y + other.h - TOLERANCE && room.y + room.h > other.y + TOLERANCE;
+  if (side === 'top') return Math.abs(room.y - (other.y + other.h)) < TOLERANCE && overlapsX;
+  if (side === 'bottom') return Math.abs(room.y + room.h - other.y) < TOLERANCE && overlapsX;
+  if (side === 'left') return Math.abs(room.x - (other.x + other.w)) < TOLERANCE && overlapsY;
+  return Math.abs(room.x + room.w - other.x) < TOLERANCE && overlapsY;
+}
+
+// S-9: per-side effective wall thickness. Shared sides get wallFt/2 so
+// the inner area of the room matches what's actually visible on the
+// canvas (and matches the math in Room.tsx:isShared). Exported for
+// unit testing.
+export function getEffectiveWalls(
+  room: Room,
+  otherRooms: Room[]
+): { top: number; right: number; bottom: number; left: number } {
+  const wallFt = (room.wallThickness || 9) / 12;
+  const shared = (side: 'top' | 'right' | 'bottom' | 'left') =>
+    otherRooms.some((other) => other.id !== room.id && isSideShared(room, other, side));
+  return {
+    top: shared('top') ? wallFt / 2 : wallFt,
+    right: shared('right') ? wallFt / 2 : wallFt,
+    bottom: shared('bottom') ? wallFt / 2 : wallFt,
+    left: shared('left') ? wallFt / 2 : wallFt,
+  };
+}
+
 export function useCanvasDrag({
   plan,
   currentFloor,
@@ -104,10 +138,15 @@ export function useCanvasDrag({
 
       if (!canvasRef.current) return;
       const rect = canvasRef.current.getBoundingClientRect();
-      const wallFt = (room.wallThickness || 9) / 12;
+      // S-9: use planRef (not the closure-bound `plan`) so the
+      // shared-wall lookup always sees the latest same-floor rooms.
+      const otherFloorRooms = planRef.current.rooms.filter(
+        (r) => r.id !== room.id && r.floor === currentFloor
+      );
+      const walls = getEffectiveWalls(room, otherFloorRooms);
 
-      const elementAbsX = rect.left + (room.x + wallFt + element.x) * pixelsPerFoot;
-      const elementAbsY = rect.top + (room.y + wallFt + element.y) * pixelsPerFoot;
+      const elementAbsX = rect.left + (room.x + walls.left + element.x) * pixelsPerFoot;
+      const elementAbsY = rect.top + (room.y + walls.top + element.y) * pixelsPerFoot;
 
       setElementDragOffset({
         x: e.clientX - elementAbsX,
@@ -273,20 +312,29 @@ export function useCanvasDrag({
         const elementAbsX = mouseX - currentState.elementDragOffset.x;
         const elementAbsY = mouseY - currentState.elementDragOffset.y;
 
-        const wallFt = (room.wallThickness || 9) / 12;
+        // S-9: account for shared walls. The dragged room's wall
+        // thickness on a shared side is half the full wallFt, and the
+        // inner area matches what's visible on the canvas (Room.tsx
+        // applies the same isShared check when rendering).
+        const otherFloorRooms = currentPlan.rooms.filter(
+          (r) => r.id !== room.id && r.floor === currentFloor
+        );
+        const walls = getEffectiveWalls(room, otherFloorRooms);
 
-        let newRelX = elementAbsX / pixelsPerFoot - room.x - wallFt;
-        let newRelY = elementAbsY / pixelsPerFoot - room.y - wallFt;
+        let newRelX = elementAbsX / pixelsPerFoot - room.x - walls.left;
+        let newRelY = elementAbsY / pixelsPerFoot - room.y - walls.top;
 
         newRelX = Math.round(newRelX * 2) / 2;
         newRelY = Math.round(newRelY * 2) / 2;
 
-        const innerW = room.w - 2 * wallFt;
-        const innerH = room.h - 2 * wallFt;
+        const innerW = room.w - walls.left - walls.right;
+        const innerH = room.h - walls.top - walls.bottom;
 
         const isOpening = element.type === 'Door' || element.type === 'Window';
-        const allowanceX = isOpening ? wallFt : 0;
-        const allowanceY = isOpening ? wallFt : 0;
+        // Allowance is the smaller of the two sides (shared side may be
+        // half-thickness) so openings can sit at the room's outer edge.
+        const allowanceX = isOpening ? Math.min(walls.left, walls.right) : 0;
+        const allowanceY = isOpening ? Math.min(walls.top, walls.bottom) : 0;
 
         let minX = -allowanceX;
         let minY = -allowanceY;

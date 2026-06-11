@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import {
   X,
   MousePointer,
@@ -58,6 +58,70 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
   const [step, setStep] = useState(0);
   const current = STEPS[step];
   const Icon = current.icon;
+  const titleId = useId();
+
+  // S-17: a11y plumbing for the modal.
+  //   - role="dialog" + aria-modal="true" so AT users land in a dialog
+  //     context, not the page background.
+  //   - aria-labelledby points at the step title (h2).
+  //   - On mount, focus the first focusable element so keyboard users
+  //     can Tab through the controls. On unmount, restore focus to
+  //     whatever was focused before (the "Open onboarding" button).
+  //   - Esc closes the modal.
+  //   - Focus trap: Tab/Shift+Tab at the boundary wraps inside.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+
+    // Focus the first focusable element inside the dialog (or the
+    // dialog itself as a fallback) on the next tick, after layout.
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const firstFocusable = dialog.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    (firstFocusable ?? dialog).focus();
+
+    return () => {
+      // Restore focus on close. Guard against the element having
+      // been removed from the DOM in the meantime.
+      const prev = previouslyFocusedRef.current;
+      if (prev && document.body.contains(prev)) {
+        prev.focus();
+      }
+    };
+  }, []);
+
+  // S-17: Esc to close + focus trap. Bound at the dialog level so it
+  // doesn't fire when the user is, say, typing in a future text input.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      onClose();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const focusables = Array.from(
+      dialog.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((el) => !el.hasAttribute('disabled'));
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    if (e.shiftKey && active === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
 
   const handleNext = () => {
     if (step < STEPS.length - 1) {
@@ -73,7 +137,17 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        // tabIndex makes the dialog itself focusable as a fallback when
+        // the focusable query returns nothing.
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden outline-none"
+      >
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-slate-400">
@@ -83,6 +157,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
           <button
             onClick={handleSkip}
             className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            aria-label="Skip onboarding"
           >
             <X className="w-4 h-4" />
           </button>
@@ -92,7 +167,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
           <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-5">
             <Icon className="w-8 h-8 text-indigo-600" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">{current.title}</h2>
+          <h2 id={titleId} className="text-xl font-bold text-slate-900 mb-2">
+            {current.title}
+          </h2>
           <p className="text-sm text-slate-500 leading-relaxed">{current.description}</p>
         </div>
 
@@ -102,6 +179,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
               <button
                 key={i}
                 onClick={() => setStep(i)}
+                aria-label={`Go to step ${i + 1}`}
+                aria-current={i === step ? 'step' : undefined}
                 className={`w-2 h-2 rounded-full transition-colors ${
                   i === step ? 'bg-indigo-600' : 'bg-slate-200 hover:bg-slate-300'
                 }`}

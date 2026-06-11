@@ -1,6 +1,5 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import * as Sentry from '@sentry/react';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './components/Toast';
@@ -24,14 +23,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// S-21: previously this wrapped <App> in both <Sentry.ErrorBoundary>
+// AND the custom <ErrorBoundary> below. The custom one already calls
+// captureError() inside componentDidCatch (see ErrorBoundary.tsx), so
+// the Sentry wrapper was double-reporting. Drop the Sentry wrapper —
+// the custom one is the single source of truth for the fallback UI
+// and the Sentry report.
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Sentry.ErrorBoundary>
-      <ErrorBoundary>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </ErrorBoundary>
-    </Sentry.ErrorBoundary>
+    <ErrorBoundary>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </ErrorBoundary>
   </StrictMode>
 );

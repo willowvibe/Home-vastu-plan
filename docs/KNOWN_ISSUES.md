@@ -42,16 +42,9 @@ _All P0 items from the 2026-06-07 sweep are resolved. The next P0 will be filed 
 
 ## 🟠 P1 — Fix this sprint (robustness)
 
-| ID   | Title                                                                            | File(s)                                                                                           | Effort |
-| ---- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------ |
-| B-8  | Shift+click advertised but does nothing (no marquee select)                      | `src/components/Canvas.tsx:87-103`, `Header.tsx:94`                                               | 2 h    |
-| B-9  | PDF export doesn't aspect-fit tall plots — image overflows page                  | `src/components/PresentationExport.tsx:88-96` 🟡 In progress (fix/b-9-pdf-aspect-fit, 2026-06-11) | 1 h    |
-| B-13 | `Room` `vastu` useMemo depends on whole `plan` → re-runs on every drag tick      | `src/components/Room.tsx:47` 🟡 In progress (fix/b-13-room-vastu-memo, 2026-06-11)                | 1 h    |
-| S-2  | Three `useEffect` dep arrays ignored (collaboration, App share loader)           | `src/hooks/useCollaboration.ts:194`, `App.tsx:178`                                                | 1 h    |
-| S-9  | `useCanvasDrag` element placement uses full wall thickness for shared-wall rooms | `src/hooks/useCanvasDrag.ts:91-105`                                                               | 1 h    |
-| S-17 | `Onboarding` modal lacks `aria-modal` and focus trap                             | `src/components/Onboarding.tsx:75`                                                                | 1 h    |
-
-**Subtotal:** ~7 h
+| ID  | Title                                                       | File(s)                                             | Effort |
+| --- | ----------------------------------------------------------- | --------------------------------------------------- | ------ |
+| B-8 | Shift+click advertised but does nothing (no marquee select) | `src/components/Canvas.tsx:87-103`, `Header.tsx:94` | 2 h    |
 
 ---
 
@@ -71,7 +64,6 @@ _All P0 items from the 2026-06-07 sweep are resolved. The next P0 will be filed 
 | Q-3  | Add Vitest tests for `useCollaboration` socket lifecycle                            | `src/hooks/useCollaboration.ts`       | 4 h    |
 | Q-5  | Add coverage thresholds to `vitest.config.ts` (70% lines)                           | `vitest.config.ts`                    | 0.5 h  |
 | Q-9  | Share `PlanUpdateEvent` type between client and server                              | `src/types.ts`, `server/src/index.ts` | 2 h    |
-| Q-10 | Extract `AppMode` type to a single source of truth                                  | `src/types.ts`                        | 0.5 h  |
 | Q-12 | Split `src/lib/exports.ts` (158 lines, 5 concerns) into 5 files                     | `src/lib/exports.ts`                  | 3 h    |
 
 **Subtotal:** ~37 h
@@ -105,16 +97,32 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ---
 
+## ✅ Recently Resolved (P1 batch #2)
+
+> The second P1 batch shipped on branch `fix/p1-batch-2`. 5 of the remaining 6 P1 items and 1 P2 item are fixed. Per-bug commit refs:
+
+| ID   | Title                                                                            | Fix commit | Notes                                                                                                                              |
+| ---- | -------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| S-2  | Three `useEffect` dep arrays ignored (collaboration, App share loader)           | `eb58370`  | Resolved-by-design. The two remaining disables (App.tsx:182, Room.tsx:56) are load-bearing; structural test pins the count.        |
+| S-9  | `useCanvasDrag` element placement uses full wall thickness for shared-wall rooms | `09ac625`  | New `getEffectiveWalls(room, otherRooms)` helper; element-drag uses per-side effective walls (shared = `wallFt/2`).                |
+| S-17 | `Onboarding` modal lacks `aria-modal` and focus trap                             | `32497a0`  | Full WAI-ARIA dialog: `role`/`aria-modal`/`aria-labelledby`, Esc-to-close, Tab/Shift+Tab focus trap, focus restore on close.       |
+| S-21 | Pick one of Sentry.ErrorBoundary vs custom ErrorBoundary (nested)                | `a8ab03f`  | Dropped `Sentry.ErrorBoundary`; the custom one already calls `captureError` in `componentDidCatch`, so was double-reporting.       |
+| Q-10 | Extract `AppMode` type to a single source of truth                               | `84cbaf8`  | `Header.tsx` now imports `AppMode` from `../../types` (was the last offender; `src/types.ts:146` was already the source of truth). |
+
+**No regressions** in `npm run lint`, `npm test`, or `npm run build`. New tests: `useCanvasDrag.test.ts` (+4), `useCollaboration.test.ts` (S-2 structural), `Onboarding.test.tsx` (extended to 4 cases).
+
+---
+
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-| Bucket | Items | Effort  | Status                               |
-| ------ | ----- | ------- | ------------------------------------ |
-| P0     | 0     | —       | ✅ All resolved (PR #28)             |
-| P1     | 6     | ~7 h    | 🟡 4 resolved (this PR), 6 remaining |
-| P2     | 13    | ~37 h   | 🔲 Not started                       |
-| P3     | many  | ongoing | 🔲 Not started                       |
+| Bucket | Items | Effort  | Status                                |
+| ------ | ----- | ------- | ------------------------------------- |
+| P0     | 0     | —       | ✅ All resolved (PR #28)              |
+| P1     | 1     | ~2 h    | 🟡 5 resolved (this PR), 1 remaining  |
+| P2     | 12    | ~36 h   | 🟡 1 resolved (this PR), 12 remaining |
+| P3     | many  | ongoing | 🔲 Not started                        |
 
-See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, and [✅ Recently Resolved (P1 batch)](#-recently-resolved-p1-batch) above for this PR's P1 fixes.
+See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, and [✅ Recently Resolved (P1 batch #2)](#-recently-resolved-p1-batch-2) above for this PR's fixes.
 
 ---
 

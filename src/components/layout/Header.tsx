@@ -1,11 +1,11 @@
 import React from 'react';
 import { Layers, FolderOpen, Sun, Moon, HelpCircle } from 'lucide-react';
-import { FloorPlan } from '../../types';
+import { FloorPlan, AppMode } from '../../types';
 
 interface HeaderProps {
   plan: FloorPlan;
-  appMode: 'edit' | 'view' | 'comment';
-  setAppMode: (mode: 'edit' | 'view' | 'comment') => void;
+  appMode: AppMode;
+  setAppMode: (mode: AppMode) => void;
   activeTab: 'design' | 'image';
   setActiveTab: (tab: 'design' | 'image') => void;
   setShowProjectManager: (show: boolean) => void;
