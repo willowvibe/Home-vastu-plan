@@ -44,6 +44,7 @@ import { Onboarding } from './components/Onboarding';
 import { LayerManager } from './components/LayerManager';
 import { useFloorPlan } from './hooks/useFloorPlan';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { getErrorMessage } from './utils';
 import {
   exportToPNG,
   exportToJSON,
@@ -463,18 +464,18 @@ export default function App() {
         props: { floor: currentFloor, mode },
       });
       alert(`Share link (${mode} mode) copied to clipboard!`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to generate share link', error);
-      alert(error.message || 'Failed to generate share link. Plan might be too large.');
+      alert(getErrorMessage(error) || 'Failed to generate share link. Plan might be too large.');
     }
   };
 
   const handleExportJSON = () => {
     try {
       exportToJSON(plan, `VastuPlan_Floor_${currentFloor}.json`, analysis);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to export JSON', error);
-      alert(error.message || 'Failed to export floor plan as JSON.');
+      alert(getErrorMessage(error) || 'Failed to export floor plan as JSON.');
     }
   };
 
@@ -497,9 +498,9 @@ export default function App() {
         } else {
           alert('Invalid floor plan format.');
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('Failed to import JSON', error);
-        alert(error.message || 'Failed to import floor plan. Invalid JSON format.');
+        alert(getErrorMessage(error) || 'Failed to import floor plan. Invalid JSON format.');
       }
     };
     input.click();

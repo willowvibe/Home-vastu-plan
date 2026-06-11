@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { FloorPlan, CollaborationUser, ChatMessage, PlanUpdateEvent } from '../types';
+import { getErrorMessage } from '../utils';
 
 const SERVER_URL = import.meta.env.VITE_COLLAB_SERVER_URL || 'http://localhost:3001';
 
@@ -102,8 +103,11 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
     });
 
     socket.on('connect_error', (err) => {
-      console.error('Connection error:', err.message);
-      setError(`Connection failed: ${err.message}`);
+      // S-12: socket.io's `err` is typed as `unknown`-ish; use the shared
+      // helper so a string throw or null doesn't render `undefined`.
+      const message = getErrorMessage(err) || 'Unknown error';
+      console.error('Connection error:', message);
+      setError(`Connection failed: ${message}`);
       setIsConnected(false);
     });
 
