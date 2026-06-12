@@ -44,6 +44,7 @@ import { Onboarding } from './components/Onboarding';
 import { LayerManager } from './components/LayerManager';
 import { useFloorPlan } from './hooks/useFloorPlan';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useTheme } from './contexts/ThemeContext';
 import { getErrorMessage } from './utils';
 import {
   exportToPNG,
@@ -60,6 +61,7 @@ import {
   ROOM_ELEMENTS,
   COMMON_ELEMENTS,
   ROOM_CATEGORIES,
+  formatFloor,
 } from './constants/floorPlanConstants';
 import { INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from './constants/geometry';
 
@@ -82,22 +84,8 @@ export default function App() {
   const [linkSetbacks, setLinkSetbacks] = useState(true);
   const [showVastuGrid, setShowVastuGrid] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
-  const [darkMode, setDarkMode] = useState(() => {
-    try {
-      return localStorage.getItem('vastuplan-darkmode') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const { darkMode, toggle: toggleDarkMode } = useTheme();
   const [measuring, setMeasuring] = useState(false);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('vastuplan-darkmode', String(darkMode));
-    } catch {
-      // ignore
-    }
-  }, [darkMode]);
 
   useEffect(() => {
     // Track dark mode toggle when value changes
@@ -624,7 +612,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans ${darkMode ? 'bg-slate-900 text-slate-100' : 'bg-slate-50 text-slate-900'}`}
+      className={`min-h-screen flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100`}
     >
       {/* Header */}
       <Header
@@ -635,8 +623,6 @@ export default function App() {
         setActiveTab={setActiveTab}
         setShowProjectManager={setShowProjectManager}
         vastuScore={vastuScore}
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
         setShowShortcutHelp={() => setShowShortcutHelp(true)}
       />
 
@@ -645,19 +631,19 @@ export default function App() {
         <div className="md:hidden flex border-b border-slate-200 bg-white shrink-0">
           <button
             onClick={() => setMobileTab('settings')}
-            className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'settings' ? 'text-indigo-600 border-b-2 border-indigo-600' : darkMode ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'settings' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
           >
             Settings
           </button>
           <button
             onClick={() => setMobileTab('canvas')}
-            className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'canvas' ? 'text-indigo-600 border-b-2 border-indigo-600' : darkMode ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'canvas' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
           >
             Canvas
           </button>
           <button
             onClick={() => setMobileTab('properties')}
-            className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'properties' ? 'text-indigo-600 border-b-2 border-indigo-600' : darkMode ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'properties' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
           >
             Properties
           </button>
@@ -667,14 +653,13 @@ export default function App() {
           <>
             {/* Left Sidebar */}
             <div
-              className={`w-full md:w-72 flex-col overflow-y-auto shrink-0 custom-scrollbar ${mobileTab === 'settings' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}
+              className={`w-full md:w-72 flex-col overflow-y-auto shrink-0 custom-scrollbar ${mobileTab === 'settings' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
             >
-              <div className={`p-5 border-b ${darkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+              <div className={`p-5 border-b border-slate-100 dark:border-slate-800`}>
                 <h3
-                  className={`text-sm font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}
+                  className={`text-sm font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-100`}
                 >
-                  <Map className={`w-4 h-4 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`} />{' '}
-                  Plot Settings
+                  <Map className={`w-4 h-4 text-slate-400 dark:text-slate-500`} /> Plot Settings
                 </h3>
 
                 <div className="mb-4">
@@ -697,9 +682,7 @@ export default function App() {
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label
-                      className={`text-xs mb-1 block ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
-                    >
+                    <label className={`text-xs mb-1 block text-slate-500 dark:text-slate-400`}>
                       Width (ft)
                     </label>
                     <input
@@ -715,13 +698,11 @@ export default function App() {
                         }));
                         commitHistory();
                       }}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'}`}
+                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
                     />
                   </div>
                   <div>
-                    <label
-                      className={`text-xs mb-1 block ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
-                    >
+                    <label className={`text-xs mb-1 block text-slate-500 dark:text-slate-400`}>
                       Length (ft)
                     </label>
                     <input
@@ -737,7 +718,7 @@ export default function App() {
                         }));
                         commitHistory();
                       }}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'}`}
+                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
                     />
                   </div>
                 </div>
@@ -917,27 +898,23 @@ export default function App() {
                 </div>
 
                 <div
-                  className={`mt-4 p-3 rounded-lg border flex flex-col gap-2 text-xs ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-100'}`}
+                  className={`mt-4 p-3 rounded-lg border flex flex-col gap-2 text-xs bg-slate-50 border-slate-100 dark:bg-slate-800 dark:border-slate-700`}
                 >
                   <div className="flex justify-between items-center">
-                    <span className={`${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                      Plot Area:
-                    </span>
-                    <strong className={`${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>
+                    <span className={`text-slate-500 dark:text-slate-400`}>Plot Area:</span>
+                    <strong className={`text-slate-800 dark:text-slate-200`}>
                       {totalArea} sq ft
                     </strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className={`${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                      Buildable Area:
-                    </span>
+                    <span className={`text-slate-500 dark:text-slate-400`}>Buildable Area:</span>
                     <strong className="text-emerald-700">{buildableArea} sq ft</strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className={`${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    <span className={`text-slate-500 dark:text-slate-400`}>
                       Built-up (Floor {currentFloor}):
                     </span>
-                    <strong className={`${darkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>
+                    <strong className={`text-indigo-700 dark:text-indigo-400`}>
                       {builtUpArea} sq ft
                     </strong>
                   </div>
@@ -999,7 +976,7 @@ export default function App() {
                       onClick={() => setCurrentFloor(floor)}
                       className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-colors ${currentFloor === floor ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                     >
-                      {floor === 0 ? 'Ground' : floor === 1 ? 'First' : 'Second'}
+                      {formatFloor(floor)}
                     </button>
                   ))}
                 </div>
@@ -1007,7 +984,7 @@ export default function App() {
                   onClick={() => {
                     if (
                       confirm(
-                        `Are you sure you want to clear all rooms on ${currentFloor === 0 ? 'Ground' : currentFloor === 1 ? 'First' : 'Second'} floor?`
+                        `Are you sure you want to clear all rooms on ${formatFloor(currentFloor)} floor?`
                       )
                     ) {
                       // Functional update — avoids a stale-closure read of
@@ -1031,7 +1008,6 @@ export default function App() {
               <LayerManager
                 layers={plan.layers || []}
                 onUpdateLayers={updateLayers}
-                darkMode={darkMode}
                 rooms={plan.rooms}
                 currentFloor={currentFloor}
               />
@@ -1085,7 +1061,7 @@ export default function App() {
                     placeholder="Search room types..."
                     value={roomSearch}
                     onChange={(e) => setRoomSearch(e.target.value)}
-                    className={`w-full border rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-500' : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'}`}
+                    className={`w-full border rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-600 dark:text-white dark:placeholder-slate-500`}
                   />
                 </div>
 
@@ -1140,13 +1116,13 @@ export default function App() {
 
             {/* Center Canvas */}
             <div
-              className={`flex-1 overflow-auto p-4 md:p-8 flex-col items-center relative ${mobileTab === 'canvas' ? 'flex' : 'hidden md:flex'} ${darkMode ? 'bg-slate-900' : 'bg-slate-100'}`}
+              className={`flex-1 overflow-auto p-4 md:p-8 flex-col items-center relative ${mobileTab === 'canvas' ? 'flex' : 'hidden md:flex'} bg-slate-100 dark:bg-slate-900`}
             >
               <div className="w-full flex flex-wrap justify-between gap-2 mb-4 max-w-4xl">
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowVastuGrid(!showVastuGrid)}
-                    className={`flex items-center justify-center w-10 h-10 border rounded-lg shadow-sm transition-colors ${showVastuGrid ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : darkMode ? 'bg-slate-800 border-slate-600 hover:bg-slate-700 text-slate-300' : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'}`}
+                    className={`flex items-center justify-center w-10 h-10 border rounded-lg shadow-sm transition-colors ${showVastuGrid ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 dark:bg-slate-800 dark:border-slate-600 dark:hover:bg-slate-700 dark:text-slate-300'}`}
                     title="Toggle Vastu Grid"
                   >
                     <Grid className="w-4 h-4" />
@@ -1225,7 +1201,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={handleExportJSON}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors ${darkMode ? 'bg-slate-800 border border-slate-600 hover:bg-slate-700 text-slate-300' : 'bg-white border border-slate-200 hover:bg-slate-50 text-slate-700'}`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 dark:bg-slate-800 dark:border dark:border-slate-600 dark:hover:bg-slate-700 dark:text-slate-300`}
                   >
                     <FileText className="w-4 h-4" />
                     <span className="hidden sm:inline">JSON Export</span>
@@ -1250,7 +1226,7 @@ export default function App() {
               <div
                 ref={canvasContainerRef}
                 data-testid="canvas-container"
-                className={`p-4 rounded-xl shadow-sm border inline-block ${appMode === 'view' ? 'pointer-events-none' : ''} ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+                className={`p-4 rounded-xl shadow-sm border inline-block ${appMode === 'view' ? 'pointer-events-none' : ''} bg-white border-slate-200 dark:bg-slate-800 dark:border-slate-700`}
               >
                 <Canvas
                   plan={plan}
@@ -1274,8 +1250,7 @@ export default function App() {
               <div className="p-8 bg-white">
                 <h1 className="text-2xl font-bold mb-4">VastuPlan Floor Plan</h1>
                 <p className="text-sm text-slate-600 mb-4">
-                  Floor {currentFloor === 0 ? 'Ground' : `Floor ${currentFloor}`} -{' '}
-                  {new Date().toLocaleDateString()}
+                  Floor {formatFloor(currentFloor)} - {new Date().toLocaleDateString()}
                 </p>
                 <div className="print-only" ref={canvasContainerRef}>
                   <Canvas
@@ -1298,16 +1273,16 @@ export default function App() {
 
             {/* Right Sidebar - Analysis & Properties */}
             <div
-              className={`w-full md:w-80 flex-col overflow-hidden shrink-0 ${mobileTab === 'properties' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}
+              className={`w-full md:w-80 flex-col overflow-hidden shrink-0 ${mobileTab === 'properties' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
             >
               {selectedRoomIds.length > 0 ? (
                 <div
-                  className={`p-5 border-b ${darkMode ? 'border-slate-700 bg-blue-900/20' : 'border-slate-100 bg-blue-50/50'}`}
+                  className={`p-5 border-b border-slate-100 bg-blue-50/50 dark:border-slate-700 dark:bg-blue-900/20`}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3
-                        className={`text-sm font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}
+                        className={`text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100`}
                       >
                         {selectedRoomIds.length === 1
                           ? 'Room Properties'
@@ -1318,7 +1293,7 @@ export default function App() {
                       {selectedRoomIds.length > 1 && (
                         <button
                           onClick={() => setSelectedRoomIds([])}
-                          className={`p-1.5 rounded-md transition-colors border border-transparent ${darkMode ? 'text-slate-400 hover:bg-slate-800 hover:border-slate-600' : 'text-slate-500 hover:bg-slate-100 hover:border-slate-300'}`}
+                          className={`p-1.5 rounded-md transition-colors border border-transparent text-slate-500 hover:bg-slate-100 hover:border-slate-300 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:border-slate-600`}
                           title="Clear Selection"
                         >
                           <span className="text-[10px] font-medium">Clear</span>
@@ -1544,14 +1519,14 @@ export default function App() {
                         {/* Room Organization */}
                         <div className="pt-4 border-t border-slate-200">
                           <h4
-                            className={`text-xs font-bold uppercase tracking-wider mb-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}
+                            className={`text-xs font-bold uppercase tracking-wider mb-3 text-slate-700 dark:text-slate-300`}
                           >
                             Organization
                           </h4>
                           {(plan.layers || []).length > 0 && (
                             <div className="mb-3">
                               <label
-                                className={`text-xs mb-1 block ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
+                                className={`text-xs mb-1 block text-slate-500 dark:text-slate-400`}
                               >
                                 Layer
                               </label>
@@ -1563,7 +1538,7 @@ export default function App() {
                                   });
                                   commitHistory();
                                 }}
-                                className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'}`}
+                                className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
                               >
                                 <option value="">No Layer</option>
                                 {(plan.layers || []).map((layer) => (
@@ -1576,7 +1551,7 @@ export default function App() {
                           )}
                           <div className="mb-3">
                             <label
-                              className={`text-xs mb-1 block ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
+                              className={`text-xs mb-1 block text-slate-500 dark:text-slate-400`}
                             >
                               Category
                             </label>
@@ -1588,7 +1563,7 @@ export default function App() {
                                 });
                                 commitHistory();
                               }}
-                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'}`}
+                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
                             >
                               <option value="Living">Living</option>
                               <option value="Sleeping">Sleeping</option>
@@ -1626,18 +1601,16 @@ export default function App() {
                                 commitHistory();
                               }}
                               placeholder="vip:yes, entertainment:true"
-                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'}`}
+                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
                             />
-                            <p
-                              className={`text-xs mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}
-                            >
+                            <p className={`text-xs mt-1 text-slate-400 dark:text-slate-500`}>
                               Format: key:value, key2:true
                             </p>
                           </div>
 
                           <div className="mb-2">
                             <label
-                              className={`text-xs mb-1 block ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
+                              className={`text-xs mb-1 block text-slate-500 dark:text-slate-400`}
                             >
                               Notes
                             </label>
@@ -1648,25 +1621,23 @@ export default function App() {
                                 commitHistory();
                               }}
                               placeholder="Add notes about this room..."
-                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-20 ${darkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'}`}
+                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-20 bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
                             />
                           </div>
                         </div>
 
                         {/* Vastu Card */}
                         <div
-                          className={`p-3 rounded-lg border ${vastu.status === 'good' ? 'bg-emerald-50 border-emerald-200' : vastu.status === 'average' ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'} ${darkMode ? 'dark:invert dark:filter' : ''}`}
+                          className={`p-3 rounded-lg border ${vastu.status === 'good' ? 'bg-emerald-50 border-emerald-200' : vastu.status === 'average' ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'} dark:invert dark:filter`}
                         >
                           <h4 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1">
                             <Compass className="w-3 h-3" /> Vastu Check
                           </h4>
-                          <div
-                            className={`text-sm mb-2 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}
-                          >
+                          <div className={`text-sm mb-2 text-slate-700 dark:text-slate-300`}>
                             Current Zone: <strong>{vastu.currentDirection}</strong>
                           </div>
                           <p
-                            className={`text-xs leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}
+                            className={`text-xs leading-relaxed text-slate-600 dark:text-slate-400`}
                           >
                             {vastu.feedback}
                           </p>
@@ -1690,7 +1661,7 @@ export default function App() {
                     disabled={
                       isAnalyzing || plan.rooms.filter((r) => r.floor === currentFloor).length === 0
                     }
-                    className={`w-full font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 shrink-0 ${darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
+                    className={`w-full font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 shrink-0 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white`}
                   >
                     {isAnalyzing ? (
                       <>
@@ -1712,36 +1683,16 @@ export default function App() {
 
                 {isAnalyzing && !analysis ? (
                   <div className="flex-1 flex flex-col gap-3 animate-pulse">
-                    <div
-                      className={`h-5 rounded w-3/4 ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-3 rounded w-full ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-3 rounded w-5/6 ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-4 rounded w-1/2 mt-2 ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-3 rounded w-full ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-3 rounded w-4/5 ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-3 rounded w-2/3 ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-4 rounded w-2/3 mt-2 ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-3 rounded w-full ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
-                    <div
-                      className={`h-3 rounded w-3/4 ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    />
+                    <div className={`h-5 rounded w-3/4 bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-3 rounded w-full bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-3 rounded w-5/6 bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-4 rounded w-1/2 mt-2 bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-3 rounded w-full bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-3 rounded w-4/5 bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-3 rounded w-2/3 bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-4 rounded w-2/3 mt-2 bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-3 rounded w-full bg-slate-200 dark:bg-slate-700`} />
+                    <div className={`h-3 rounded w-3/4 bg-slate-200 dark:bg-slate-700`} />
                   </div>
                 ) : analysis ? (
                   <div className="prose prose-sm prose-slate dark:prose-invert max-w-none flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
@@ -1818,8 +1769,8 @@ export default function App() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">VastuPlan Floor Plan</h1>
           <p className="text-sm text-slate-600 mb-8">
-            Floor {currentFloor === 0 ? 'Ground' : `Floor ${currentFloor}`} |{' '}
-            {new Date().toLocaleDateString()} | Generated on {new Date().toLocaleTimeString()}
+            Floor {formatFloor(currentFloor)} | {new Date().toLocaleDateString()} | Generated on{' '}
+            {new Date().toLocaleTimeString()}
           </p>
           <div className="border border-slate-200 p-4">
             <Canvas

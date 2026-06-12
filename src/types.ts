@@ -52,7 +52,7 @@ export interface Room {
   y: number; // in feet
   w: number; // in feet
   h: number; // in feet
-  floor: number; // 0 = Ground, 1 = First, etc.
+  floor: number; // 0 = 0th, 1 = 1st, 2 = 2nd, … (see formatFloor() in src/constants/floorPlanConstants.ts)
   wallThickness: number; // in inches, e.g. 9 for external, 4.5 for internal
   category?: RoomCategory;
   tags?: RoomTags;

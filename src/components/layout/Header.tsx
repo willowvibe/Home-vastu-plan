@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layers, FolderOpen, Sun, Moon, HelpCircle } from 'lucide-react';
 import { FloorPlan, AppMode } from '../../types';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface HeaderProps {
   plan: FloorPlan;
@@ -10,8 +11,6 @@ interface HeaderProps {
   setActiveTab: (tab: 'design' | 'image') => void;
   setShowProjectManager: (show: boolean) => void;
   vastuScore: number;
-  darkMode: boolean;
-  setDarkMode: (value: boolean) => void;
   setShowShortcutHelp?: () => void;
 }
 
@@ -23,10 +22,10 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   setShowProjectManager,
   vastuScore,
-  darkMode,
-  setDarkMode,
   setShowShortcutHelp,
 }) => {
+  const { darkMode, toggle: toggleDarkMode } = useTheme();
+
   const getVastuColor = (score: number) => {
     if (score >= 80) return 'text-emerald-600';
     if (score >= 50) return 'text-amber-600';
@@ -42,23 +41,17 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header
-      className={`border-b px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between sticky top-0 z-20 gap-3 md:gap-0 transition-colors duration-200 ${darkMode ? 'bg-slate-800/95 border-slate-700 backdrop-blur-sm' : 'bg-white/95 border-slate-200 backdrop-blur-sm'}`}
-    >
+    <header className="border-b border-slate-200 dark:border-slate-700 bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-sm px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between sticky top-0 z-20 gap-3 md:gap-0 transition-colors duration-200">
       <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
         <div className="flex items-center gap-3">
-          <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-105 ${darkMode ? 'bg-indigo-600 shadow-indigo-900/50' : 'bg-indigo-600 shadow-indigo-200'}`}
-          >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-105 bg-indigo-600 shadow-indigo-200 dark:shadow-indigo-900/50">
             <Layers className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1
-              className={`text-xl font-bold tracking-tight transition-colors ${darkMode ? 'text-white' : 'text-slate-900'}`}
-            >
+            <h1 className="text-xl font-bold tracking-tight transition-colors text-slate-900 dark:text-white">
               VastuPlan 2D
             </h1>
-            <p className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
               Indian Home Design & Vastu
             </p>
           </div>
@@ -70,23 +63,15 @@ export const Header: React.FC<HeaderProps> = ({
             className={`md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${getVastuBadgeColor(vastuScore, darkMode)}`}
           >
             <div className={`text-sm font-bold ${getVastuColor(vastuScore)}`}>{vastuScore}/100</div>
-            <span
-              className={`text-[10px] uppercase ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
-            >
-              Score
-            </span>
+            <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400">Score</span>
           </div>
         )}
       </div>
 
       <div className="flex items-center gap-3 md:gap-6 w-full md:w-auto justify-between md:justify-end">
         {appMode !== 'edit' && (
-          <div
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${darkMode ? 'bg-amber-900/30 border-amber-700' : 'bg-amber-50 border-amber-200'}`}
-          >
-            <div
-              className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}
-            >
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-700">
+            <div className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
               {appMode} Mode
             </div>
             {appMode === 'view' && (
@@ -104,9 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div
             className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${getVastuBadgeColor(vastuScore, darkMode)}`}
           >
-            <div
-              className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
-            >
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
               Vastu Score
             </div>
             <div className={`text-sm font-bold ${getVastuColor(vastuScore)}`}>{vastuScore}/100</div>
@@ -114,8 +97,8 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         <button
-          onClick={() => setDarkMode(!darkMode)}
-          className={`p-2 rounded-lg border transition-all duration-300 hover:scale-105 hover:shadow-sm ${darkMode ? 'bg-slate-800 border-slate-600 text-amber-400 hover:bg-slate-700 hover:border-amber-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}
+          onClick={toggleDarkMode}
+          className="p-2 rounded-lg border transition-all duration-300 hover:scale-105 hover:shadow-sm bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-amber-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-amber-600"
           title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           aria-label={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
@@ -124,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={() => setShowShortcutHelp?.()}
-          className={`p-2 rounded-lg border transition-colors ${darkMode ? 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+          className="p-2 rounded-lg border transition-colors bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
           title="Keyboard Shortcuts (?)"
           aria-label="Keyboard Shortcuts"
         >

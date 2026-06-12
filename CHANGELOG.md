@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Versioning note (2026-06-11):** Earlier entries referenced `2.0.0` / `2.1.0` even though the code was pre-release. This CHANGELOG has been collapsed onto the actual release line (`0.1.x` alpha, per the `VERSION` file) so that `VERSION`, `package.json`, `CHANGELOG.md`, and `README.md` all agree. The P0 sweep, P1 quick-wins, P1 batch #2, and P2 hygiene batch are all rolled up under `0.1.0`. For the active backlog, see [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md).
 
-## [Unreleased]
+## [Unreleased] — 2026-06-12
+
+> Post-deploy polish batch on `fix/post-deploy-polish` (3 commits, awaiting PR).
+
+### Added
+
+- Vercel deployment via Git integration (`vercel.json` + README pointer). Every push to `main` → Production; every PR → Preview URL. See `docs/superpowers/specs/2026-06-12-vercel-deployment-design.md`.
+- New `formatFloor()` helper in `src/constants/floorPlanConstants.ts`. Floor labels now use ordinals: `0th / 1st / 2nd / …`.
+- `<ThemeProvider>` + `useTheme()` in `src/contexts/ThemeContext.tsx`, plus a `useDarkMode()` hook in `src/hooks/useDarkMode.ts`. The Tailwind v4 `dark:` variant is now enabled via `@custom-variant dark (...);` in `src/index.css`.
+- New `CLAUDE.md` at the repo root with project conventions, theme system rules, and pitfalls.
+
+### Changed
+
+- **Theme system refactor:** migrated 53 ternary class strings to Tailwind v4's `dark:` variant. `<html class="dark">` toggles the whole app. Section-specific light/dark shades for visual sectioning (header / sidebar / canvas / properties / modals each get their own shade). `App.tsx`'s local `darkMode` state is gone; components consume `useTheme()`.
+- Floor label wording: `Ground / First / Second` → `0th / 1st / 2nd`.
 
 > The 2026-06-11 test-coverage batch ships 2 P2 items in branch `fix/q-2-q-3-hook-tests` (awaiting PR). Test count grew from 97 to 128 (+31). Per-item detail below.
 
