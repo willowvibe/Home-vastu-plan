@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect the test-coverage batch (Q-1: `useCanvasDrag` behavioural tests).
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect PRs #28, #39, #43, #44, #45, #46, and the Q-1 test-coverage branch (this branch, 1 item: Q-1).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -8,11 +8,17 @@
 
 > **P0 sweep — RESOLVED 2026-06-08 in PR #28:** B-1, B-2, B-5, B-10, B-11, S-5, S-7, S-10, S-15 all fixed. See the [✅ Resolved in PR #28](#-resolved-in-pr-28) section at the bottom of this document for per-bug commit refs, and `CHANGELOG.md` for the user-facing change log.
 >
-> **P1 quick-wins — RESOLVED 2026-06-09 in branch `fix/p1-quick-wins` (pending merge):** B-3, B-7, S-16, B-17 all fixed. See the [✅ Resolved in P1 quick-wins](#-resolved-in-p1-quick-wins) section at the bottom of this document.
+> **P1 quick-wins — RESOLVED 2026-06-09 in PR #39:** B-3, B-7, S-16, B-17 all fixed. See the [✅ Resolved in P1 quick-wins](#-resolved-in-p1-quick-wins) section at the bottom of this document.
 >
-> **P2 hygiene — RESOLVED 2026-06-11 in branch `fix/p2-hygiene-batch` (pending PR):** S-21, S-22, Q-5, Q-6, Q-7, Q-14, Q-15, Q-20, Q-25 fixed. See the [✅ Resolved in P2 hygiene batch](#-resolved-in-p2-hygiene-batch) section at the bottom of this document.
+> **P1 batch #2 — RESOLVED 2026-06-11 in PR #43:** S-2, S-9, S-17, S-21, Q-10 all fixed. See the [✅ Resolved in P1 batch #2](#-resolved-in-p1-batch-2) section at the bottom of this document.
 >
-> **Test coverage (Q-1) — RESOLVED 2026-06-11 in branch `fix/q-1-use-canvas-drag-tests` (pending PR):** Q-1 (`useCanvasDrag` behavioural tests, +23 tests) fixed. See the [✅ Resolved in test-coverage batch (Q-1)](#-resolved-in-test-coverage-batch-q-1) section at the bottom of this document.
+> **P2 hygiene batch — RESOLVED 2026-06-11 in PR #44:** S-22, Q-5, Q-6, Q-7+Q-14, Q-15, Q-20, Q-25 all fixed (plus the missed S-21 doc row). See the [✅ Resolved in P2 hygiene batch](#-resolved-in-p2-hygiene-batch) section at the bottom of this document.
+>
+> **P2 refactor batch — RESOLVED 2026-06-11 in PR #45:** S-8, S-12, Q-9, Q-12, S-3 all fixed. See the [✅ Resolved in P2 refactor batch](#-resolved-in-p2-refactor-batch) section at the bottom of this document.
+>
+> **Test-coverage batch (Q-2 + Q-3) — RESOLVED 2026-06-11 in PR #46:** Q-2 (`useFloorPlan` history, +15 tests), Q-3 (`useCollaboration` socket lifecycle, +20 tests) all fixed. See the [✅ Resolved in test-coverage batch](#-resolved-in-test-coverage-batch) section at the bottom of this document.
+>
+> **Test-coverage batch (Q-1) — RESOLVED 2026-06-11 on `fix/q-1-use-canvas-drag-tests` (this branch, pending PR):** Q-1 (`useCanvasDrag` behavioural tests, +23 tests) fixed. See the [✅ Resolved in test-coverage batch (Q-1)](#-resolved-in-test-coverage-batch-q-1) section at the bottom of this document.
 
 ---
 
@@ -436,6 +442,8 @@ This hook handles 100% of drag, resize, and rotation math. A refactor without te
 
 ### Q-2. No tests for `useFloorPlan` history management
 
+> **Resolved 2026-06-11 on `fix/q-2-q-3-hook-tests`** (test-coverage batch, awaiting PR). 15 behavioural tests added in `src/hooks/useFloorPlan.test.ts` covering: the `commitHistory` identical-state guard, the `MAX_HISTORY_SIZE` cap, undo/redo at the head and the tail, the "new commit after undo truncates the redo branch" invariant, `resetPlan`, and the functional-form `updatePlan`.
+
 Boundary cases:
 
 - `commitHistory` with identical state (no-op) — covered indirectly, but no assertion
@@ -443,6 +451,8 @@ Boundary cases:
 - `undo` at the head and tail
 
 ### Q-3. No tests for `useCollaboration` socket lifecycle
+
+> **Resolved 2026-06-11 on `fix/q-2-q-3-hook-tests`** (test-coverage batch, awaiting PR). 20 new tests added in `src/hooks/useCollaboration.test.ts` covering: the B-1 stable-deps effect, the B-2 functional `onPlanChange` setter, the S-12 `getErrorMessage` error-narrowing path (Error / string / number fallbacks), the room-joined plan-sync fallback, the local-echo guard on `plan-updated`, the `plan-synced` echo guard, `joinRoom` / `leaveRoom` / `broadcastUpdate` public-API behaviour, and the unmount cleanup.
 
 The most fragile part of the system and the least tested. Mock socket.io-client.
 
@@ -564,14 +574,16 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-| Bucket                   | Items                                         | Suggested owner track | Effort    |
-| ------------------------ | --------------------------------------------- | --------------------- | --------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_         | —                     | —         |
-| **P1 — Fix this sprint** | B-8                                           | robustness            | 2 h       |
-| **P2 — Refactor**        | S-1, S-3, S-4, S-8, S-12, Q-2, Q-3, Q-9, Q-12 | health                | 1-2 weeks |
-| **P3 — Polish**          | All Q and G items                             | DX / features         | ongoing   |
+> **State as of 2026-06-11 (post PRs #28, #39, #43, #44, #45, #46 + this Q-1 branch, awaiting PR):** All 9 P0s and 9 of 10 P1s are resolved. The remaining P1 is B-8 (shift+click marquee, design call needed). P2 has 2 items totaling ~12-16 h. P3 is ongoing.
 
-**Where to start:** S-1 (split `App.tsx` — 8-12 h, the single biggest structural win) or Q-2/Q-3 (test coverage for the remaining 2 complex hooks, 7 h combined).
+| Bucket                   | Items                                 | Suggested owner track | Effort   |
+| ------------------------ | ------------------------------------- | --------------------- | -------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_ | —                     | —        |
+| **P1 — Fix this sprint** | B-8                                   | robustness            | 2 h      |
+| **P2 — Refactor**        | S-1, S-4                              | health                | ~12-16 h |
+| **P3 — Polish**          | All Q and G items                     | DX / features         | ongoing  |
+
+**Where to start:** **S-1** (split `App.tsx` — 8-12 h, the single biggest structural win). The P2 hooks-test trio (Q-1, Q-2, Q-3) is now complete. The remaining P2 items are both larger refactors; coordinate with the user before starting since both touch many files.
 
 ---
 
@@ -601,7 +613,7 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 
 ## ✅ Resolved in P1 quick-wins
 
-> The 2026-06-09 P1 quick-wins batch fixed 4 P1 items in branch `fix/p1-quick-wins` (pending PR). The per-bug entries in §2 / §3 are kept for traceability. Test coverage added in 2 of the 4 cases.
+> The 2026-06-09 P1 quick-wins batch fixed 4 P1 items in branch `fix/p1-quick-wins` and shipped in PR #39 (merge commit `1694af7`). The per-bug entries in §2 / §3 are kept for traceability. Test coverage added in 2 of the 4 cases.
 
 | ID   | Title                                                         | Per-bug entry | Tests | Notes                                                                                             |
 | ---- | ------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------- |
@@ -614,9 +626,25 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 
 ---
 
+## ✅ Resolved in P1 batch #2
+
+> The 2026-06-11 P1 batch #2 fixed 5 P1 items (S-2, S-9, S-17, S-21) and 1 P2 item (Q-10) in branch `fix/p1-batch-2` and shipped in PR #43 (merge commit `36b67ca`). The per-bug entries in §2 / §3 are kept for traceability.
+
+| ID   | Title                                                                            | Per-bug entry | Tests | Notes                                                                                                                                                                                                                     |
+| ---- | -------------------------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-2  | Three `useEffect` dep arrays ignored (collaboration, App share loader)           | §3 S-2        | +1    | Resolved-by-design. The two remaining disables (App.tsx:182, Room.tsx:56) are load-bearing; a structural test in `useCollaboration.test.ts` pins the disable count to ≤ 2.                                                |
+| S-9  | `useCanvasDrag` element placement uses full wall thickness for shared-wall rooms | §3 S-9        | +4    | New `getEffectiveWalls(room, otherRooms)` helper in `useCanvasDrag.ts`; element-drag uses per-side effective walls (shared = `wallFt/2`).                                                                                 |
+| S-17 | `Onboarding` modal lacks `aria-modal` and focus trap                             | §3 S-17       | +3    | Full WAI-ARIA dialog: `role` / `aria-modal` / `aria-labelledby` (via `useId`), Esc-to-close, Tab/Shift+Tab focus trap, focus restore on close. Onboarding test extended to 4 cases.                                       |
+| S-21 | Pick one of Sentry.ErrorBoundary vs custom ErrorBoundary (nested)                | §3 S-21       | —     | Dropped `Sentry.ErrorBoundary` in `main.tsx`; the custom `ErrorBoundary` already calls `captureError` in `componentDidCatch`, so the Sentry wrapper was double-reporting. Doc row was missed in PR #43; closed in PR #44. |
+| Q-10 | Extract `AppMode` type to a single source of truth                               | §4 Q-10       | —     | `Header.tsx` now imports `AppMode` from `src/types.ts` (was the last offender; `src/types.ts:146` was already the source of truth from the P0 sweep).                                                                     |
+
+**Validation:** `npm run lint` ✅ (0 errors), `npm test` (51/51, +8 new) ✅, `npm run build` ✅.
+
+---
+
 ## ✅ Resolved in P2 hygiene batch
 
-> The 2026-06-11 P2/P3 hygiene batch fixed 7 P2/P3 items in branch `fix/p2-hygiene-batch`. The per-bug entries in §2 / §3 are kept for traceability. No test coverage changes beyond the +4 S-22 hash tests; the rest are config, type, and tooling.
+> The 2026-06-11 P2/P3 hygiene batch fixed 7 P2/P3 items in branch `fix/p2-hygiene-batch` and shipped in PR #44 (merge commit `bf2c214`). The per-bug entries in §2 / §3 are kept for traceability. No test coverage changes beyond the +4 S-22 hash tests; the rest are config, type, and tooling.
 
 | ID   | Title                                                                              | Per-bug entry | Tests | Notes                                                                                                                                                                                                         |
 | ---- | ---------------------------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -645,6 +673,35 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 **Validation:** `npm run lint` ✅ (0 errors, 2 pre-existing warnings unchanged), `npm test` (78/78, +23 new) ✅, `npm run build` ✅.
 
 **Subtle implementation note:** the `handlePointerMove` listener early-returns on `if (!canvasRef.current) return`, so every test that dispatches `pointermove` on `window` must use a non-null `canvasRef.current` with a real `getBoundingClientRect()` (otherwise the listener bails before calling `onUpdateRoom`). The test file's `canvasRef()` helper makes this ergonomic.
+
+---
+
+## ✅ Resolved in P2 refactor batch
+
+> The 2026-06-11 P2 refactor batch fixed 5 P2 items in branch `fix/p2-refactor-batch` (commits `c40e621`..`f45745b`) and shipped in PR #45. The per-bug entries in §2 / §3 are kept for traceability. Test count grew from 55 to 97 (+42), mostly from pinning the new constants/helpers to regression tests.
+
+| ID   | Title                                                                                              | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                           |
+| ---- | -------------------------------------------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-8  | Hard-coded color/size magic numbers in `useCanvasDrag.ts`                                          | §3 S-8        | +17   | New `src/constants/geometry.ts` centralizes TOLERANCE_FT (0.1), INCHES_PER_FOOT (12), DEFAULT_WALL_THICKNESS_IN (9), SNAP_GRID_FT (1), SNAP_GRID_SUB_FT (0.1), MIN/MAX_ROOM_SIZE_FT, PIXELS_PER_FOOT, FT_PER_METER, etc. Replaced 14 hard-coded values across 4 callers.                                                        |
+| S-12 | `error: any` caught in `App.tsx` (handleShare, handleImportJSON, etc.)                             | §3 S-12       | +12   | New `getErrorMessage(error: unknown)` in `src/utils.ts` (12 tests). Switched 3 catch sites in App.tsx + 2 `err.message` sites in useCollaboration.ts. Lint rule `@typescript-eslint/no-explicit-any` flipped `off` → `warn` (with a follow-up comment to promote to `error` once the 30+ pre-existing any uses are cleaned up). |
+| Q-9  | `socket.io-client` is at the client but the server uses raw `socket.io`; no versioned API contract | §4 Q-9        | —     | New `src/types/shared.ts` is the single source of truth for `PlanUpdateEvent`. `data: any` → `data: unknown` (forced 3 narrow-back sites in useCollaboration.ts). Server's `tsconfig.json` widened to allow the import.                                                                                                         |
+| Q-12 | `src/lib/exports.ts` is `158` lines and mixes 5 concerns                                           | §4 Q-12       | +9    | Split into `exportPng.ts`, `exportSvg.ts`, `exportJson.ts`, `shareLink.ts`, `printPlan.ts`. The original `exports.ts` is now a 22-line back-compat barrel. Plus a `compressPlan` / `decompressPlan` pure-function pair in `shareLink.ts` (9 round-trip tests).                                                                  |
+| S-3  | `setPlan` is exposed from `useFloorPlan` and called directly with non-functional form              | §3 S-3        | +4    | `setPlan` removed from the public return of `useFloorPlan`. Internal `setPlan` retained (used by `undo` / `redo` / `resetPlan` / `commitHistory` — those know the exact target value). `useFloorPlan.test.ts` pins the public-API shape so a future re-exposure fails CI.                                                       |
+
+**Validation:** `npm run lint` ✅ (0 errors, 36 warnings — 35 pre-existing any uses, 1 react-refresh; 0 new), `npm test` (97/97, +42 new) ✅, `npm run build` ✅, `server tsc --noEmit` ✅. No behaviour changes; the entire diff is mechanical refactor + test pinning.
+
+---
+
+## ✅ Resolved in test-coverage batch
+
+> The 2026-06-11 test-coverage batch fixed 2 P2 items in branch `fix/q-2-q-3-hook-tests` (merged in PR #46). The per-bug entries in §4 are kept for traceability. Test count grew from 97 to 128 (+31) — both hooks are now covered by behavioural tests that pin every public-API contract and the key B-1 / B-2 / S-2 / S-12 invariants.
+
+| ID  | Title                                            | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --- | ------------------------------------------------ | ------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-2 | No tests for `useFloorPlan` history management   | §4 Q-2        | +15   | Behavioural tests in `useFloorPlan.test.ts` covering: `commitHistory` with identical state (no-op), `commitHistory` past `MAX_HISTORY_SIZE` (50), `undo` at the head and the tail, `redo` past the head, the "new commit after undo truncates the redo branch" invariant, `resetPlan` clearing the history stack, and the functional-form `updatePlan((prev) => ...)` reading the latest state. The 4 pre-existing S-3 structural tests are retained.                                                                                                                 |
+| Q-3 | No tests for `useCollaboration` socket lifecycle | §4 Q-3        | +20   | Behavioural tests in `useCollaboration.test.ts` covering: the connect / disconnect state transitions, the B-1 stable-deps effect, the B-2 functional `onPlanChange` setter, the S-12 `getErrorMessage` error-narrowing path (Error / string / number fallbacks), the `room-joined` plan-sync fallback when the server returns an empty plan, the local-echo guard on `plan-updated` (the `isLocalUpdateRef`), the `plan-synced` echo guard (`modifiedBy === our userId`), `joinRoom` / `leaveRoom` / `broadcastUpdate` public-API behaviour, and the unmount cleanup. |
+
+**Validation:** `npm test` (128/128, +31 new) ✅, `npm run lint` ✅ (0 new warnings), `npm run build` ✅. The 3 pre-existing B-1 / B-2 / S-2 tests in `useCollaboration.test.ts` are retained unchanged. No source-code changes; the entire diff is test additions.
 
 ---
 

@@ -3,6 +3,7 @@ import { Room as RoomType } from '../types';
 import { cn } from '../utils';
 import { analyzeRoomVastu } from '../services/vastu';
 import { RoomElement } from './RoomElement';
+import { TOLERANCE_FT, INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from '../constants/geometry';
 
 interface RoomProps {
   room: RoomType;
@@ -29,8 +30,6 @@ interface RoomProps {
   onUpdateRoom: (id: string, updates: Partial<RoomType>) => void;
   onUpdateRoomEnd?: () => void;
 }
-
-const TOLERANCE = 0.1;
 
 export const Room: React.FC<RoomProps> = React.memo(
   ({
@@ -63,24 +62,25 @@ export const Room: React.FC<RoomProps> = React.memo(
           ? 'bg-amber-100/80 border-amber-400'
           : 'bg-red-100/80 border-red-400';
 
-    const wallFt = (room.wallThickness || 9) / 12;
+    const wallFt = (room.wallThickness || DEFAULT_WALL_THICKNESS_IN) / INCHES_PER_FOOT;
 
     const isShared = useCallback(
       (side: 'top' | 'right' | 'bottom' | 'left') => {
         return floorRooms.some((other) => {
           if (other.id === room.id) return false;
           const overlapsX =
-            room.x < other.x + other.w - TOLERANCE && room.x + room.w > other.x + TOLERANCE;
+            room.x < other.x + other.w - TOLERANCE_FT && room.x + room.w > other.x + TOLERANCE_FT;
           const overlapsY =
-            room.y < other.y + other.h - TOLERANCE && room.y + room.h > other.y + TOLERANCE;
+            room.y < other.y + other.h - TOLERANCE_FT && room.y + room.h > other.y + TOLERANCE_FT;
 
           if (side === 'top')
-            return Math.abs(room.y - (other.y + other.h)) < TOLERANCE && overlapsX;
+            return Math.abs(room.y - (other.y + other.h)) < TOLERANCE_FT && overlapsX;
           if (side === 'bottom')
-            return Math.abs(room.y + room.h - other.y) < TOLERANCE && overlapsX;
+            return Math.abs(room.y + room.h - other.y) < TOLERANCE_FT && overlapsX;
           if (side === 'left')
-            return Math.abs(room.x - (other.x + other.w)) < TOLERANCE && overlapsY;
-          if (side === 'right') return Math.abs(room.x + room.w - other.x) < TOLERANCE && overlapsY;
+            return Math.abs(room.x - (other.x + other.w)) < TOLERANCE_FT && overlapsY;
+          if (side === 'right')
+            return Math.abs(room.x + room.w - other.x) < TOLERANCE_FT && overlapsY;
           return false;
         });
       },
