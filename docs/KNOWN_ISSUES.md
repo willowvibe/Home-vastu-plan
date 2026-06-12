@@ -2,7 +2,7 @@
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
 > **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
-> **Last updated:** 2026-06-11 (post test-coverage batch on `fix/q-2-q-3-hook-tests`, awaiting PR)
+> **Last updated:** 2026-06-11 (post test-coverage batch on `fix/q-2-q-3-hook-tests`, awaiting PR; this branch resolves Q-1)
 
 ## Quick links
 
@@ -50,13 +50,12 @@ _All P0 items from the 2026-06-07 sweep are resolved. The next P0 will be filed 
 
 ## 🟡 P2 — Refactor (health)
 
-| ID  | Title                                                                            | File(s)                      | Effort |
-| --- | -------------------------------------------------------------------------------- | ---------------------------- | ------ |
-| S-1 | Split `App.tsx` (1,839 lines) into Sidebar / Properties / Toolbar / hook modules | `src/App.tsx`                | 8-12 h |
-| S-4 | Add property tests for Vastu ideal-direction matrix                              | `src/services/vastu.ts`      | 4 h    |
-| Q-1 | Add Vitest tests for `useCanvasDrag`                                             | `src/hooks/useCanvasDrag.ts` | 6 h    |
+| ID  | Title                                                                            | File(s)                 | Effort |
+| --- | -------------------------------------------------------------------------------- | ----------------------- | ------ |
+| S-1 | Split `App.tsx` (1,839 lines) into Sidebar / Properties / Toolbar / hook modules | `src/App.tsx`           | 8-12 h |
+| S-4 | Add property tests for Vastu ideal-direction matrix                              | `src/services/vastu.ts` | 4 h    |
 
-**Subtotal:** ~18 h
+**Subtotal:** ~12-16 h
 
 ---
 
@@ -122,6 +121,18 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ---
 
+## ✅ Recently Resolved (Test coverage batch — Q-1)
+
+> The 2026-06-11 test-coverage batch (Q-1) shipped on branch `fix/q-1-use-canvas-drag-tests` (this PR). 1 P2 item fixed (Q-1: `useCanvasDrag` behavioural tests). Per-bug commit refs:
+
+| ID  | Title                                | Fix commit | Notes                                                                                                                                                                                                                                                                                                                                                                                             |
+| --- | ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-1 | Add Vitest tests for `useCanvasDrag` | `3a1c0c9`  | Three new describe blocks: room drag (snap-to-grid 1ft / 0.1ft, plot-bounds clamp, same-floor collision clamp x/y, other-floor rooms ignored, pointerup lifecycle), room resize (SE/SW handles, 2ft min, plot clamp, pointerup), element drag (`draggingElement` state, half-foot rounding, inner-room clamp, Door opening overhang, pointerup). The 4 pre-existing B-5 + S-9 tests are retained. |
+
+**No regressions** in `npm run lint` (0 errors, 2 pre-existing warnings unchanged), `npm test` (78/78, +23 new), or `npm run build`.
+
+---
+
 ## ✅ Recently Resolved (P2 refactor batch)
 
 > The 2026-06-11 P2 refactor batch shipped in PR #45. 5 P2 items fixed. Test count grew from 55 to 97 (+42), mostly from pinning the new constants / helpers to regression tests. Per-bug commit refs:
@@ -140,12 +151,12 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## ✅ Recently Resolved (Test coverage batch)
 
-> The 2026-06-11 test-coverage batch ships 2 P2 items in branch `fix/q-2-q-3-hook-tests` (awaiting PR). Test count grew from 97 to 128 (+31) — both complex hooks are now covered by behavioural tests. Per-bug commit refs:
+> The 2026-06-11 test-coverage batch ships 2 P2 items in branch `fix/q-2-q-3-hook-tests` (PR #46, merged). Test count grew from 97 to 128 (+31) — both complex hooks are now covered by behavioural tests. Per-bug commit refs:
 
 | ID  | Title                                                    | Fix commit | Notes                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | --- | -------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Q-2 | Add Vitest tests for `useFloorPlan` history              | (this PR)  | 15 behavioural tests in `useFloorPlan.test.ts` covering the `commitHistory` identical-state guard, the `MAX_HISTORY_SIZE` cap, undo/redo at the head and the tail, the "new commit after undo truncates the redo branch" invariant, `resetPlan`, and the functional-form `updatePlan`. The 4 pre-existing S-3 structural tests are retained.                                                                           |
-| Q-3 | Add Vitest tests for `useCollaboration` socket lifecycle | (this PR)  | 20 new tests in `useCollaboration.test.ts` covering the B-1 stable-deps effect, the B-2 functional `onPlanChange` setter, the S-12 `getErrorMessage` error-narrowing path (Error / string / number fallbacks), the `room-joined` plan-sync fallback, the local-echo guard on `plan-updated`, the `plan-synced` echo guard, `joinRoom` / `leaveRoom` / `broadcastUpdate` public-API behaviour, and the unmount cleanup. |
+| Q-2 | Add Vitest tests for `useFloorPlan` history              | `bc86b00`  | 15 behavioural tests in `useFloorPlan.test.ts` covering the `commitHistory` identical-state guard, the `MAX_HISTORY_SIZE` cap, undo/redo at the head and the tail, the "new commit after undo truncates the redo branch" invariant, `resetPlan`, and the functional-form `updatePlan`. The 4 pre-existing S-3 structural tests are retained.                                                                           |
+| Q-3 | Add Vitest tests for `useCollaboration` socket lifecycle | `bc86b00`  | 20 new tests in `useCollaboration.test.ts` covering the B-1 stable-deps effect, the B-2 functional `onPlanChange` setter, the S-12 `getErrorMessage` error-narrowing path (Error / string / number fallbacks), the `room-joined` plan-sync fallback, the local-echo guard on `plan-updated`, the `plan-synced` echo guard, `joinRoom` / `leaveRoom` / `broadcastUpdate` public-API behaviour, and the unmount cleanup. |
 
 **No regressions** in `npm run lint` (0 new warnings), `npm test` (128/128, +31 new), or `npm run build`. The diff is test-only — no source-code changes.
 
@@ -153,20 +164,18 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-> **State as of 2026-06-11 (post test-coverage batch, awaiting PR).** All 9 P0s and 9 of 10 P1s resolved. P1: only B-8 remains. P2: 3 items / ~18 h.
+> **State as of 2026-06-11 (post Q-1 + Q-2 + Q-3 test-coverage batches, all P2 hook tests resolved).** All 9 P0s and 9 of 10 P1s resolved. P1: only B-8 remains. P2: 2 items / ~12-16 h.
 
-| Bucket | Items | Effort  | Status                                                              |
-| ------ | ----- | ------- | ------------------------------------------------------------------- |
-| P0     | 0     | —       | ✅ All resolved (PR #28)                                            |
-| P1     | 1     | ~2 h    | 🟡 5 resolved (#43), 1 remaining (B-8)                              |
-| P2     | 3     | ~18 h   | 🟡 12 resolved (#43 + #44 + #45 + test-coverage batch), 3 remaining |
-| P3     | many  | ongoing | 🔲 Not started                                                      |
+| Bucket | Items | Effort   | Status                                                                     |
+| ------ | ----- | -------- | -------------------------------------------------------------------------- |
+| P0     | 0     | —        | ✅ All resolved (PR #28)                                                   |
+| P1     | 1     | ~2 h     | 🟡 5 resolved (#43), 1 remaining (B-8)                                     |
+| P2     | 2     | ~12-16 h | 🟡 14 resolved (#43 + #44 + #45 + Q-2 + Q-3 + Q-1), 2 remaining (S-1, S-4) |
+| P3     | many  | ongoing  | 🔲 Not started                                                             |
 
-See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P2 refactor batch)](#-recently-resolved-p2-refactor-batch) above for the P2 refactor PR, and [✅ Recently Resolved (Test coverage batch)](#-recently-resolved-test-coverage-batch) above for the just-shipped Q-2 + Q-3 fixes.
+See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P1 batch #2)](#-recently-resolved-p1-batch-2) above for the P1 batch #2 fixes, [✅ Recently Resolved (P2 hygiene batch)](#-recently-resolved-p2-hygiene-batch) above for that batch, [✅ Recently Resolved (P2 refactor batch)](#-recently-resolved-p2-refactor-batch) above for the P2 refactor PR, [✅ Recently Resolved (Test coverage batch)](#-recently-resolved-test-coverage-batch) above for Q-2 + Q-3, and [✅ Recently Resolved (Test coverage batch — Q-1)](#-recently-resolved-test-coverage-batch--q-1) above for Q-1.
 
-**Suggested next batch (≤ 1 day, low-risk):** None of the remaining P2 items are < 1 day. The smallest is **Q-1** (Vitest coverage for `useCanvasDrag`, ~6 h) — the most fragile hook in the system that still has no unit tests. The biggest follow-up is **S-1** (`App.tsx` split, 8-12 h) — coordinate with the user before starting since a 1,000+-line diff benefits from its own branch.
-
----
+**Suggested next batch:** No more P2 hooks-test work remains (Q-1, Q-2, Q-3 all done). The next move is **S-1** (split `App.tsx`, 8-12 h) — the single biggest structural win in the backlog. Coordinate with the user before starting since a 1,000+-line diff benefits from its own branch. Alternative low-risk small wins: **S-4** (4 h, property tests for Vastu matrix).
 
 ## How to use this document
 

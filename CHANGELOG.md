@@ -96,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **S-7**: Sentry's `setUser`, `clearUser`, `setTag`, and `addBreadcrumb` are no-ops when `initSentry` was not called, instead of throwing on an uninitialized SDK. `isSentryInitialized()` is exported for callers that want to check.
 - **S-10**: `(window as any).showToast?.(...)` in `App.tsx` is replaced with the real `useToast()` hook. `ToastProvider` is moved to `main.tsx` so the hook can resolve in `App`.
 - **S-15**: `PresentationExport` logo upload validates the file with a magic-byte sniff (PNG / JPEG) and a 5 MB cap; non-image files are rejected with an error toast.
+- **Q-1**: `useCanvasDrag` (the most fragile untested hook — drag/resize/element math, plot-bounds clamp, collision detection, shared walls) is now covered by 23 behavioural tests in `src/hooks/useCanvasDrag.test.ts`. Pins: snap-to-grid on/off, plot-bounds clamping (all 4 setbacks), same-floor collision clamping (x and y), other-floor rooms ignored, SE/SW resize with 2ft min, element half-foot rounding, inner-room clamp, Door opening overhang, pointerup lifecycle. The 4 pre-existing B-5 + S-9 tests are retained. Test count: 78 (was 55, +23).
 
 ### Fixed — 2026-06-09 (P1 quick-wins, PR #39)
 
@@ -146,5 +147,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Multi-select rooms with shift+click (B-8, requires a marquee-select or refactor of `selectedRoomIds`)
 - `App.tsx` split into Sidebar / Properties / Toolbar modules (S-1, 8-12 h — the single biggest structural win)
-- Vitest coverage for `useCanvasDrag` (Q-1, ~6 h)
 - Collaborative editing backend deployment automation

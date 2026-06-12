@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect PRs #28, #39, #43, #44, #45, and the test-coverage batch on `fix/q-2-q-3-hook-tests` (2 items: Q-2, Q-3).
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect PRs #28, #39, #43, #44, #45, #46, and the Q-1 test-coverage branch (this branch, 1 item: Q-1).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -16,7 +16,9 @@
 >
 > **P2 refactor batch — RESOLVED 2026-06-11 in PR #45:** S-8, S-12, Q-9, Q-12, S-3 all fixed. See the [✅ Resolved in P2 refactor batch](#-resolved-in-p2-refactor-batch) section at the bottom of this document.
 >
-> **Test-coverage batch — RESOLVED 2026-06-11 on `fix/q-2-q-3-hook-tests` (awaiting PR):** Q-2, Q-3 all fixed. See the [✅ Resolved in test-coverage batch](#-resolved-in-test-coverage-batch) section at the bottom of this document.
+> **Test-coverage batch (Q-2 + Q-3) — RESOLVED 2026-06-11 in PR #46:** Q-2 (`useFloorPlan` history, +15 tests), Q-3 (`useCollaboration` socket lifecycle, +20 tests) all fixed. See the [✅ Resolved in test-coverage batch](#-resolved-in-test-coverage-batch) section at the bottom of this document.
+>
+> **Test-coverage batch (Q-1) — RESOLVED 2026-06-11 on `fix/q-1-use-canvas-drag-tests` (this branch, pending PR):** Q-1 (`useCanvasDrag` behavioural tests, +23 tests) fixed. See the [✅ Resolved in test-coverage batch (Q-1)](#-resolved-in-test-coverage-batch-q-1) section at the bottom of this document.
 
 ---
 
@@ -572,16 +574,16 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-11 (post PR #45 + test-coverage batch, awaiting PR):** All 9 P0s and 9 of 10 P1s are resolved. The remaining P1 is B-8 (shift+click marquee, design call needed). P2 has 3 items totaling ~18 h. P3 is ongoing.
+> **State as of 2026-06-11 (post PRs #28, #39, #43, #44, #45, #46 + this Q-1 branch, awaiting PR):** All 9 P0s and 9 of 10 P1s are resolved. The remaining P1 is B-8 (shift+click marquee, design call needed). P2 has 2 items totaling ~12-16 h. P3 is ongoing.
 
-| Bucket                   | Items                                 | Suggested owner track | Effort  |
-| ------------------------ | ------------------------------------- | --------------------- | ------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_ | —                     | —       |
-| **P1 — Fix this sprint** | B-8                                   | robustness            | 2 h     |
-| **P2 — Refactor**        | S-1, S-4, Q-1                         | health                | ~18 h   |
-| **P3 — Polish**          | All Q and G items                     | DX / features         | ongoing |
+| Bucket                   | Items                                 | Suggested owner track | Effort   |
+| ------------------------ | ------------------------------------- | --------------------- | -------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_ | —                     | —        |
+| **P1 — Fix this sprint** | B-8                                   | robustness            | 2 h      |
+| **P2 — Refactor**        | S-1, S-4                              | health                | ~12-16 h |
+| **P3 — Polish**          | All Q and G items                     | DX / features         | ongoing  |
 
-**Suggested next batch (≤ 1 day, low-risk):** None of the remaining P2 items are < 1 day. The smallest is **Q-1** (Vitest coverage for `useCanvasDrag`, ~6 h) — the most fragile hook in the system that still has no unit tests. The biggest follow-up is **S-1** (`App.tsx` split, 8-12 h) — coordinate with the user before starting since a 1,000+-line diff benefits from its own branch.
+**Where to start:** **S-1** (split `App.tsx` — 8-12 h, the single biggest structural win). The P2 hooks-test trio (Q-1, Q-2, Q-3) is now complete. The remaining P2 items are both larger refactors; coordinate with the user before starting since both touch many files.
 
 ---
 
@@ -660,6 +662,20 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 
 ---
 
+## ✅ Resolved in test-coverage batch (Q-1)
+
+> The 2026-06-11 test-coverage batch (Q-1) fixed the last untested complex hook in branch `fix/q-1-use-canvas-drag-tests` (pending PR). The per-bug entry in §4 is kept for traceability. Tests-only — no source-code or behaviour changes.
+
+| ID  | Title                                                            | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                                                                             |
+| --- | ---------------------------------------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-1 | No tests for `useCanvasDrag` (the most complex non-trivial hook) | §4 Q-1        | +23   | Three new describe blocks: room drag (snap-to-grid 1ft / 0.1ft, plot-bounds clamp, same-floor collision clamp x/y, other-floor rooms ignored, pointerup lifecycle), room resize (SE/SW handles, 2ft min, plot clamp, pointerup), element drag (`draggingElement` state, half-foot rounding, inner-room clamp, Door opening overhang, pointerup). The 4 pre-existing B-5 + S-9 tests are retained. |
+
+**Validation:** `npm run lint` ✅ (0 errors, 2 pre-existing warnings unchanged), `npm test` (78/78, +23 new) ✅, `npm run build` ✅.
+
+**Subtle implementation note:** the `handlePointerMove` listener early-returns on `if (!canvasRef.current) return`, so every test that dispatches `pointermove` on `window` must use a non-null `canvasRef.current` with a real `getBoundingClientRect()` (otherwise the listener bails before calling `onUpdateRoom`). The test file's `canvasRef()` helper makes this ergonomic.
+
+---
+
 ## ✅ Resolved in P2 refactor batch
 
 > The 2026-06-11 P2 refactor batch fixed 5 P2 items in branch `fix/p2-refactor-batch` (commits `c40e621`..`f45745b`) and shipped in PR #45. The per-bug entries in §2 / §3 are kept for traceability. Test count grew from 55 to 97 (+42), mostly from pinning the new constants/helpers to regression tests.
@@ -678,7 +694,7 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 
 ## ✅ Resolved in test-coverage batch
 
-> The 2026-06-11 test-coverage batch fixed 2 P2 items in branch `fix/q-2-q-3-hook-tests` (awaiting PR). The per-bug entries in §4 are kept for traceability. Test count grew from 97 to 128 (+31) — both hooks are now covered by behavioural tests that pin every public-API contract and the key B-1 / B-2 / S-2 / S-12 invariants.
+> The 2026-06-11 test-coverage batch fixed 2 P2 items in branch `fix/q-2-q-3-hook-tests` (merged in PR #46). The per-bug entries in §4 are kept for traceability. Test count grew from 97 to 128 (+31) — both hooks are now covered by behavioural tests that pin every public-API contract and the key B-1 / B-2 / S-2 / S-12 invariants.
 
 | ID  | Title                                            | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | --- | ------------------------------------------------ | ------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
