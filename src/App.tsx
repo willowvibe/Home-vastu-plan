@@ -44,6 +44,7 @@ import { Onboarding } from './components/Onboarding';
 import { LayerManager } from './components/LayerManager';
 import { useFloorPlan } from './hooks/useFloorPlan';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { getErrorMessage } from './utils';
 import {
   exportToPNG,
   exportToJSON,
@@ -60,6 +61,7 @@ import {
   COMMON_ELEMENTS,
   ROOM_CATEGORIES,
 } from './constants/floorPlanConstants';
+import { INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from './constants/geometry';
 
 export default function App() {
   const { plan, updatePlan, commitHistory, undo, redo, resetPlan, historyIndex, historyLength } =
@@ -206,7 +208,7 @@ export default function App() {
       w: defaultW,
       h: defaultH,
       floor: currentFloor,
-      wallThickness: 9, // Default 9 inches
+      wallThickness: DEFAULT_WALL_THICKNESS_IN, // Default 9 inches
     };
     updatePlan((prev) => ({ ...prev, rooms: [...prev.rooms, newRoom] }));
     commitHistory();
@@ -237,7 +239,8 @@ export default function App() {
             updates.h !== undefined ||
             updates.wallThickness !== undefined
           ) {
-            const wallFt = (updatedRoom.wallThickness || 9) / 12;
+            const wallFt =
+              (updatedRoom.wallThickness || DEFAULT_WALL_THICKNESS_IN) / INCHES_PER_FOOT;
             const innerW = updatedRoom.w - 2 * wallFt;
             const innerH = updatedRoom.h - 2 * wallFt;
 
@@ -461,18 +464,18 @@ export default function App() {
         props: { floor: currentFloor, mode },
       });
       alert(`Share link (${mode} mode) copied to clipboard!`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to generate share link', error);
-      alert(error.message || 'Failed to generate share link. Plan might be too large.');
+      alert(getErrorMessage(error) || 'Failed to generate share link. Plan might be too large.');
     }
   };
 
   const handleExportJSON = () => {
     try {
       exportToJSON(plan, `VastuPlan_Floor_${currentFloor}.json`, analysis);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to export JSON', error);
-      alert(error.message || 'Failed to export floor plan as JSON.');
+      alert(getErrorMessage(error) || 'Failed to export floor plan as JSON.');
     }
   };
 
@@ -495,9 +498,9 @@ export default function App() {
         } else {
           alert('Invalid floor plan format.');
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('Failed to import JSON', error);
-        alert(error.message || 'Failed to import floor plan. Invalid JSON format.');
+        alert(getErrorMessage(error) || 'Failed to import floor plan. Invalid JSON format.');
       }
     };
     input.click();
@@ -550,7 +553,7 @@ export default function App() {
       ...prev,
       rooms: prev.rooms.map((r) => {
         if (r.id === roomId) {
-          const wallFt = (r.wallThickness || 9) / 12;
+          const wallFt = (r.wallThickness || DEFAULT_WALL_THICKNESS_IN) / INCHES_PER_FOOT;
           const innerW = r.w - 2 * wallFt;
           const innerH = r.h - 2 * wallFt;
           const centerX = Math.max(0, (innerW - w) / 2);
@@ -1410,7 +1413,7 @@ export default function App() {
                             Wall Thickness
                           </label>
                           <select
-                            value={room.wallThickness || 9}
+                            value={room.wallThickness || DEFAULT_WALL_THICKNESS_IN}
                             onChange={(e) => {
                               updateRoom(room.id, {
                                 wallThickness: Number(e.target.value),

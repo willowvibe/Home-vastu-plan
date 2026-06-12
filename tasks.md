@@ -6,7 +6,13 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 ## Progress Update
 
-### Completed Tasks (28/30)
+> **Note (2026-06-11):** This document is a historical snapshot of the original 30-task list and the "Launch Readiness" production checklist. **It is no longer the source of truth for active work** — see [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md) for the current backlog (P0/P1/P2/P3 items filed during the 2026-06-07 review and after). The original entries below are kept for traceability.
+
+## Progress Update
+
+### Completed Tasks (30/30)
+
+All 30 originally-filed tasks are complete (per `tasks-completed.md`). The list below was the original v2.0 / v2.1 plan; the actual shipped version is `0.1.0` (see `CHANGELOG.md` and `VERSION`).
 
 - ✅ **Task 1**: Room Element Rotation Bounds Constraint - Fixed in `src/components/Canvas.tsx`
 - ✅ **Task 2**: Wall Thickness Change Element Positions - Fixed in `src/App.tsx`
@@ -40,7 +46,9 @@ This document lists all identified bugs and usability improvements for the Vastu
 - ✅ **Fix**: Keyboard shortcuts ignore events when typing in input fields
 - ✅ **Fix**: Room vastu analysis memoized with `useMemo` to avoid recalculation on every render
 
-**Branch**: `feature/next-set`
+---
+
+The remainder of this file (Tasks 16, 18, 19, 23–30, and the Launch Readiness checklist) is the original v2.0 / v2.1 plan, preserved as a historical record. **For the active backlog, see [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md).**
 
 ---
 
@@ -283,7 +291,7 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 **Issue:** Only light theme available.
 
-**Fix Applied:** Added Sun/Moon toggle in Header. Preference persisted to localStorage. All UI elements styled for both light and dark themes.
+- **Fix Applied:** Added Sun/Moon toggle in Header. Preference persisted to localStorage. All UI elements styled for both light and dark themes.
 
 **Estimated Effort:** 6 hours
 
@@ -291,7 +299,7 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 **Issue:** Users must start from blank plan.
 
-**Fix Applied:** Added predefined templates (Small Apartment, Medium House, Large Villa) accessible from Plot Settings.
+- **Fix Applied:** Added predefined templates (Small Apartment, Medium House, Large Villa) accessible from Plot Settings.
 
 **Estimated Effort:** 6 hours
 
@@ -299,7 +307,7 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 **Issue:** Cannot compare differences between versions.
 
-**Fix Applied:** Added version comparison in Project Manager with room count diff display.
+- **Fix Applied:** Added version comparison in Project Manager with room count diff display.
 
 **Estimated Effort:** 8 hours
 
@@ -307,7 +315,7 @@ This document lists all identified bugs and usability improvements for the Vastu
 
 **Issue:** Cannot import/export raw plan data.
 
-**Fix Applied:** Added JSON import/export buttons in the Data Management section of the sidebar.
+- **Fix Applied:** Added JSON import/export buttons in the Data Management section of the sidebar.
 
 **Estimated Effort:** 4 hours
 
@@ -391,13 +399,13 @@ These tasks are required before the app can be considered a full-fledged product
 | L15 | Persist plans to database (PostgreSQL/MongoDB)              | 🔲 Pending | Need cloud DB                      |
 | L16 | Replace URL-based sharing with database share links         | 🔲 Pending | Short shareable URLs               |
 | L17 | Add auto-save to cloud                                      | 🔲 Pending | Depends on L14, L15                |
-| L18 | Add CI/CD pipeline (GitHub Actions)                         | 🔲 Pending | Build, test, deploy                |
-| L19 | Add Docker support                                          | 🔲 Pending | `Dockerfile`, `docker-compose.yml` |
-| L20 | Add testing infrastructure (Vitest + React Testing Library) | 🔲 Pending | Unit + integration tests           |
-| L21 | Add E2E tests (Playwright)                                  | 🔲 Pending | Critical user flows                |
-| L22 | Add ESLint + Prettier configuration                         | 🔲 Pending | Code quality                       |
-| L23 | Add error tracking (Sentry)                                 | 🔲 Pending | Monitor production errors          |
-| L24 | Add analytics (Plausible/PostHog)                           | 🔲 Pending | Track feature usage                |
+| L18 | Add CI/CD pipeline (GitHub Actions)                         | ✅ Done    | `.github/workflows/ci.yml`         |
+| L19 | Add Docker support                                          | ✅ Done    | `Dockerfile`, `docker-compose.yml` |
+| L20 | Add testing infrastructure (Vitest + React Testing Library) | ✅ Done    | 55 unit/integration tests          |
+| L21 | Add E2E tests (Playwright)                                  | ✅ Done    | 7 happy-path tests                 |
+| L22 | Add ESLint + Prettier configuration                         | ✅ Done    | `eslint.config.js`, `.prettierrc`  |
+| L23 | Add error tracking (Sentry)                                 | ✅ Done    | `@sentry/react` (prod only)        |
+| L24 | Add analytics (Plausible/PostHog)                           | ✅ Done    | `plausible-tracker`                |
 | L25 | Deploy collaboration server                                 | 🔲 Pending | `server/` needs hosting            |
 
 ## Notes

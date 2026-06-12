@@ -1,5 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Room, FloorPlan, AppMode } from '../types';
+import {
+  TOLERANCE_FT,
+  INCHES_PER_FOOT,
+  DEFAULT_WALL_THICKNESS_IN,
+  SNAP_GRID_FT,
+  SNAP_GRID_SUB_FT,
+} from '../constants/geometry';
 
 interface UseCanvasDragOptions {
   plan: FloorPlan;
@@ -14,17 +21,18 @@ interface UseCanvasDragOptions {
 
 // S-9: when a room shares a wall with a neighbor, the wall thickness on
 // the shared side is halved (the wall is "absorbed" by the room-to-room
-// interface, not double-drawn). TOLERANCE matches the overlap math in
+// interface, not double-drawn). TOLERANCE_FT matches the overlap math in
 // Room.tsx:isShared so the two stay in sync.
-const TOLERANCE = 0.1;
 
 function isSideShared(room: Room, other: Room, side: 'top' | 'right' | 'bottom' | 'left'): boolean {
-  const overlapsX = room.x < other.x + other.w - TOLERANCE && room.x + room.w > other.x + TOLERANCE;
-  const overlapsY = room.y < other.y + other.h - TOLERANCE && room.y + room.h > other.y + TOLERANCE;
-  if (side === 'top') return Math.abs(room.y - (other.y + other.h)) < TOLERANCE && overlapsX;
-  if (side === 'bottom') return Math.abs(room.y + room.h - other.y) < TOLERANCE && overlapsX;
-  if (side === 'left') return Math.abs(room.x - (other.x + other.w)) < TOLERANCE && overlapsY;
-  return Math.abs(room.x + room.w - other.x) < TOLERANCE && overlapsY;
+  const overlapsX =
+    room.x < other.x + other.w - TOLERANCE_FT && room.x + room.w > other.x + TOLERANCE_FT;
+  const overlapsY =
+    room.y < other.y + other.h - TOLERANCE_FT && room.y + room.h > other.y + TOLERANCE_FT;
+  if (side === 'top') return Math.abs(room.y - (other.y + other.h)) < TOLERANCE_FT && overlapsX;
+  if (side === 'bottom') return Math.abs(room.y + room.h - other.y) < TOLERANCE_FT && overlapsX;
+  if (side === 'left') return Math.abs(room.x - (other.x + other.w)) < TOLERANCE_FT && overlapsY;
+  return Math.abs(room.x + room.w - other.x) < TOLERANCE_FT && overlapsY;
 }
 
 // S-9: per-side effective wall thickness. Shared sides get wallFt/2 so
@@ -35,7 +43,7 @@ export function getEffectiveWalls(
   room: Room,
   otherRooms: Room[]
 ): { top: number; right: number; bottom: number; left: number } {
-  const wallFt = (room.wallThickness || 9) / 12;
+  const wallFt = (room.wallThickness || DEFAULT_WALL_THICKNESS_IN) / INCHES_PER_FOOT;
   const shared = (side: 'top' | 'right' | 'bottom' | 'left') =>
     otherRooms.some((other) => other.id !== room.id && isSideShared(room, other, side));
   return {
@@ -168,7 +176,7 @@ export function useCanvasDrag({
         const room = currentPlan.rooms.find((r) => r.id === currentState.draggingRoom);
         if (!room) return;
 
-        const snapValue = snapToGrid ? 1 : 0.1;
+        const snapValue = snapToGrid ? SNAP_GRID_FT : SNAP_GRID_SUB_FT;
         let newX =
           Math.round((e.clientX - currentState.dragOffset.x) / pixelsPerFoot / snapValue) *
           snapValue;

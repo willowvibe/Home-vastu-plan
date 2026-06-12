@@ -1,13 +1,13 @@
 # Known Issues & Improvements
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
-> **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md`.
-> **Last updated:** 2026-06-09
+> **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
+> **Last updated:** 2026-06-11 (post P2 refactor batch on `fix/p2-refactor-batch`, awaiting PR)
 
 ## Quick links
 
 - Full review: [docs/CODE_REVIEW.md](./CODE_REVIEW.md)
-- Architecture: [docs/ARCHITECTURE.md](./ARCHITECTURE.md)
+- Changelog: [CHANGELOG.md](../CHANGELOG.md)
 - E2E status: [memory/e2e-tests-completed.md](../memory/e2e-tests-completed.md)
 
 ---
@@ -50,20 +50,15 @@ _All P0 items from the 2026-06-07 sweep are resolved. The next P0 will be filed 
 
 ## 🟡 P2 — Refactor (health)
 
-| ID   | Title                                                                            | File(s)                               | Effort |
-| ---- | -------------------------------------------------------------------------------- | ------------------------------------- | ------ |
-| S-1  | Split `App.tsx` (1,839 lines) into Sidebar / Properties / Toolbar / hook modules | `src/App.tsx`                         | 8-12 h |
-| S-3  | Replace `setPlan` with a single `updatePlan` API                                 | `src/hooks/useFloorPlan.ts`           | 2 h    |
-| S-4  | Add property tests for Vastu ideal-direction matrix                              | `src/services/vastu.ts`               | 4 h    |
-| S-8  | Move geometry constants (TOLERANCE, wall defaults) to `constants/geometry.ts`    | multiple                              | 1 h    |
-| S-12 | Replace `catch (error: any)` with `catch (error: unknown)` + type narrowing      | multiple                              | 2 h    |
-| Q-1  | Add Vitest tests for `useCanvasDrag`                                             | `src/hooks/useCanvasDrag.ts`          | 6 h    |
-| Q-2  | Add Vitest tests for `useFloorPlan` history                                      | `src/hooks/useFloorPlan.ts`           | 3 h    |
-| Q-3  | Add Vitest tests for `useCollaboration` socket lifecycle                         | `src/hooks/useCollaboration.ts`       | 4 h    |
-| Q-9  | Share `PlanUpdateEvent` type between client and server                           | `src/types.ts`, `server/src/index.ts` | 2 h    |
-| Q-12 | Split `src/lib/exports.ts` (158 lines, 5 concerns) into 5 files                  | `src/lib/exports.ts`                  | 3 h    |
+| ID  | Title                                                                            | File(s)                         | Effort |
+| --- | -------------------------------------------------------------------------------- | ------------------------------- | ------ |
+| S-1 | Split `App.tsx` (1,839 lines) into Sidebar / Properties / Toolbar / hook modules | `src/App.tsx`                   | 8-12 h |
+| S-4 | Add property tests for Vastu ideal-direction matrix                              | `src/services/vastu.ts`         | 4 h    |
+| Q-1 | Add Vitest tests for `useCanvasDrag`                                             | `src/hooks/useCanvasDrag.ts`    | 6 h    |
+| Q-2 | Add Vitest tests for `useFloorPlan` history                                      | `src/hooks/useFloorPlan.ts`     | 3 h    |
+| Q-3 | Add Vitest tests for `useCollaboration` socket lifecycle                         | `src/hooks/useCollaboration.ts` | 4 h    |
 
-**Subtotal:** ~33 h
+**Subtotal:** ~25 h
 
 ---
 
@@ -78,16 +73,16 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ---
 
-## ✅ Recently Resolved (P1 batch)
+## ✅ Recently Resolved (P1 batch #1 — P1 quick-wins)
 
-> The first P1 batch shipped in this branch (`fix/p1-quick-wins`). 4 of the 10 P1 items are fixed. Per-bug commit refs:
+> The first P1 batch shipped in PR #39 (merge commit `1694af7`) on 2026-06-09. 4 of the 10 P1 items are fixed. Per-bug commit refs:
 
-| ID   | Title                                                    | Fix commit   | Notes                                                                                |
-| ---- | -------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------ |
-| B-3  | "Clear floor" uses captured `plan` instead of functional | _on this PR_ | `updatePlan((prev) => ...)` + drops the now-unused `setPlan` import.                 |
-| B-7  | Ruler distance label hard-coded to `' ft`                | _on this PR_ | `RulerOverlay` accepts `unit`; converts ft→m at 0.3048. Also fixes B-14 (half-foot). |
-| S-16 | `ProjectManager` `localStorage.setItem` not in try/catch | _on this PR_ | Wraps setItem; toast for `QuotaExceededError` (and any other DOMException).          |
-| B-17 | Dark mode + `prose-slate` produces white-on-white panel  | _on this PR_ | `dark:prose-invert` on the analysis panel container.                                 |
+| ID   | Title                                                    | Fix commit | Notes                                                                                |
+| ---- | -------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------ |
+| B-3  | "Clear floor" uses captured `plan` instead of functional | `db30f60`  | `updatePlan((prev) => ...)` + drops the now-unused `setPlan` import.                 |
+| B-7  | Ruler distance label hard-coded to `' ft`                | `3f115f1`  | `RulerOverlay` accepts `unit`; converts ft→m at 0.3048. Also fixes B-14 (half-foot). |
+| S-16 | `ProjectManager` `localStorage.setItem` not in try/catch | `9b54d86`  | Wraps setItem; toast for `QuotaExceededError` (and any other DOMException).          |
+| B-17 | Dark mode + `prose-slate` produces white-on-white panel  | `db30f60`  | `dark:prose-invert` on the analysis panel container.                                 |
 
 **No regressions** in `npm run lint`, `npm test` (33/33, +8 new), or `npm run build`.
 
@@ -95,7 +90,7 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## ✅ Recently Resolved (P1 batch #2)
 
-> The second P1 batch shipped on branch `fix/p1-batch-2`. 5 of the remaining 6 P1 items and 1 P2 item are fixed. Per-bug commit refs:
+> The second P1 batch shipped in PR #43 (merge commit `36b67ca`) on 2026-06-11. 5 of the remaining 6 P1 items and 1 P2 item are fixed. Per-bug commit refs:
 
 | ID   | Title                                                                            | Fix commit | Notes                                                                                                                              |
 | ---- | -------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -111,7 +106,7 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## ✅ Recently Resolved (P2 hygiene batch)
 
-> The P2/P3 hygiene batch shipped on branch `fix/p2-hygiene-batch`. 7 P2/P3 items fixed: S-22 (proper CACHE_NAME bump), Q-5 (coverage thresholds), Q-6 (allowJs), Q-7+Q-14 (re-include sw.ts + setup.ts in tsc), Q-15 (drop 3 unused deps), Q-20 (Node engine), Q-25 (VITE_GEMINI_API_KEY). Also resolves the missed S-21 row from the P1 batch #2 docs (the code change shipped then; the doc row was missed). Per-bug commit refs:
+> The P2/P3 hygiene batch shipped in PR #44 (merge commit `bf2c214`) on 2026-06-11. 7 P2/P3 items fixed: S-22 (proper CACHE_NAME bump), Q-5 (coverage thresholds), Q-6 (allowJs), Q-7+Q-14 (re-include sw.ts + setup.ts in tsc), Q-15 (drop 3 unused deps), Q-20 (Node engine), Q-25 (VITE_GEMINI_API_KEY). Also resolves the missed S-21 row from the P1 batch #2 docs (the code change shipped then; the doc row was missed). Per-bug commit refs:
 
 | ID   | Title                                                                              | Fix commit | Notes                                                                                                                                                                                                                                                            |
 | ---- | ---------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -129,16 +124,36 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ---
 
+## ✅ Recently Resolved (P2 refactor batch)
+
+> The 2026-06-11 P2 refactor batch ships 5 P2 items in branch `fix/p2-refactor-batch` (commits `c40e621`..`f45745b`, awaiting PR). Test count grew from 55 to 97 (+42), mostly from pinning the new constants / helpers to regression tests. Per-bug commit refs:
+
+| ID   | Title                                                                         | Fix commit | Notes                                                                                                                                                                                                                                                                                                                               |
+| ---- | ----------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-3  | Replace `setPlan` with a single `updatePlan` API                              | `f45745b`  | `setPlan` removed from `useFloorPlan`'s public return; internal `setPlan` retained for the 4 history-aware callers. `useFloorPlan.test.ts` (4 tests) pins the public-API shape.                                                                                                                                                     |
+| S-8  | Move geometry constants (TOLERANCE, wall defaults) to `constants/geometry.ts` | `c40e621`  | New `src/constants/geometry.ts` centralizes TOLERANCE_FT (0.1), INCHES_PER_FOOT (12), DEFAULT_WALL_THICKNESS_IN (9), SNAP_GRID_FT (1), SNAP_GRID_SUB_FT (0.1), MIN/MAX_ROOM_SIZE_FT, PIXELS_PER_FOOT, FT_PER_METER, etc. Replaced 14 hard-coded values across 4 callers. `geometry.test.ts` (17 tests) is the regression catcher.   |
+| S-12 | Replace `catch (error: any)` with `catch (error: unknown)` + type narrowing   | `6063d3c`  | New `getErrorMessage(error: unknown)` in `src/utils.ts` (12 tests). Switched 3 catch sites in `App.tsx` + 2 `err.message` sites in `useCollaboration.ts`. Lint rule `@typescript-eslint/no-explicit-any` flipped `off` → `warn` (with a follow-up comment to promote to `error` once the 30+ pre-existing any uses are cleaned up). |
+| Q-9  | Share `PlanUpdateEvent` type between client and server                        | `91606a1`  | New `src/types/shared.ts` is the single source of truth. `data: any` → `data: unknown` (forced 3 narrow-back sites in `useCollaboration.ts`). Server's `tsconfig.json` widened to allow the import.                                                                                                                                 |
+| Q-12 | Split `src/lib/exports.ts` (158 lines, 5 concerns) into 5 files               | `ace86aa`  | Split into `exportPng.ts`, `exportSvg.ts`, `exportJson.ts`, `shareLink.ts`, `printPlan.ts`. The original `exports.ts` is now a 22-line back-compat barrel. Plus a `compressPlan` / `decompressPlan` pure-function pair in `shareLink.ts` (9 round-trip tests).                                                                      |
+
+**No regressions** in `npm run lint` (0 errors, 36 warnings — 35 pre-existing `any` uses, 1 react-refresh), `npm test` (97/97, +42 new), or `npm run build`. Server `tsc --noEmit` also passes — Q-9's cross-package type now typechecks on the server side.
+
+---
+
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-| Bucket | Items | Effort  | Status                                |
-| ------ | ----- | ------- | ------------------------------------- |
-| P0     | 0     | —       | ✅ All resolved (PR #28)              |
-| P1     | 1     | ~2 h    | 🟡 5 resolved (#43), 1 remaining      |
-| P2     | 10    | ~33 h   | 🟡 8 resolved (this PR), 10 remaining |
-| P3     | many  | ongoing | 🔲 Not started                        |
+> **State as of 2026-06-11 (post P2 refactor batch, awaiting PR).** All 9 P0s and 9 of 10 P1s resolved. P1: only B-8 remains. P2: 5 items / ~25 h.
 
-See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P1 batch #2)](#-recently-resolved-p1-batch-2) above for the P1 batch #2 fixes, and [✅ Recently Resolved (P2 hygiene batch)](#-recently-resolved-p2-hygiene-batch) above for this PR.
+| Bucket | Items | Effort  | Status                                                      |
+| ------ | ----- | ------- | ----------------------------------------------------------- |
+| P0     | 0     | —       | ✅ All resolved (PR #28)                                    |
+| P1     | 1     | ~2 h    | 🟡 5 resolved (#43), 1 remaining (B-8)                      |
+| P2     | 5     | ~25 h   | 🟡 10 resolved (#43 + #44 + P2 refactor batch), 5 remaining |
+| P3     | many  | ongoing | 🔲 Not started                                              |
+
+See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P2 refactor batch)](#-recently-resolved-p2-refactor-batch) above for the just-shipped P2 fixes.
+
+**Suggested next batch (≤ 1 day, low-risk):** None of the remaining P2 items are < 1 day. The smallest remaining items are: Q-2 (3 h, `useFloorPlan` history tests) or Q-3 (4 h, `useCollaboration` socket tests). The biggest follow-up is **S-1** (`App.tsx` split, 8-12 h) — coordinate with the user before starting since a 1,000+-line diff benefits from its own branch.
 
 ---
 

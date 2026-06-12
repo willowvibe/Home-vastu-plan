@@ -5,6 +5,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import apiRouter from './api/index.js';
 import { query } from './db/connection.js';
+// Q-9: shared type — same PlanUpdateEvent the client emits, so the
+// server's `tsc` build catches any drift on the next `npm run build`.
+// The relative path is the cost of not having a workspace package;
+// see `docs/CODE_REVIEW.md` §Q-9.
+import type { PlanUpdateEvent } from '../../src/types/shared.js';
 
 dotenv.config();
 
@@ -51,13 +56,7 @@ interface ChatMessage {
   timestamp: number;
 }
 
-interface PlanUpdate {
-  type: 'room' | 'plan' | 'element';
-  action: 'add' | 'update' | 'delete' | 'move';
-  data: any;
-  timestamp: number;
-  userId: string;
-}
+// Q-9: replaced by the shared type imported above.
 
 // In-memory storage for collaboration
 const rooms = new Map<string, Room>();
@@ -165,7 +164,7 @@ io.on('connection', (socket: Socket) => {
   });
 
   // Update plan (room added, updated, deleted, etc.)
-  socket.on('plan-update', (update: PlanUpdate) => {
+  socket.on('plan-update', (update: PlanUpdateEvent) => {
     if (!currentRoomId || !currentUser) return;
 
     const room = rooms.get(currentRoomId);

@@ -108,7 +108,12 @@ export function useFloorPlan(initialPlan: FloorPlan) {
 
   return {
     plan,
-    setPlan,
+    // S-3: setPlan removed from the public API. The hook only exposes
+    // `updatePlan` (which accepts a value OR an updater function) plus
+    // the history controls. The internal `setPlan` is still used by
+    // `undo` / `redo` / `resetPlan` / `commitHistory` — those are the
+    // only legitimate non-functional sites, because they already know
+    // the exact target value (a history snapshot or a loaded plan).
     updatePlan,
     commitHistory,
     undo,

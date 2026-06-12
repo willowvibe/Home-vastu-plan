@@ -4,7 +4,11 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "outDir": "./dist",
-    "rootDir": ".",
+    // Q-9: rootDir widened from "." to ".." so the server can import the
+    // shared PlanUpdateEvent from `src/types/shared`. The shared file
+    // sits outside the server package because the client also imports
+    // from it. See `docs/CODE_REVIEW.md` §Q-9.
+    "rootDir": "..",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -15,6 +19,6 @@
     "sourceMap": true,
     "types": ["node"]
   },
-  "include": ["src/**/*", "db/**/*"],
+  "include": ["src/**/*", "db/**/*", "../src/types/shared.ts"],
   "exclude": ["node_modules", "dist"]
 }
