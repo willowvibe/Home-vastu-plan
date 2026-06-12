@@ -160,3 +160,24 @@ export const COMMON_ELEMENTS = [
   { type: 'Door', w: 3, h: 0.5 },
   { type: 'Window', w: 4, h: 0.5 },
 ];
+
+/**
+ * Format a floor number as an English ordinal: 0 → "0th", 1 → "1st",
+ * 2 → "2nd", 11 → "11th", 21 → "21st", etc. The 11/12/13 special case
+ * (and 111/112/113, 211/212/213, …) is the only non-mechanical part —
+ * these always take "th" regardless of the last digit.
+ */
+export function formatFloor(n: number): string {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1:
+      return `${n}st`;
+    case 2:
+      return `${n}nd`;
+    case 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
+  }
+}

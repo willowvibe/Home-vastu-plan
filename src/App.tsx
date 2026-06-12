@@ -60,6 +60,7 @@ import {
   ROOM_ELEMENTS,
   COMMON_ELEMENTS,
   ROOM_CATEGORIES,
+  formatFloor,
 } from './constants/floorPlanConstants';
 import { INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from './constants/geometry';
 
@@ -999,7 +1000,7 @@ export default function App() {
                       onClick={() => setCurrentFloor(floor)}
                       className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-colors ${currentFloor === floor ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                     >
-                      {floor === 0 ? 'Ground' : floor === 1 ? 'First' : 'Second'}
+                      {formatFloor(floor)}
                     </button>
                   ))}
                 </div>
@@ -1007,7 +1008,7 @@ export default function App() {
                   onClick={() => {
                     if (
                       confirm(
-                        `Are you sure you want to clear all rooms on ${currentFloor === 0 ? 'Ground' : currentFloor === 1 ? 'First' : 'Second'} floor?`
+                        `Are you sure you want to clear all rooms on ${formatFloor(currentFloor)} floor?`
                       )
                     ) {
                       // Functional update — avoids a stale-closure read of
@@ -1274,8 +1275,7 @@ export default function App() {
               <div className="p-8 bg-white">
                 <h1 className="text-2xl font-bold mb-4">VastuPlan Floor Plan</h1>
                 <p className="text-sm text-slate-600 mb-4">
-                  Floor {currentFloor === 0 ? 'Ground' : `Floor ${currentFloor}`} -{' '}
-                  {new Date().toLocaleDateString()}
+                  Floor {formatFloor(currentFloor)} - {new Date().toLocaleDateString()}
                 </p>
                 <div className="print-only" ref={canvasContainerRef}>
                   <Canvas
@@ -1818,8 +1818,8 @@ export default function App() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">VastuPlan Floor Plan</h1>
           <p className="text-sm text-slate-600 mb-8">
-            Floor {currentFloor === 0 ? 'Ground' : `Floor ${currentFloor}`} |{' '}
-            {new Date().toLocaleDateString()} | Generated on {new Date().toLocaleTimeString()}
+            Floor {formatFloor(currentFloor)} | {new Date().toLocaleDateString()} | Generated on{' '}
+            {new Date().toLocaleTimeString()}
           </p>
           <div className="border border-slate-200 p-4">
             <Canvas
