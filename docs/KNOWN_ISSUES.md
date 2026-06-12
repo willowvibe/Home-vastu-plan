@@ -2,13 +2,29 @@
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
 > **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
-> **Last updated:** 2026-06-11 (post test-coverage batch on `fix/q-2-q-3-hook-tests`, awaiting PR; this branch resolves Q-1)
+> **Last updated:** 2026-06-12 (post-deploy polish batch on `fix/post-deploy-polish`, 3 commits, pending PR; this branch resolves Q-1 (floor labels) and Q-2 (theme system) from the post-deploy findings)
 
 ## Quick links
 
 - Full review: [docs/CODE_REVIEW.md](./CODE_REVIEW.md)
 - Changelog: [CHANGELOG.md](../CHANGELOG.md)
 - E2E status: [memory/e2e-tests-completed.md](../memory/e2e-tests-completed.md)
+
+---
+
+## ✅ Recently Resolved (Post-deploy polish batch)
+
+> The post-deploy polish batch ships on branch `fix/post-deploy-polish` (3 commits, pending PR). 2 P3/Q-items fixed: Q-1 (floor labels) and Q-2 (theme system duplicate state). Also adds a Vercel deployment config and a project-root `CLAUDE.md`. Per-bug commit refs:
+
+| ID  | Title                                                                  | Fix commit | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --- | ---------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-1 | Floor labels are words ("Ground / First / Second"), not ordinals       | `17e38fa`  | Renames to `0th / 1st / 2nd / …` via the new `formatFloor()` helper in `src/constants/floorPlanConstants.ts` (15 assertions in `floorPlanConstants.test.ts` cover the 11/12/13 special case, two-digit, three-digit). 5 call sites in `App.tsx` + 1 in `types.ts` (doc comment) updated. No regressions in any of the 159 tests.                                                                                                                                                    |
+| Q-2 | Theme system duplicates state: `App.tsx` has local `useState<boolean>` | `e6b44f4`  | New `<ThemeProvider>` + `useTheme()` in `src/contexts/ThemeContext.tsx`, plus `useDarkMode()` in `src/hooks/useDarkMode.ts` (4 tests cover toggle, localStorage persistence, and the "no stored value → honor current `<html class>`" path). 53 ternary class strings in `App.tsx`/`Header.tsx`/`LayerManager.tsx` migrated to Tailwind v4's `dark:` variant. Linchpin: `@custom-variant dark (&:where(.dark, .dark *));` in `src/index.css` (41 `.dark` rules in dist CSS, was 0). |
+
+**No regressions** in `npm run lint`, `npm test` (159/159, +4 new `useDarkMode` tests), or `npm run build`. Also includes:
+
+- **Vercel deployment** — `vercel.json` + `vercel-build.sh` + a README pointer. Every push to `main` → Production; every PR → Preview URL. See `docs/superpowers/specs/2026-06-12-vercel-deployment-design.md`. (Coordinate with the willowvibe org admin to wire the project in the Vercel UI after merge — 5 min.)
+- **Project conventions doc** — new `CLAUDE.md` at the repo root (under 200 lines) covering project overview, dev environment, git/mirror note, conventions (incl. the localStorage-shim pattern for tests), theme system rules + section-shade table, and the things-future-Claude-should-know (wall thickness is in inches, `formatFloor()` semantics, the Vercel deploy context).
 
 ---
 
@@ -164,16 +180,16 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-> **State as of 2026-06-11 (post Q-1 + Q-2 + Q-3 test-coverage batches, all P2 hook tests resolved).** All 9 P0s and 9 of 10 P1s resolved. P1: only B-8 remains. P2: 2 items / ~12-16 h.
+> **State as of 2026-06-12 (post Q-1 + Q-2 + Q-3 test-coverage batches, all P2 hook tests resolved; post-deploy polish batch on `fix/post-deploy-polish`, pending PR).** All 9 P0s and 9 of 10 P1s resolved. P1: only B-8 remains. P2: 2 items / ~12-16 h. P3/Q: 16 resolved, 2 remaining (Q-1 + Q-2 from the post-deploy polish batch — both fixed in this branch, awaiting PR).
 
 | Bucket | Items | Effort   | Status                                                                     |
 | ------ | ----- | -------- | -------------------------------------------------------------------------- |
 | P0     | 0     | —        | ✅ All resolved (PR #28)                                                   |
 | P1     | 1     | ~2 h     | 🟡 5 resolved (#43), 1 remaining (B-8)                                     |
 | P2     | 2     | ~12-16 h | 🟡 14 resolved (#43 + #44 + #45 + Q-2 + Q-3 + Q-1), 2 remaining (S-1, S-4) |
-| P3     | many  | ongoing  | 🔲 Not started                                                             |
+| P3 / Q | many  | ongoing  | 🟡 16 resolved, 2 remaining (Q-1, Q-2) — both shipped on this branch       |
 
-See [✅ Recently Resolved](#-recently-resolved) above for P0 commit refs, [✅ Recently Resolved (P1 batch #2)](#-recently-resolved-p1-batch-2) above for the P1 batch #2 fixes, [✅ Recently Resolved (P2 hygiene batch)](#-recently-resolved-p2-hygiene-batch) above for that batch, [✅ Recently Resolved (P2 refactor batch)](#-recently-resolved-p2-refactor-batch) above for the P2 refactor PR, [✅ Recently Resolved (Test coverage batch)](#-recently-resolved-test-coverage-batch) above for Q-2 + Q-3, and [✅ Recently Resolved (Test coverage batch — Q-1)](#-recently-resolved-test-coverage-batch--q-1) above for Q-1.
+See [✅ Recently Resolved (Post-deploy polish batch)](#-recently-resolved-post-deploy-polish-batch) for the most recent resolutions, [✅ Recently Resolved (Test coverage batch — Q-1)](#-recently-resolved-test-coverage-batch--q-1) for Q-1 hook tests, [✅ Recently Resolved (Test coverage batch)](#-recently-resolved-test-coverage-batch) for Q-2 + Q-3, and the [✅ Recently Resolved](#-recently-resolved) section above for the P0 sweep.
 
 **Suggested next batch:** No more P2 hooks-test work remains (Q-1, Q-2, Q-3 all done). The next move is **S-1** (split `App.tsx`, 8-12 h) — the single biggest structural win in the backlog. Coordinate with the user before starting since a 1,000+-line diff benefits from its own branch. Alternative low-risk small wins: **S-4** (4 h, property tests for Vastu matrix).
 

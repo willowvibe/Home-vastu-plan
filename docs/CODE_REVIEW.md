@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-11 to reflect PRs #28, #39, #43, #44, #45, #46, and the Q-1 test-coverage branch (this branch, 1 item: Q-1).
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-12 to add the post-deploy polish batch (`fix/post-deploy-polish`, 3 commits, pending PR).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -18,7 +18,9 @@
 >
 > **Test-coverage batch (Q-2 + Q-3) — RESOLVED 2026-06-11 in PR #46:** Q-2 (`useFloorPlan` history, +15 tests), Q-3 (`useCollaboration` socket lifecycle, +20 tests) all fixed. See the [✅ Resolved in test-coverage batch](#-resolved-in-test-coverage-batch) section at the bottom of this document.
 >
-> **Test-coverage batch (Q-1) — RESOLVED 2026-06-11 on `fix/q-1-use-canvas-drag-tests` (this branch, pending PR):** Q-1 (`useCanvasDrag` behavioural tests, +23 tests) fixed. See the [✅ Resolved in test-coverage batch (Q-1)](#-resolved-in-test-coverage-batch-q-1) section at the bottom of this document.
+> **Test-coverage batch (Q-1) — RESOLVED 2026-06-12 in PR #47:** Q-1 (`useCanvasDrag` behavioural tests, +23 tests) fixed. See the [✅ Resolved in test-coverage batch (Q-1)](#-resolved-in-test-coverage-batch-q-1) section at the bottom of this document.
+>
+> **Post-deploy polish — RESOLVED 2026-06-12 on `fix/post-deploy-polish` (3 commits, pending PR):** Tailwind v4 `dark:` variant enabled (was previously dead code); 53 darkMode ternaries migrated to the `dark:` variant; `useTheme()` context; `formatFloor()` helper for ordinal floor labels. See the [✅ Resolved in post-deploy polish](#-resolved-in-post-deploy-polish) section at the bottom of this document.
 
 ---
 
@@ -702,6 +704,27 @@ Also in the same PR: **Q-1** — `AppMode` string union extracted to `src/types.
 | Q-3 | No tests for `useCollaboration` socket lifecycle | §4 Q-3        | +20   | Behavioural tests in `useCollaboration.test.ts` covering: the connect / disconnect state transitions, the B-1 stable-deps effect, the B-2 functional `onPlanChange` setter, the S-12 `getErrorMessage` error-narrowing path (Error / string / number fallbacks), the `room-joined` plan-sync fallback when the server returns an empty plan, the local-echo guard on `plan-updated` (the `isLocalUpdateRef`), the `plan-synced` echo guard (`modifiedBy === our userId`), `joinRoom` / `leaveRoom` / `broadcastUpdate` public-API behaviour, and the unmount cleanup. |
 
 **Validation:** `npm test` (128/128, +31 new) ✅, `npm run lint` ✅ (0 new warnings), `npm run build` ✅. The 3 pre-existing B-1 / B-2 / S-2 tests in `useCollaboration.test.ts` are retained unchanged. No source-code changes; the entire diff is test additions.
+
+---
+
+## ✅ Resolved in post-deploy polish
+
+> The 2026-06-12 post-deploy polish batch on `fix/post-deploy-polish` (3 commits, pending PR) fixed a long-standing theme-system bug. The per-bug entry was in §3 (theme-system duplicated state, was the `Q-?` row added post-2026-06-11). The root cause was 3 things piled up:
+
+1. **Tailwind v4's `dark:` variant was not enabled.** The 7 places that used `dark:` classes compiled to nothing because `src/index.css` had no `@custom-variant` declaration. They looked right in the code; they didn't paint.
+2. **Dark mode "worked" only via 53 ternary class strings threaded as props from `App.tsx`.** This conflated "what color is this" with "is the user in dark mode", forced every new component to receive `darkMode` as a prop, and couldn't be reused outside `App`'s tree.
+3. **Light and dark palettes were flat.** Header, sidebar, canvas frame, and properties panel all used the same `bg-white` / `bg-slate-50` in light mode and `bg-slate-800` / `bg-slate-900` in dark mode. The "mostly all white" UI was the visible symptom.
+
+The fix: 1 CSS line (`@custom-variant dark (&:where(.dark, .dark *));`), 1 hook (`useDarkMode` reading from `localStorage` OR `documentElement.classList`, writing to both on change), 1 context (`<ThemeProvider>` + `useTheme()`), and migration of the 53 ternaries. The 7 already-`dark:`-using sites needed no code change — they started working the moment `@custom-variant` landed.
+
+Test count: 151 → 159 (+8 total: +4 from `formatFloor()` in Commit 1, +4 from `useDarkMode()` in Commit 2).
+
+| ID  | Title                                                          | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --- | -------------------------------------------------------------- | ------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-1 | Floor labels hardcoded as Ground/First/Second                  | §6 Q-1        | +4    | New `formatFloor()` helper in `src/constants/floorPlanConstants.ts` handles English ordinals including the 11/12/13 special case. Replaces 5 ternary sites in `App.tsx` (one in the floor selector, one in the clear-floor confirmation, two in the print headers, plus the import). The stale `// 0 = Ground, 1 = First, etc.` comment in `src/types.ts:55` is updated.                                                                                                                                                                                                                                                                                                                                                                            |
+| Q-2 | Dark mode "implemented twice" (ternaries + dead dark: classes) | §6 Q-2        | +4    | The 7 already-`dark:`-using sites start working with `@custom-variant dark` in `src/index.css`. The 53 ternary class strings across `App.tsx`, `Header.tsx`, `LayerManager.tsx` migrate to the `dark:` variant with section-specific shades (page=`slate-50/900`, header=`slate-100/800`, sidebar=`white/900`, properties=`slate-50/900`, canvas=`white/800`, modal=`white/800`, input=`white/800`). `App.tsx`'s local `darkMode` state and the prop-passing to `Header` / `LayerManager` are gone; components consume `useTheme()`. New `useDarkMode()` hook handles `localStorage` + `<html class="dark">` with a per-file real-store shim in its test (the global `vi.fn()` mock in `src/test/setup.ts` would have made persistence untestable). |
+
+**Validation:** `npm test` (159/159, +8 new) ✅, `npm run lint` ✅ (0 new errors), `npm run build` ✅ (41 `dark:` variant rules now in `dist/assets/index-*.css`; 0 before). No new dependencies. The 3-commit split keeps `git log` clean and makes the theme refactor easy to revert without losing the floor rename.
 
 ---
 
