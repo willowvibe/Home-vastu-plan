@@ -136,6 +136,20 @@ This alpha release includes the full feature set advertised in earlier preview b
 - View / comment modes lock the canvas and keyboard shortcuts so the app is read-only
 - Honor `prefers-reduced-motion` (no decorative animations in core flows)
 
+## 🚀 Deploy
+
+The web app deploys to **Vercel** via the Vercel Git integration. No GitHub Actions
+file is required for the deploy — the existing `ci.yml` runs lint + tests on every
+PR, and Vercel builds and deploys on every push/merge to `main` (production) and on
+every PR (preview URLs).
+
+To link the repo to Vercel: see the 7-step runbook in
+[`docs/superpowers/specs/2026-06-12-vercel-deployment-design.md`](./docs/superpowers/specs/2026-06-12-vercel-deployment-design.md).
+This is a one-time per-account setup. After that, every push deploys automatically.
+
+The optional Socket.io collaboration server in `server/` is deployed separately
+via `.github/workflows/deploy-server.yml` to Render + Railway.
+
 ## 🧪 Internals (for contributors)
 
 - **State**: `useFloorPlan` owns plan + history (bounded, undo/redo, localStorage autosave with `loadedAt` race guard)
