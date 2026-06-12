@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-> The 2026-06-11 P2 refactor batch ships 5 P2 items in branch `fix/p2-refactor-batch` (commits `c40e621`..`f45745b`, awaiting PR). All refactors; no user-facing behaviour change. Test count grew from 55 to 97 (+42). Per-item detail below.
+> The 2026-06-11 test-coverage batch ships 2 P2 items in branch `fix/q-2-q-3-hook-tests` (awaiting PR). Test count grew from 97 to 128 (+31). Per-item detail below.
 
 ## [0.1.0] - 2026-06-11 — First alpha (with follow-up fixes)
 
-> 2026-06-11: rolled up the 2026-06-07 alpha entry plus the P0 sweep (PR #28), P1 quick-wins (PR #39), P1 batch #2 (PR #43), and P2 hygiene batch (PR #44) into a single `0.1.0` line. `package.json` is now `0.1.0` (and renamed from `react-example` to `vastuplan-2d`), matching `VERSION` and `README.md`.
+> 2026-06-11: rolled up the 2026-06-07 alpha entry plus the P0 sweep (PR #28), P1 quick-wins (PR #39), P1 batch #2 (PR #43), and P2 hygiene batch (PR #44), and the P2 refactor batch (PR #45) into a single `0.1.0` line. `package.json` is now `0.1.0` (and renamed from `react-example` to `vastuplan-2d`), matching `VERSION` and `README.md`.
 
 ### Added
 
@@ -124,13 +124,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Q-20**: `engines.node: ">=20.0.0"` + `.nvmrc` (20).
 - **Q-25**: `gemini.ts` now prefers `import.meta.env.VITE_GEMINI_API_KEY`; `vite-env.d.ts` declares the type.
 
-### Fixed — 2026-06-11 (P2 refactor batch, on `fix/p2-refactor-batch`, awaiting PR)
+### Fixed — 2026-06-11 (P2 refactor batch, PR #45)
 
 - **S-3**: `useFloorPlan` no longer exposes `setPlan` on its public return. Internal `setPlan` retained for the 4 history-aware callers (`undo` / `redo` / `resetPlan` / `commitHistory`). `useFloorPlan.test.ts` (4 tests) pins the public-API shape so a future re-exposure fails CI.
 - **S-8**: New `src/constants/geometry.ts` centralizes the TOLERANCE_FT, INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN, SNAP_GRID_FT / SUB_FT, MIN/MAX_ROOM_SIZE_FT, PIXELS_PER_FOOT, and FT_PER_METER constants. Replaced 14 hard-coded values across 4 callers (`App.tsx`, `useCanvasDrag.ts`, `Room.tsx`, `lib/exports.ts`). `geometry.test.ts` (17 tests) is the regression catcher.
 - **S-12**: New `getErrorMessage(error: unknown)` helper in `src/utils.ts` (12 tests) replaces the unsafe `error.message` access. Switched 3 `catch (error: any)` sites in `App.tsx` and 2 `err.message` sites in `useCollaboration.ts`. Lint rule `@typescript-eslint/no-explicit-any` flipped `off` → `warn` (promotion to `error` is a follow-up once the 30+ pre-existing `any` uses are cleaned up).
 - **Q-9**: New `src/types/shared.ts` is the single source of truth for the `PlanUpdateEvent` type shared between client and the collaboration server. `data: any` → `data: unknown` on both sides. The server's `tsconfig.json` was widened to allow the cross-package import.
 - **Q-12**: `src/lib/exports.ts` split into 5 per-concern modules: `exportPng.ts`, `exportSvg.ts`, `exportJson.ts`, `shareLink.ts`, `printPlan.ts`. The original `exports.ts` is now a 22-line back-compat barrel. Plus a `compressPlan` / `decompressPlan` pure-function pair in `shareLink.ts` (9 round-trip tests).
+
+### Fixed — 2026-06-11 (Test-coverage batch, on `fix/q-2-q-3-hook-tests`, awaiting PR)
+
+- **Q-2**: `useFloorPlan` history is now covered by 15 behavioural tests (`useFloorPlan.test.ts`). Pins: the `commitHistory` identical-state guard, the MAX_HISTORY_SIZE cap, undo/redo at the head and the tail, the "new commit after undo truncates the redo branch" invariant, `resetPlan`, and the functional-form `updatePlan`.
+- **Q-3**: `useCollaboration` socket lifecycle is now covered by 20 new tests (`useCollaboration.test.ts`). Pins: the B-1 stable-deps effect, the B-2 functional `onPlanChange` setter, the S-12 `getErrorMessage` error-narrowing path (Error / string / number fallbacks), the room-joined plan-sync fallback, the local-echo guard on `plan-updated`, the `plan-synced` echo guard, `joinRoom` / `leaveRoom` / `broadcastUpdate` public-API behaviour, and the unmount cleanup.
 
 ### Changed
 
@@ -141,5 +146,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Multi-select rooms with shift+click (B-8, requires a marquee-select or refactor of `selectedRoomIds`)
 - `App.tsx` split into Sidebar / Properties / Toolbar modules (S-1, 8-12 h — the single biggest structural win)
-- Vitest coverage for `useCanvasDrag` / `useFloorPlan` / `useCollaboration` (Q-1 / Q-2 / Q-3, ~13 h combined)
+- Vitest coverage for `useCanvasDrag` (Q-1, ~6 h)
 - Collaborative editing backend deployment automation
