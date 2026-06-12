@@ -29,16 +29,16 @@ This spec adds a deployment target for the frontend only, using Vercel:
 
 ## 2. What changes
 
-| File | Action | Why |
-|---|---|---|
-| `vercel.json` | **create** | Pin Vite framework, build command, output dir, and SW / asset cache headers. |
-| `README.md` | **edit** (append ~5 lines) | Add a "Deploy" section that points here. |
-| `docs/superpowers/specs/2026-06-12-vercel-deployment-design.md` | **create** (this file) | Per the brainstorming skill's spec convention. |
-| `vite.config.ts` | unchanged | Already produces a deployable static build. |
-| `package.json` | unchanged | No new scripts, no new deps. |
-| `.github/workflows/ci.yml` | unchanged | Lint + test + build on every PR continues to run as a gate. |
-| `.github/workflows/deploy-server.yml` | unchanged | Server deploys (Render + Railway) are out of scope. |
-| Vercel project (out-of-repo) | **create** | One-time setup by the org admin; documented in §6. |
+| File                                                            | Action                     | Why                                                                          |
+| --------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------- |
+| `vercel.json`                                                   | **create**                 | Pin Vite framework, build command, output dir, and SW / asset cache headers. |
+| `README.md`                                                     | **edit** (append ~5 lines) | Add a "Deploy" section that points here.                                     |
+| `docs/superpowers/specs/2026-06-12-vercel-deployment-design.md` | **create** (this file)     | Per the brainstorming skill's spec convention.                               |
+| `vite.config.ts`                                                | unchanged                  | Already produces a deployable static build.                                  |
+| `package.json`                                                  | unchanged                  | No new scripts, no new deps.                                                 |
+| `.github/workflows/ci.yml`                                      | unchanged                  | Lint + test + build on every PR continues to run as a gate.                  |
+| `.github/workflows/deploy-server.yml`                           | unchanged                  | Server deploys (Render + Railway) are out of scope.                          |
+| Vercel project (out-of-repo)                                    | **create**                 | One-time setup by the org admin; documented in §6.                           |
 
 **Net diff vs. `main @ 2e53cfc`:** 2 new files (`vercel.json`, this spec), 1 small edit to `README.md`. No source-code changes.
 
@@ -64,9 +64,7 @@ This spec adds a deployment target for the frontend only, using Vercel:
     },
     {
       "source": "/assets/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ]
 }
@@ -74,16 +72,16 @@ This spec adds a deployment target for the frontend only, using Vercel:
 
 ### Why each key is here
 
-| Key | Value | Why |
-|---|---|---|
-| `$schema` | `https://openapi.vercel.sh/vercel.json` | Enables editor IntelliSense in editors that support JSON Schema. Free, harmless. |
-| `framework` | `"vite"` | Pins Vercel's auto-detection. Without it, Vercel falls back to "Other" and may pick a wrong install / dev command. |
-| `buildCommand` | `"npm run build"` | Same command as `ci.yml`. Single source of truth for the build. |
-| `outputDirectory` | `"dist"` | Vite's default output dir. Vercel would guess it; pinning removes drift risk. |
-| `cleanUrls` | `true` | Drops `.html` from URLs. Pure cosmetic but standard for SPAs. |
-| `trailingSlash` | `false` | `/foo` not `/foo/`. SPA-friendly, no server-side routing to break. |
-| `headers` (sw.js) | `Cache-Control: public, max-age=0, must-revalidate` + `Service-Worker-Allowed: /` | The browser refuses to update a service worker that's served with a long cache. The `Service-Worker-Allowed: /` header lets the SW control the entire origin (the default scope is `/sw.js` which is too narrow). |
-| `headers` (assets/) | `Cache-Control: public, max-age=31536000, immutable` | Vite emits `[name]-[hash].js` / `.css` files in `dist/assets/`. The hash changes on every build, so a 1-year immutable cache is safe and saves bandwidth. |
+| Key                 | Value                                                                             | Why                                                                                                                                                                                                               |
+| ------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$schema`           | `https://openapi.vercel.sh/vercel.json`                                           | Enables editor IntelliSense in editors that support JSON Schema. Free, harmless.                                                                                                                                  |
+| `framework`         | `"vite"`                                                                          | Pins Vercel's auto-detection. Without it, Vercel falls back to "Other" and may pick a wrong install / dev command.                                                                                                |
+| `buildCommand`      | `"npm run build"`                                                                 | Same command as `ci.yml`. Single source of truth for the build.                                                                                                                                                   |
+| `outputDirectory`   | `"dist"`                                                                          | Vite's default output dir. Vercel would guess it; pinning removes drift risk.                                                                                                                                     |
+| `cleanUrls`         | `true`                                                                            | Drops `.html` from URLs. Pure cosmetic but standard for SPAs.                                                                                                                                                     |
+| `trailingSlash`     | `false`                                                                           | `/foo` not `/foo/`. SPA-friendly, no server-side routing to break.                                                                                                                                                |
+| `headers` (sw.js)   | `Cache-Control: public, max-age=0, must-revalidate` + `Service-Worker-Allowed: /` | The browser refuses to update a service worker that's served with a long cache. The `Service-Worker-Allowed: /` header lets the SW control the entire origin (the default scope is `/sw.js` which is too narrow). |
+| `headers` (assets/) | `Cache-Control: public, max-age=31536000, immutable`                              | Vite emits `[name]-[hash].js` / `.css` files in `dist/assets/`. The hash changes on every build, so a 1-year immutable cache is safe and saves bandwidth.                                                         |
 
 ### What is deliberately NOT in `vercel.json`
 
@@ -125,13 +123,13 @@ The deployed bundle bakes `VITE_*` env vars at build time (this is how Vite work
 
 ### First deploy (this spec)
 
-| Var | State | Effect |
-|---|---|---|
-| `VITE_GEMINI_API_KEY` | unset | "Analyze with AI" button throws `VITE_GEMINI_API_KEY not configured` error. Everything else works. |
-| `VITE_COLLAB_SERVER_URL` | unset | App falls back to `http://localhost:3001` (in `src/hooks/useCollaboration.ts:6`). Real-time collab won't work in production until set. |
-| `VITE_ANALYTICS_ENABLED` | unset → defaults `true` | Plausible analytics runs against the default domain. |
-| `VITE_ANALYTICS_DOMAIN` | unset → defaults `vastuplan.app` | Plausible self-reports events to that domain. Update if you change the production URL. |
-| `VITE_ANALYTICS_API_HOST` | unset → defaults `https://plausible.io` | Uses the Plausible cloud. |
+| Var                       | State                                   | Effect                                                                                                                                 |
+| ------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_GEMINI_API_KEY`     | unset                                   | "Analyze with AI" button throws `VITE_GEMINI_API_KEY not configured` error. Everything else works.                                     |
+| `VITE_COLLAB_SERVER_URL`  | unset                                   | App falls back to `http://localhost:3001` (in `src/hooks/useCollaboration.ts:6`). Real-time collab won't work in production until set. |
+| `VITE_ANALYTICS_ENABLED`  | unset → defaults `true`                 | Plausible analytics runs against the default domain.                                                                                   |
+| `VITE_ANALYTICS_DOMAIN`   | unset → defaults `vastuplan.app`        | Plausible self-reports events to that domain. Update if you change the production URL.                                                 |
+| `VITE_ANALYTICS_API_HOST` | unset → defaults `https://plausible.io` | Uses the Plausible cloud.                                                                                                              |
 
 ### Adding env vars later
 
@@ -170,17 +168,17 @@ After step 6, **every** subsequent push to `main` triggers a new production buil
 
 A successful first deploy satisfies all of the following:
 
-| Check | How to verify | Expected result |
-|---|---|---|
-| Production URL returns 200 | `curl -I https://vastuplan-2d-<suffix>.vercel.app` | `HTTP/2 200`, `content-type: text/html` |
-| HTML loads with the right title | Open the URL in a browser, View Source | `<title>VastuPlan 2D — Indian Home Design & Vastu Compliance</title>` |
-| JS bundle loads | Browser devtools → Network → filter `.js` | `dist/assets/index-[hash].js` returns 200 with `cache-control: public, max-age=31536000, immutable` |
-| Service worker registers | Devtools → Application → Service Workers | `sw.js` listed as activated and running |
-| SW cache name is the per-deploy hash | Devtools → Application → Cache Storage | Cache name matches `vastuplan-<hash>` where `<hash>` is derived from `index.html` content (see `src/services/buildHash.ts`) |
-| App renders a canvas | Open the URL, add a room from the left sidebar | Room appears on the canvas, can be dragged |
-| No console errors | Devtools → Console | No red errors on first load. The "VITE_GEMINI_API_KEY not configured" warning is acceptable on first load (only fires when AI features are used). |
-| Preview URL on a PR | Open a PR against `main` | PR page shows a "Vercel" check with a green ✅ and a `https://fix-...vercel.app` URL |
-| PR preview matches main | Visit the preview URL | Same UI as the production URL |
+| Check                                | How to verify                                      | Expected result                                                                                                                                   |
+| ------------------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Production URL returns 200           | `curl -I https://vastuplan-2d-<suffix>.vercel.app` | `HTTP/2 200`, `content-type: text/html`                                                                                                           |
+| HTML loads with the right title      | Open the URL in a browser, View Source             | `<title>VastuPlan 2D — Indian Home Design & Vastu Compliance</title>`                                                                             |
+| JS bundle loads                      | Browser devtools → Network → filter `.js`          | `dist/assets/index-[hash].js` returns 200 with `cache-control: public, max-age=31536000, immutable`                                               |
+| Service worker registers             | Devtools → Application → Service Workers           | `sw.js` listed as activated and running                                                                                                           |
+| SW cache name is the per-deploy hash | Devtools → Application → Cache Storage             | Cache name matches `vastuplan-<hash>` where `<hash>` is derived from `index.html` content (see `src/services/buildHash.ts`)                       |
+| App renders a canvas                 | Open the URL, add a room from the left sidebar     | Room appears on the canvas, can be dragged                                                                                                        |
+| No console errors                    | Devtools → Console                                 | No red errors on first load. The "VITE_GEMINI_API_KEY not configured" warning is acceptable on first load (only fires when AI features are used). |
+| Preview URL on a PR                  | Open a PR against `main`                           | PR page shows a "Vercel" check with a green ✅ and a `https://fix-...vercel.app` URL                                                              |
+| PR preview matches main              | Visit the preview URL                              | Same UI as the production URL                                                                                                                     |
 
 If any check fails, see §9 (Failure modes).
 
@@ -199,16 +197,16 @@ If any check fails, see §9 (Failure modes).
 
 ## 9. Failure modes
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Build fails: "Cannot find module" | `npm ci` ran with stale lockfile or `node_modules` | Delete the Vercel build cache (Project → Settings → General → Clear Build Cache) and re-deploy. |
-| Build fails: "TS error in `src/…`" | A recent change broke typecheck | The same change will have failed in `ci.yml` first — fix there. Vercel will pick up the fix on the next push. |
-| Production URL returns 404 | `outputDirectory` mismatch | Confirm `dist/` exists after build. `vercel.json` pins this. |
-| Service worker doesn't update after a deploy | The SW is being served from browser cache | Hard reload (Cmd-Shift-R) or unregister the SW in Devtools. The `Cache-Control: max-age=0, must-revalidate` on `/sw.js` is correct; the issue is always local browser state. |
-| App shows "VITE_GEMINI_API_KEY not configured" | Expected behavior on first deploy | Add the var in Vercel env settings, or accept it (AI features are optional). |
-| Collab button silently does nothing | Expected behavior on first deploy | Set `VITE_COLLAB_SERVER_URL` to the Render/Railway public URL, or accept it (collab requires the server to be reachable). |
-| Preview URL 404s on a PR | PR was opened from a fork, not from a branch in the repo | Vercel only deploys PRs from branches in the same repo. PRs from forks don't get previews (security: prevents leaking secrets). |
-| `Vercel` check missing on a PR | The Vercel GitHub App isn't installed on the org | Re-do the prerequisite in §6 (org owner installs the Vercel GitHub App on `willowvibe`). |
+| Symptom                                        | Likely cause                                             | Fix                                                                                                                                                                          |
+| ---------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Build fails: "Cannot find module"              | `npm ci` ran with stale lockfile or `node_modules`       | Delete the Vercel build cache (Project → Settings → General → Clear Build Cache) and re-deploy.                                                                              |
+| Build fails: "TS error in `src/…`"             | A recent change broke typecheck                          | The same change will have failed in `ci.yml` first — fix there. Vercel will pick up the fix on the next push.                                                                |
+| Production URL returns 404                     | `outputDirectory` mismatch                               | Confirm `dist/` exists after build. `vercel.json` pins this.                                                                                                                 |
+| Service worker doesn't update after a deploy   | The SW is being served from browser cache                | Hard reload (Cmd-Shift-R) or unregister the SW in Devtools. The `Cache-Control: max-age=0, must-revalidate` on `/sw.js` is correct; the issue is always local browser state. |
+| App shows "VITE_GEMINI_API_KEY not configured" | Expected behavior on first deploy                        | Add the var in Vercel env settings, or accept it (AI features are optional).                                                                                                 |
+| Collab button silently does nothing            | Expected behavior on first deploy                        | Set `VITE_COLLAB_SERVER_URL` to the Render/Railway public URL, or accept it (collab requires the server to be reachable).                                                    |
+| Preview URL 404s on a PR                       | PR was opened from a fork, not from a branch in the repo | Vercel only deploys PRs from branches in the same repo. PRs from forks don't get previews (security: prevents leaking secrets).                                              |
+| `Vercel` check missing on a PR                 | The Vercel GitHub App isn't installed on the org         | Re-do the prerequisite in §6 (org owner installs the Vercel GitHub App on `willowvibe`).                                                                                     |
 
 ---
 
