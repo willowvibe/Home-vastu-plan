@@ -134,3 +134,27 @@ And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already ha
 **Verified working:** Pressing `R` on a selected room does rotate it — the room's `width` and `height` swap (e.g., 480×320 → 320×480 for a 12×16 room). So the feature works, it's just hidden.
 
 ---
+
+### U-5 — View / Comment mode is unreachable from the UI
+
+**Severity:** P1
+**Surface:** header, appMode state, sharing
+**Discovered during:** Phase 1 — Mode switch
+
+**Repro:**
+1. Open the app, default state.
+2. Look at the header (the top bar with the VastuPlan logo, "Vastu Score", dark-mode toggle, Keyboard Shortcuts button, Projects / Floor Plan / AI Image Editor tabs).
+3. Look at the rest of the UI for any "View", "Edit", "Comment" toggle.
+
+**Observed:** No mode switcher exists in the UI. The only way to enter View or Comment mode is to load a shared URL with `?mode=view` or `?mode=comment` query parameter (the share-link loader at `App.tsx:158-174` calls `setAppMode(mode)`). Once you're in View mode via a shared link, an "Edit Copy" button appears in the header (Header.tsx:78-83) — but that only works to *exit* view mode; it doesn't help you *enter* it in the first place.
+
+The `handleShare` function in `App.tsx:468` accepts a `mode: 'view' | 'comment'` argument, but only `handleShare('view')` is wired to a button (line 1191). `handleShare('comment')` is defined but never called from the UI.
+
+**Expected:** Either:
+- A "Share" / "View Mode" button in the header that toggles into a read-only preview of the current plan, or
+- A two-button group in the canvas toolbar: "Share (View)" and "Share (Comment)", so the user can generate both types of share links, or
+- At minimum, a "Preview as View-Only" link that opens the current plan in a new tab in view mode.
+
+**Hypothesis:** Looking at `Header.tsx:71-86`, the entire "VIEW MODE" indicator block is wrapped in `{appMode !== 'edit' && (...)}`, which is the *only* place `appMode` shows up in the header. There is no input that ever sets `appMode` to a non-edit value (other than the URL loader). The app was designed with sharing in mind, but the affordance for *generating* a shareable link is only the Share View-Only button — the user can share a view-only link but cannot easily experience the view mode themselves.
+
+**Trace:** `Array.from(document.querySelectorAll('button')).filter(b => b.textContent?.match(/view|edit|comment/i))` returns only "AI Image Editor" (a false-positive substring match). The header has 5 buttons (dark toggle, keyboard shortcuts, Projects, Floor Plan, AI Image Editor) and 1 dropdown — none of them set `appMode`.
