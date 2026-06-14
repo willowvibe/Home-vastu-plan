@@ -106,32 +106,30 @@ And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already ha
 
 ---
 
-### U-4 — Rotate: no UI button, only a hidden keyboard shortcut
+### U-4 — Rotate button exists but is icon-only and the keyboard shortcut is undocumented
 
-**Severity:** P2
-**Surface:** room properties, keyboard shortcuts
-**Discovered during:** Phase 1 — Rotate room
+**Severity:** P3
+**Surface:** room properties, keyboard shortcuts help dialog
+**Discovered during:** Phase 1 — Rotate room (re-tested after second look)
 
 **Repro:**
-1. Open the app. Add any room (e.g., "Bedroom 12'x12'"). The new room is auto-selected (blue ring + 4 resize handles).
-2. Look at the right sidebar ("Room Properties" panel).
-3. Look at the header toolbar (the row with Projects, Floor Plan, AI Image Editor, etc.).
-4. Look at the entire page for any button labeled "Rotate", "↻", or similar.
+1. Open the app. Add a room. The new room is auto-selected.
+2. Look at the right sidebar — "Room Properties" panel header has a row of 3 icon-only buttons: "Duplicate Room", "Rotate 90°", "Delete Room".
+3. Open the Keyboard Shortcuts help dialog (header → ? button).
 
-**Observed:** No "Rotate" button exists anywhere in the UI. The only way to rotate a room is to press the `R` key on the keyboard. The keyboard shortcuts help dialog (header → Keyboard Shortcuts) does NOT list the `R` shortcut either — the help dialog is empty (it shows four empty categories: Navigation, Room Management, View Controls, Export).
+**Observed:** The rotate button is a small icon button with no text label and only a `title="Rotate 90°"` tooltip. Users who don't hover will not know what it does. The Keyboard Shortcuts help dialog shows four empty categories (Navigation, Room Management, View Controls, Export) — `R` for rotate, `Ctrl+D` for duplicate, `Delete`/`Backspace` for delete, `Ctrl+Z`/`Ctrl+Y` for undo/redo, `?` for help, `Ctrl++`/`Ctrl+-` for zoom — none are listed.
 
 **Expected:** Either:
-- A "Rotate" button in the Room Properties panel, near Width/Length/Wall Thickness, so users can rotate a room without learning a hidden key, or
-- The `R` shortcut (plus `Ctrl+D` duplicate, `Delete`, etc.) listed in the keyboard shortcuts help dialog so users can discover them.
+- Add text labels next to the icon buttons (Duplicate Room / Rotate 90° / Delete Room) so users can read the function, or
+- Populate the Keyboard Shortcuts help dialog with the actual key bindings so users can discover them.
 
-**Hypothesis:** The rotate handler exists in `src/hooks/useKeyboardShortcuts.ts:66-71` (binds `R` to `onRotate()`), and `EVENTS.ROOM_ROTATED` is defined in `src/services/analytics.ts:92`. But:
-- `onRotate` is not wired to a button in `RoomPropertiesPanel` or the toolbar.
-- The keyboard shortcuts help dialog content is empty (all four categories show no entries).
-- Without one or the other, this functionality is undiscoverable.
+**Hypothesis:** `RoomPropertiesPanel` renders the action buttons as `<button title="Rotate 90°">` with an SVG inside and no `<span>` label. The keyboard shortcuts help dialog is rendered in `App.tsx` with empty placeholder sections.
 
-**Trace:** `Array.from(document.querySelectorAll('button')).map(b => b.textContent?.trim()).filter(Boolean)` returns 41 buttons — none of them contain "rotate", "rotat", or "↻".
+**Trace:** `Array.from(document.querySelectorAll('button')).filter(b => /rot/i.test(b.innerHTML))` returns `<button class="p-1.5 ..." title="Rotate 90°"><svg ...>`. There is a button, it's just not labeled.
 
-**Verified working:** Pressing `R` on a selected room does rotate it — the room's `width` and `height` swap (e.g., 480×320 → 320×480 for a 12×16 room). So the feature works, it's just hidden.
+**Verified working:** Pressing `R` on a selected room does rotate it — the room's `width` and `height` swap (e.g., 480×320 → 320×480 for a 12×16 room). Clicking the icon button also rotates.
+
+**Downgraded from initial P2 to P3:** the button exists and has a `title` attribute, so it's discoverable on hover. The main discoverability gap is the empty help dialog.
 
 ---
 
