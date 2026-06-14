@@ -105,3 +105,32 @@ And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already ha
 **Related:** U-1 (rooms stack invisibly) makes U-3 worse — there's no way to "uncover" the buried rooms since clicking on them doesn't select.
 
 ---
+
+### U-4 — Rotate: no UI button, only a hidden keyboard shortcut
+
+**Severity:** P2
+**Surface:** room properties, keyboard shortcuts
+**Discovered during:** Phase 1 — Rotate room
+
+**Repro:**
+1. Open the app. Add any room (e.g., "Bedroom 12'x12'"). The new room is auto-selected (blue ring + 4 resize handles).
+2. Look at the right sidebar ("Room Properties" panel).
+3. Look at the header toolbar (the row with Projects, Floor Plan, AI Image Editor, etc.).
+4. Look at the entire page for any button labeled "Rotate", "↻", or similar.
+
+**Observed:** No "Rotate" button exists anywhere in the UI. The only way to rotate a room is to press the `R` key on the keyboard. The keyboard shortcuts help dialog (header → Keyboard Shortcuts) does NOT list the `R` shortcut either — the help dialog is empty (it shows four empty categories: Navigation, Room Management, View Controls, Export).
+
+**Expected:** Either:
+- A "Rotate" button in the Room Properties panel, near Width/Length/Wall Thickness, so users can rotate a room without learning a hidden key, or
+- The `R` shortcut (plus `Ctrl+D` duplicate, `Delete`, etc.) listed in the keyboard shortcuts help dialog so users can discover them.
+
+**Hypothesis:** The rotate handler exists in `src/hooks/useKeyboardShortcuts.ts:66-71` (binds `R` to `onRotate()`), and `EVENTS.ROOM_ROTATED` is defined in `src/services/analytics.ts:92`. But:
+- `onRotate` is not wired to a button in `RoomPropertiesPanel` or the toolbar.
+- The keyboard shortcuts help dialog content is empty (all four categories show no entries).
+- Without one or the other, this functionality is undiscoverable.
+
+**Trace:** `Array.from(document.querySelectorAll('button')).map(b => b.textContent?.trim()).filter(Boolean)` returns 41 buttons — none of them contain "rotate", "rotat", or "↻".
+
+**Verified working:** Pressing `R` on a selected room does rotate it — the room's `width` and `height` swap (e.g., 480×320 → 320×480 for a 12×16 room). So the feature works, it's just hidden.
+
+---
