@@ -143,6 +143,12 @@ export const Canvas: React.FC<CanvasProps> = ({
           onElementPointerDown={handleElementPointerDown}
           onUpdateRoom={onUpdateRoom}
           onUpdateRoomEnd={onUpdateRoomEnd}
+          // U-3: a click on a room must select it. The room-body
+          // pointerdown fires both this and the drag branch, guarded
+          // by `e.target === e.currentTarget` so child clicks (label,
+          // elements, resize handles) still bail. The shift path
+          // toggles selection (B-8 multi-select P1 hook contract).
+          onSelectRoom={onSelectRoom}
         />
       ))}
 

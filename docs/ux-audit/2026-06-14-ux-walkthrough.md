@@ -17,6 +17,7 @@
 **Discovered during:** Phase 1 — Add room
 
 **Repro:**
+
 1. Open the app, default state, "0th" floor active.
 2. Click "Bedroom 12'x12'" in the Add Rooms panel.
 3. Click "Kitchen 10'x10'".
@@ -26,6 +27,7 @@
 **Observed:** All four rooms are placed at `left: 60px, top: 60px` in the canvas. They are completely stacked, with only the topmost room (the one last added, currently selected with the blue ring) visible. The other three rooms are hidden behind it. Properties panel shows the most-recently-added room.
 
 **Expected:** Each new room should be placed in a way that makes all rooms visible — either:
+
 - An offset of a few feet on each new room (e.g., `x: left + idx * 0.5, y: top + idx * 0.5`), or
 - A new room appears at the canvas center, or
 - The user is alerted "you already have a room here" and prompted to drag.
@@ -43,6 +45,7 @@
 **Discovered during:** Phase 1 — Add room (after U-1)
 
 **Repro:**
+
 1. Open the app at viewport ~1830×829 (any desktop width 1024+).
 2. The left sidebar (288px wide) contains, top to bottom: Plot Settings, Data Management, Floor, Layers, **Add Rooms** (at the very bottom).
 3. The canvas is to the right of the left sidebar, occupying the same vertical space.
@@ -50,6 +53,7 @@
 **Observed:** The left sidebar is ~1755px tall, and the viewport is ~829px tall. To click an "Add Room" button the user must scroll the page (or the left sidebar) down to where the Add Rooms section is. The canvas is in the center column, so scrolling down pushes the canvas out of view. Result: the user clicks "+ Bedroom 12'x12'", the room is added (at position 60,60 per U-1), but the canvas is no longer visible. The user has no visual feedback until they scroll back up. Combined with U-1 (rooms stack invisibly), the new room is doubly hidden.
 
 **Expected:** Either:
+
 - The left sidebar should be sticky / viewport-constrained, with the Add Rooms section near the top (since it's the most-frequent interaction), or
 - The Add Rooms section should be in its own panel near the canvas (e.g., a floating "add" toolbar that stays visible while the canvas is in view), or
 - The page layout should be reworked so the canvas is always visible when the user is interacting with the Add Rooms.
@@ -67,6 +71,7 @@
 **Discovered during:** Phase 1 — Click room (after U-1, U-2)
 
 **Repro:**
+
 1. Open the app, default state, "0th" floor active.
 2. Click "Bedroom 12'x12'" in the Add Rooms panel. (A new room is added at `(setback.left, setback.top)` and is auto-selected; the right sidebar shows its properties.)
 3. Click on the bedroom in the canvas (or on any of the rooms that follows it).
@@ -77,11 +82,13 @@
 Worse: in conjunction with U-1 (rooms stack at the same position), the user has no way to "discover" the rooms they added. The only currently selected room is the most recently added one (a Bedroom in the repro), and clicking on what looks like another room (the Bathroom at a different position) does nothing.
 
 **Expected:** Clicking on a room should:
+
 - If the room is not currently selected: select it (replacing the previous selection unless Shift is held), show the blue ring + 4 resize handles, update the right sidebar to that room's properties.
 - If the room is already selected and the click is on its body (not a handle): keep it selected.
 - Clicking on a resize handle should resize, not change selection.
 
 **Hypothesis:** `Room.tsx` has no `onSelectRoom` call in its `onPointerDown` handler. Looking at the file:
+
 - `Room.tsx:125-133` — the outer `onPointerDown` only calls the drag handler (`onPointerDown(e, room, 'drag')` if `e.target === e.currentTarget`); it never calls `onSelectRoom(roomId)`.
 - `Canvas.tsx:90-91` — the canvas's `onPointerDown` only calls `onSelectRoom(null)` to deselect; it never calls `onSelectRoom(roomId)` for clicks on a room.
 - `useCanvasDrag.ts` (entire file) — does not call `onSelectRoom` at all.
@@ -89,6 +96,7 @@ Worse: in conjunction with U-1 (rooms stack at the same position), the user has 
 So the only path that ever calls `onSelectRoom` with a non-null id is the post-`addRoom` call in `App.tsx:220` (`handleSelectRoom(newRoom.id, false)`). The click-to-select path has been broken since the original `Room` component was introduced (`72b8bfd` "Add Vastu-related components", before PR #50).
 
 **Fix sketch:**
+
 ```tsx
 // Room.tsx:125
 onPointerDown={(e) => {
@@ -98,11 +106,14 @@ onPointerDown={(e) => {
   }
 }}
 ```
+
 And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already has `onSelectRoom` in its prop interface; the wiring was just never done.)
 
 **Trace:** `document.querySelector('div.cursor-move.ring-blue-500')` shows the latest-added room. After `page.mouse.click(1050, 720)` (on a Bathroom at coordinates `(989, 643) - (1109, 803)`), `document.querySelectorAll('div.cursor-move.ring-blue-500')` returns 0 — the Bathroom did NOT become selected. `page.mouse.click(1100, 300)` (on empty canvas) does deselect (count drops to 0), confirming the deselect path works but the select path doesn't.
 
 **Related:** U-1 (rooms stack invisibly) makes U-3 worse — there's no way to "uncover" the buried rooms since clicking on them doesn't select.
+
+**Resolution (2026-06-14):** Fixed in `fix/room-props-and-drag-freeze` (commit pending — see KNOWN_ISSUES §"Recently Resolved (U-3 click-to-select)" when it lands). The fix adds a new optional `onSelectRoom?: (roomId, isShiftKey) => void` prop to `Room.tsx`, calls `onSelectRoom?.(room.id, e.shiftKey)` from the room-body `onPointerDown` (guarded by `e.target === e.currentTarget` so resize handles and labels still bail), and passes `onSelectRoom` from `Canvas.tsx` → `<Room>`. Shift path uses the existing B-8 `useSelection` toggle branch, so multi-select now also works for free. 5 new tests in `Room.test.tsx` (× positive select / × positive shift / × negative resize handle / × negative label span / × optional-prop safety). 194/194 tests pass, 0 lint errors, build clean. Manual repro: open app → add Bedroom → click on it in canvas → ROOM PROPERTIES panel populates → click empty canvas → deselects.
 
 ---
 
@@ -113,6 +124,7 @@ And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already ha
 **Discovered during:** Phase 1 — Rotate room (re-tested after second look)
 
 **Repro:**
+
 1. Open the app. Add a room. The new room is auto-selected.
 2. Look at the right sidebar — "Room Properties" panel header has a row of 3 icon-only buttons: "Duplicate Room", "Rotate 90°", "Delete Room".
 3. Open the Keyboard Shortcuts help dialog (header → ? button).
@@ -120,6 +132,7 @@ And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already ha
 **Observed:** The rotate button is a small icon button with no text label and only a `title="Rotate 90°"` tooltip. Users who don't hover will not know what it does. The Keyboard Shortcuts help dialog shows four empty categories (Navigation, Room Management, View Controls, Export) — `R` for rotate, `Ctrl+D` for duplicate, `Delete`/`Backspace` for delete, `Ctrl+Z`/`Ctrl+Y` for undo/redo, `?` for help, `Ctrl++`/`Ctrl+-` for zoom — none are listed.
 
 **Expected:** Either:
+
 - Add text labels next to the icon buttons (Duplicate Room / Rotate 90° / Delete Room) so users can read the function, or
 - Populate the Keyboard Shortcuts help dialog with the actual key bindings so users can discover them.
 
@@ -140,20 +153,22 @@ And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already ha
 **Discovered during:** Phase 1 — Mode switch
 
 **Repro:**
+
 1. Open the app, default state.
 2. Look at the header (the top bar with the VastuPlan logo, "Vastu Score", dark-mode toggle, Keyboard Shortcuts button, Projects / Floor Plan / AI Image Editor tabs).
 3. Look at the rest of the UI for any "View", "Edit", "Comment" toggle.
 
-**Observed:** No mode switcher exists in the UI. The only way to enter View or Comment mode is to load a shared URL with `?mode=view` or `?mode=comment` query parameter (the share-link loader at `App.tsx:158-174` calls `setAppMode(mode)`). Once you're in View mode via a shared link, an "Edit Copy" button appears in the header (Header.tsx:78-83) — but that only works to *exit* view mode; it doesn't help you *enter* it in the first place.
+**Observed:** No mode switcher exists in the UI. The only way to enter View or Comment mode is to load a shared URL with `?mode=view` or `?mode=comment` query parameter (the share-link loader at `App.tsx:158-174` calls `setAppMode(mode)`). Once you're in View mode via a shared link, an "Edit Copy" button appears in the header (Header.tsx:78-83) — but that only works to _exit_ view mode; it doesn't help you _enter_ it in the first place.
 
 The `handleShare` function in `App.tsx:468` accepts a `mode: 'view' | 'comment'` argument, but only `handleShare('view')` is wired to a button (line 1191). `handleShare('comment')` is defined but never called from the UI.
 
 **Expected:** Either:
+
 - A "Share" / "View Mode" button in the header that toggles into a read-only preview of the current plan, or
 - A two-button group in the canvas toolbar: "Share (View)" and "Share (Comment)", so the user can generate both types of share links, or
 - At minimum, a "Preview as View-Only" link that opens the current plan in a new tab in view mode.
 
-**Hypothesis:** Looking at `Header.tsx:71-86`, the entire "VIEW MODE" indicator block is wrapped in `{appMode !== 'edit' && (...)}`, which is the *only* place `appMode` shows up in the header. There is no input that ever sets `appMode` to a non-edit value (other than the URL loader). The app was designed with sharing in mind, but the affordance for *generating* a shareable link is only the Share View-Only button — the user can share a view-only link but cannot easily experience the view mode themselves.
+**Hypothesis:** Looking at `Header.tsx:71-86`, the entire "VIEW MODE" indicator block is wrapped in `{appMode !== 'edit' && (...)}`, which is the _only_ place `appMode` shows up in the header. There is no input that ever sets `appMode` to a non-edit value (other than the URL loader). The app was designed with sharing in mind, but the affordance for _generating_ a shareable link is only the Share View-Only button — the user can share a view-only link but cannot easily experience the view mode themselves.
 
 **Trace:** `Array.from(document.querySelectorAll('button')).filter(b => b.textContent?.match(/view|edit|comment/i))` returns only "AI Image Editor" (a false-positive substring match). The header has 5 buttons (dark toggle, keyboard shortcuts, Projects, Floor Plan, AI Image Editor) and 1 dropdown — none of them set `appMode`.
 
@@ -166,6 +181,7 @@ The `handleShare` function in `App.tsx:468` accepts a `mode: 'view' | 'comment'`
 **Discovered during:** Phase 2 — PDF Export
 
 **Repro:**
+
 1. Add at least one room to the floor (e.g., Bedroom 12'x12').
 2. Click "PDF Export" in the toolbar.
 3. Presentation Export modal opens. Fill in Project Name / Client Name / Consultant Name.
@@ -197,6 +213,7 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Discovered during:** Phase 2 — PDF Export (after U-6)
 
 **Repro:**
+
 1. Open the app. Look at the toolbar buttons in the bottom-right of the canvas.
 2. Read the button label: "PDF Export".
 3. Click it.
@@ -204,6 +221,7 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Observed:** The button opens a **modal titled "Presentation Export"** (not "PDF Export") with form fields for Project Name / Client Name / Consultant / Logo. The user expected a PDF; they got a presentation builder. A user who just wants a quick PDF of the floor plan has to fill in three text fields they may not care about before the export runs.
 
 **Expected:** Either:
+
 - Rename the button to "Presentation Export" so the label matches what opens, OR
 - Have a plain "PDF Export" that immediately generates a PDF with sensible defaults (project name = "Untitled", client = "N/A") and a separate "Customize Presentation…" path, OR
 - Add a "Skip — use defaults" link in the modal for users who don't want to fill in anything.
@@ -223,12 +241,14 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Discovered during:** Phase 2 — JSON import roundtrip
 
 **Repro:**
+
 1. Clear the floor. Verify the "Undo" button is disabled.
 2. Import a JSON file with rooms (via "Import JSON" → file picker).
 3. Rooms appear on the canvas. The success alert reads "Floor plan imported successfully!".
 4. Look at the "Undo" button.
 
 **Observed:** The "Undo" button is **disabled** even though the plan changed substantially (0 rooms → 2 rooms). Pressing Ctrl+Z does nothing. The user cannot undo a wrong-file import. If they import the wrong JSON, they have to:
+
 - Manually delete each room, OR
 - Click "Clear Floor" (which is also not undoable), losing everything.
 
@@ -249,13 +269,15 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Discovered during:** Phase 3 — AI analysis
 
 **Repro:**
+
 1. Open a fresh checkout (or any environment without `VITE_GEMINI_API_KEY` set in `.env`).
 2. Add at least one room (the "Analyze Floor Plan" button is disabled until you do).
 3. Click "Analyze Floor Plan".
 
-**Observed:** A native `alert()` pops up: `Failed to analyze floor plan.` No PDF, no Vastu score panel, no progress indicator — just the alert. Dismissing it leaves the button enabled (so the user can click it again and get the same alert). The right sidebar's Vastu Score (visible in the header: "40/100") is a *static* placeholder, not a result of the analysis.
+**Observed:** A native `alert()` pops up: `Failed to analyze floor plan.` No PDF, no Vastu score panel, no progress indicator — just the alert. Dismissing it leaves the button enabled (so the user can click it again and get the same alert). The right sidebar's Vastu Score (visible in the header: "40/100") is a _static_ placeholder, not a result of the analysis.
 
 **Expected:** Either:
+
 - The button should be disabled with a tooltip / hint "Set `VITE_GEMINI_API_KEY` in `.env` to enable AI analysis" when the key is missing, OR
 - The failure should show a useful error like "AI analysis is not configured. Add `VITE_GEMINI_API_KEY=...` to your `.env` file. See `.env.example`."
 
@@ -274,12 +296,14 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Discovered during:** Phase 2 — Share link (after U-5)
 
 **Repro:**
+
 1. Open the app on a non-secure context (e.g., `http://localhost:3001`) OR deny clipboard permission OR use a browser that blocks clipboard writes.
 2. Add a room. Click "Share View-Only Link".
 
 **Observed:** The alert says: `Share link (view mode) copied to clipboard!` — but the clipboard is empty (or the write was rejected). The user has no way to recover the link.
 
 **Expected:** Either:
+
 - `await navigator.clipboard.writeText(url)` and only show the success alert when the promise resolves. If it rejects, show the link in a modal with a "Copy" button as a fallback, OR
 - Always show the link in a modal with a "Copy" button (no reliance on the clipboard API).
 
@@ -298,6 +322,7 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Discovered during:** Phase 3 — Edge cases (very large rooms)
 
 **Repro:**
+
 1. Open the app. Default plot is 30' × 40' (1200 sq ft).
 2. Add a room (e.g., Bedroom 12' × 12').
 3. Open Room Properties. Change Width to 500 (the max allowed by the input).
@@ -305,13 +330,14 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Observed:** The room is silently resized to 500ft wide. The plot is only 30ft wide, so the room extends ~470ft past the right edge of the plot, going off the canvas entirely. The canvas auto-grows its `scrollWidth` to 10320px (33× the original plot width). The user can scroll the canvas for hundreds of pixels to find the room, with no visual indication of where the plot ends. No error, no warning, no clamp to the plot's buildable area (24' × 34' after setbacks). The room's interior measurements (after wall thickness) become negative for some dimensions (e.g., a 2ft room with 9" walls has `In: <0' x 0.5'>`).
 
 **Expected:** Either:
+
 - Clamp the room's width/height to the buildable area when resizing, OR
 - Show a visible warning ("This room extends past the plot boundary"), OR
 - At minimum, prevent the input from accepting values > buildable area.
 
 **Hypothesis:** The width/height `<input>` (`App.tsx:22_24` / `RoomPropertiesPanel`) uses `min={2} max={500}` without any cross-field check against `plan.plotWidth / plotHeight`. The drag resize handler in `useCanvasDrag` does not clamp to plot bounds either. The autosave accepts the value and the canvas re-flows.
 
-**Trace:** Room 500×12 at (3,3) in a 30×40 plot → canvas scrollWidth jumps from ~720 to 10320px. Room is rendered ~16× wider than the plot. No warning UI. Built-up sqft recalculates to 6000 (500×12) but it's the *floor built-up* label that updates, not the per-room "In:" inner dimension which is what would show a user they crossed a line.
+**Trace:** Room 500×12 at (3,3) in a 30×40 plot → canvas scrollWidth jumps from ~720 to 10320px. Room is rendered ~16× wider than the plot. No warning UI. Built-up sqft recalculates to 6000 (500×12) but it's the _floor built-up_ label that updates, not the per-room "In:" inner dimension which is what would show a user they crossed a line.
 
 **Related:** U-1 (rooms stack invisibly at the same position) + U-11 (rooms can be resized past the plot) compound — a new user creates several rooms, all stacked at (3,3), and then makes one of them 500ft wide, then drags it past the plot. The canvas becomes a confusing mess.
 
@@ -324,6 +350,7 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Discovered during:** Phase 2 — Multi-floor (between U-8 and U-11)
 
 **Repro:**
+
 1. Open the app. Default state, 0th floor active with two imported rooms visible.
 2. Click "1st" in the floor selector. The floor is now active; canvas shows no rooms. (The 0th-floor rooms are correctly hidden.)
 3. Click "2nd". Same — no rooms, no hint.
@@ -347,12 +374,14 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Discovered during:** Phase 2 — Multi-floor
 
 **Repro:**
+
 1. Open the app.
 2. Look at the Floor selector. It shows three buttons: "0th", "1st", "2nd".
 
 **Observed:** The app supports any number of floors (a user can drag a room to "2nd" and beyond by setting `room.floor`). But the selector only shows three fixed buttons. If a user has a 5-floor building, they're stuck — the only way to access floors 3, 4, 5 is to add rooms with `room.floor >= 3` via the JSON import, but the floor selector will never show those buttons. (Verified: importing a JSON with `room.floor: 4` works, but the user has no way to switch to floor 4 to see/edit those rooms.)
 
 **Expected:** Either:
+
 - The floor selector should dynamically add a button for the highest floor used, OR
 - A "Custom floor…" picker, OR
 - Drop the "0th/1st/2nd" fixed triplet and use a dropdown/adder.
@@ -372,10 +401,12 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Discovered during:** Phase 3 — Mobile viewport
 
 **Repro:**
+
 1. Open Chrome DevTools, set viewport to 500 × 812 (the smallest supported; 375 is rejected as below the minimum).
 2. Open the app.
 
 **Observed:** The desktop 3-column layout (header on top, left sidebar / canvas / right sidebar below) **does not collapse to a mobile-friendly single column**. Instead:
+
 - The header is rendered at the **bottom** of the viewport (the VastuPlan 2D logo and the navigation buttons appear at the bottom of the screen, with the Vastu Score badge at the top).
 - The canvas and the left sidebar (Plot Settings / Data Management / Floor / Layers / Add Rooms) are laid out **side by side**, with the canvas on the left and the sidebar on the right, but both squeezed into a 500px-wide area — content is tiny and overlapping.
 - The right sidebar (Room Properties when a room is selected) is not visible at all.
@@ -384,6 +415,7 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 The result is an unusable layout on a phone or small tablet. There is no responsive "tabs" pattern (e.g., bottom tab bar: Plan / Settings / Properties), no hamburger menu, no stacking. The entire app was designed desktop-first and not adapted for narrow viewports.
 
 **Expected:** Either:
+
 - A bottom tab bar with three tabs: "Plan" (canvas) / "Settings" (left sidebar) / "Properties" (right sidebar) — common in mobile design tools (Figma, Excalidraw), OR
 - A hamburger / drawer pattern that lets the user pick which panel to show, with the canvas as the default.
 
@@ -402,16 +434,19 @@ The result is an unusable layout on a phone or small tablet. There is no respons
 **Discovered during:** Phase 1 — Resize (re-test after PR #50)
 
 **Repro:**
+
 1. Add a room.
 2. Click the room to select it (after fix to U-3 lands — or use the `selectedRoomIds` to force-select via dev tools).
 3. Look at the blue selection ring around the room.
 
 **Observed:** 4 corner handles are rendered (`Room.tsx:163, 167, 171, 175` — NW, NE, SW, SE). However:
+
 - There are no **edge** handles (no N, S, E, W mid-edge handles). A user who wants to resize only the width (or only the height) must drag a corner, which resizes both dimensions.
 - The handles are tiny **12px × 12px circles** (`-top-1.5 -left-1.5 w-3 h-3`). On a high-DPI screen or a phone, the hit target is very small.
 - The handles only render when the room is **selected**; the user has no preview of resize affordance before clicking.
 
 **Expected:** Either:
+
 - Add mid-edge handles (N, S, E, W) for one-axis-only resizing, OR
 - Make the corner handles larger (e.g., 16–20px) with a hit-area padding for accessibility, OR
 - Show the corner handles on hover (dimmed) before selection.

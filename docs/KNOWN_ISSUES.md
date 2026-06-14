@@ -12,6 +12,17 @@
 
 ---
 
+## ✅ Recently Resolved (U-3 click-to-select + B-8 multi-select)
+
+> **2026-06-14 — `fix/room-props-and-drag-freeze` (pending PR).** The 2026-06-14 UX walkthrough surfaced 1 P0 (U-3) and 1 P1 (B-8) on the same code path: `Room.tsx`'s room-body `onPointerDown` only ever fired the drag branch, never `onSelectRoom`. The fix adds an optional `onSelectRoom?: (roomId, isShiftKey) => void` prop to `Room.tsx`, calls `onSelectRoom?.(room.id, e.shiftKey)` from the room-body handler (guarded by `e.target === e.currentTarget` so child clicks still bail), and passes the existing `Canvas.tsx` `onSelectRoom` prop down to `<Room>`. The shift path goes through the existing `useSelection` toggle branch, which was already implemented — it just had no UI affordance to invoke it.
+
+| ID  | Title                                                                                                                        | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --- | ---------------------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| U-3 | Clicking a room on the canvas does not select it (P0 from [2026-06-14 walkthrough](./ux-audit/2026-06-14-ux-walkthrough.md)) | ✅ Resolved | `Room.tsx` + `Canvas.tsx` wiring only — 2-line behavioural change plus 5 new tests in `Room.test.tsx` (plain click → `onSelectRoom(id, false)`; shift+click → `onSelectRoom(id, true)`; resize handle click → does NOT call `onSelectRoom`; label span click → does NOT call `onSelectRoom`; optional-prop safety — `onSelectRoom?.(…)`). 194/194 tests pass (was 189), 0 lint errors, build clean. Manual repro: add Bedroom → click on it in canvas → ROOM PROPERTIES populates. |
+| B-8 | Shift+click advertised but does nothing (no marquee select)                                                                  | 🟡 Partial  | The shift+click **toggle** path is now wired (B-8 was waiting on this UI affordance). **Marquee select** (drag-to-select a rectangle) is still unimplemented and remains a separate P1 — see the [P1 table](#-p1--fix-this-sprint-robustness) below.                                                                                                                                                                                                                               |
+
+---
+
 ## ✅ Recently Resolved (Post-deploy polish batch)
 
 > The post-deploy polish batch ships on branch `fix/post-deploy-polish` (3 commits, pending PR). 2 P3/Q-items fixed: Q-1 (floor labels) and Q-2 (theme system duplicate state). Also adds a Vercel deployment config and a project-root `CLAUDE.md`. Per-bug commit refs:
@@ -58,9 +69,9 @@ _All P0 items from the 2026-06-07 sweep are resolved. The next P0 will be filed 
 
 ## 🟠 P1 — Fix this sprint (robustness)
 
-| ID  | Title                                                       | File(s)                                             | Effort |
-| --- | ----------------------------------------------------------- | --------------------------------------------------- | ------ |
-| B-8 | Shift+click advertised but does nothing (no marquee select) | `src/components/Canvas.tsx:87-103`, `Header.tsx:94` | 2 h    |
+| ID  | Title                                                       | File(s)                                                | Effort |
+| --- | ----------------------------------------------------------- | ------------------------------------------------------ | ------ |
+| B-8 | Shift+click toggle works; marquee drag-select still missing | `src/components/Canvas.tsx` (marquee), `Header.tsx:94` | 2-3 h  |
 
 ---
 

@@ -29,6 +29,10 @@ interface RoomProps {
   ) => void;
   onUpdateRoom: (id: string, updates: Partial<RoomType>) => void;
   onUpdateRoomEnd?: () => void;
+  // U-3: optional because the print-only Canvas in App.tsx renders
+  // rooms without a selection handler. When omitted, the room-body
+  // click is still a drag — the select call is silently skipped.
+  onSelectRoom?: (roomId: string, isShiftKey: boolean) => void;
 }
 
 export const Room: React.FC<RoomProps> = React.memo(
@@ -42,6 +46,7 @@ export const Room: React.FC<RoomProps> = React.memo(
     onElementPointerDown,
     onUpdateRoom,
     onUpdateRoomEnd,
+    onSelectRoom,
   }) => {
     // B-13: depend on the plan primitives that analyzeRoomVastu actually
     // reads (plotWidth, plotHeight, northAngle), not the whole `plan` ref.
@@ -128,6 +133,13 @@ export const Room: React.FC<RoomProps> = React.memo(
           // The handles' own onPointerDown will still fire for the
           // resize branch.
           if (e.target === e.currentTarget) {
+            // U-3: clicking a room must select it. The select call
+            // happens BEFORE the drag branch — the drag branch is
+            // gated on `e.target === e.currentTarget` too, so they
+            // share the same guard. Plain click replaces selection
+            // (useSelection's default); shift+click toggles, which
+            // also satisfies the B-8 multi-select P1 contract.
+            onSelectRoom?.(room.id, e.shiftKey);
             onPointerDown(e, room, 'drag');
           }
         }}
