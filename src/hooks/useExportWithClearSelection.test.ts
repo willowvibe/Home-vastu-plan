@@ -9,13 +9,10 @@ describe('useExportWithClearSelection', () => {
   beforeEach(() => {
     rafCallbacks = [];
     nextRafId = 1;
-    vi.stubGlobal(
-      'requestAnimationFrame',
-      (cb: FrameRequestCallback) => {
-        rafCallbacks.push(cb);
-        return nextRafId++;
-      }
-    );
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      rafCallbacks.push(cb);
+      return nextRafId++;
+    });
     vi.stubGlobal('cancelAnimationFrame', (_id: number) => {});
   });
   afterEach(() => {
@@ -88,9 +85,9 @@ describe('useExportWithClearSelection', () => {
   });
 
   it('unmount during export is safe (no setState-after-unmount warning)', async () => {
-    const exportFn = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 50))
-    );
+    const exportFn = vi
+      .fn()
+      .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 50)));
     const onStaleSelection = vi.fn();
     const setSelectedRoomIds = vi.fn();
     const { result, unmount } = renderHook(() =>

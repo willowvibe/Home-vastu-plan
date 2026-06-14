@@ -52,4 +52,11 @@ describe('useSelection (reducer for selectedRoomIds)', () => {
     act(() => result.current.clear());
     expect(result.current.selectedRoomIds).toEqual([]);
   });
+
+  it('replace(ids) bulk-sets the selection', () => {
+    const { result } = renderHook(() => useSelection());
+    act(() => result.current.select('a'));
+    act(() => result.current.replace(['x', 'y', 'z']));
+    expect(result.current.selectedRoomIds).toEqual(['x', 'y', 'z']);
+  });
 });

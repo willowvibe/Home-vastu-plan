@@ -33,5 +33,15 @@ export function useSelection() {
     setSelectedRoomIds([]);
   }, []);
 
-  return { selectedRoomIds, select, clear };
+  /**
+   * Bulk replace the selection. Use this for paste / duplicate-N flows
+   * where you need to set multiple ids at once without going through
+   * the `select` reducer. Prefer `select` and `clear` for one-shot
+   * user interactions.
+   */
+  const replace = useCallback((ids: string[]) => {
+    setSelectedRoomIds(ids);
+  }, []);
+
+  return { selectedRoomIds, select, clear, replace };
 }

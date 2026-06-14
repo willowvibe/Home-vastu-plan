@@ -60,10 +60,7 @@ export function useExportWithClearSelection({
         // detected.
         requestAnimationFrame(() => {
           if (!mountedRef.current) return;
-          if (
-            prevSelectedId &&
-            (!isRoomStillPresent || isRoomStillPresent(prevSelectedId))
-          ) {
+          if (prevSelectedId && (!isRoomStillPresent || isRoomStillPresent(prevSelectedId))) {
             setSelectedRoomIds([prevSelectedId]);
           } else if (prevSelectedId) {
             onStaleSelection();
