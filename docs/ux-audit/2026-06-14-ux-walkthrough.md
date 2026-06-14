@@ -362,3 +362,64 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Trace:** Importing a JSON with `room.floor: 4` succeeds — the room is in the autosave. But the floor selector still only shows 0th/1st/2nd. The user can never see floor 4. (Discovered accidentally while writing this finding; not retested with an actual JSON file, but the code structure makes it clear.)
 
 **Downgraded from P2 to P3:** This is an architectural limitation, not a regression. The app was originally designed around 3 floors. The import is more flexible than the UI, but the discrepancy is silent.
+
+---
+
+### U-14 — Mobile layout is broken: header lands at the bottom, canvas and sidebar are side-by-side, no tabs
+
+**Severity:** P1
+**Surface:** responsive layout, mobile viewport (≤500px wide)
+**Discovered during:** Phase 3 — Mobile viewport
+
+**Repro:**
+1. Open Chrome DevTools, set viewport to 500 × 812 (the smallest supported; 375 is rejected as below the minimum).
+2. Open the app.
+
+**Observed:** The desktop 3-column layout (header on top, left sidebar / canvas / right sidebar below) **does not collapse to a mobile-friendly single column**. Instead:
+- The header is rendered at the **bottom** of the viewport (the VastuPlan 2D logo and the navigation buttons appear at the bottom of the screen, with the Vastu Score badge at the top).
+- The canvas and the left sidebar (Plot Settings / Data Management / Floor / Layers / Add Rooms) are laid out **side by side**, with the canvas on the left and the sidebar on the right, but both squeezed into a 500px-wide area — content is tiny and overlapping.
+- The right sidebar (Room Properties when a room is selected) is not visible at all.
+- The "Vastu Score: 47/100" badge takes the full top width but the buttons are at the bottom.
+
+The result is an unusable layout on a phone or small tablet. There is no responsive "tabs" pattern (e.g., bottom tab bar: Plan / Settings / Properties), no hamburger menu, no stacking. The entire app was designed desktop-first and not adapted for narrow viewports.
+
+**Expected:** Either:
+- A bottom tab bar with three tabs: "Plan" (canvas) / "Settings" (left sidebar) / "Properties" (right sidebar) — common in mobile design tools (Figma, Excalidraw), OR
+- A hamburger / drawer pattern that lets the user pick which panel to show, with the canvas as the default.
+
+**Hypothesis:** `App.tsx` is built around `<header>` + `<main class="flex flex-col md:flex-row">`. The `md:` breakpoint is 768px (Tailwind default). At 500px wide, `md:flex-row` does **not** apply, so the layout should be `flex-col` (stacked). But the visual rendering shows side-by-side, suggesting either the `md:` breakpoint is wrong or the canvas wrapper has its own width constraint that forces horizontal scroll instead of stacking. The header's `flex` direction may also be wrong (e.g., `flex-row` instead of `flex-col` at small widths).
+
+**Trace:** Resize to 500 × 812. Visual: header is at the bottom; canvas is on the left half; left sidebar is on the right half. They are side by side, not stacked.
+
+**Related:** U-2 (left sidebar is below the fold on desktop) — U-14 confirms the sidebar / canvas / properties panel layout was never designed for small viewports. A mobile fix is likely a redesign of `App.tsx`'s main grid, which is part of the S-1 split.
+
+---
+
+### U-15 — Resize handles exist on all 4 corners (NW, NE, SE, SW) but no edge handles; the SE handle requires precise click target
+
+**Severity:** P3
+**Surface:** Room selection, resize handles
+**Discovered during:** Phase 1 — Resize (re-test after PR #50)
+
+**Repro:**
+1. Add a room.
+2. Click the room to select it (after fix to U-3 lands — or use the `selectedRoomIds` to force-select via dev tools).
+3. Look at the blue selection ring around the room.
+
+**Observed:** 4 corner handles are rendered (`Room.tsx:163, 167, 171, 175` — NW, NE, SW, SE). However:
+- There are no **edge** handles (no N, S, E, W mid-edge handles). A user who wants to resize only the width (or only the height) must drag a corner, which resizes both dimensions.
+- The handles are tiny **12px × 12px circles** (`-top-1.5 -left-1.5 w-3 h-3`). On a high-DPI screen or a phone, the hit target is very small.
+- The handles only render when the room is **selected**; the user has no preview of resize affordance before clicking.
+
+**Expected:** Either:
+- Add mid-edge handles (N, S, E, W) for one-axis-only resizing, OR
+- Make the corner handles larger (e.g., 16–20px) with a hit-area padding for accessibility, OR
+- Show the corner handles on hover (dimmed) before selection.
+
+**Hypothesis:** `Room.tsx:160-178` renders 4 corner handles, but they are sized `w-3 h-3` (12px). The `useCanvasDrag` hook handles `'nw' | 'sw' | 'ne' | 'se'` — all 4 corners — so the drag logic supports all of them. But the hook does **not** handle edge-midpoint resize (no `'n' | 's' | 'e' | 'w'` cases).
+
+**Trace:** Read `Room.tsx:160-178` and `useCanvasDrag.ts`. Both confirm 4 corner handles, no edge handles.
+
+**Downgraded from initial P2 to P3:** the 4 corner handles do exist; this is mostly a polish / discoverability issue, not a broken flow.
+
+**Related:** U-3 (clicks on a room don't currently select it, so the user can't even see the resize handles without the U-3 fix landing first).
