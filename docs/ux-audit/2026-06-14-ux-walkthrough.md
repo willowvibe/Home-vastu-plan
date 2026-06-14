@@ -288,3 +288,77 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Trace:** `navigator.clipboard.writeText` is a Promise; calling it without await means the success alert fires before the write completes. The `try/catch` at line 469 only catches synchronous errors, not promise rejections.
 
 **Related:** U-5 (the share button only supports "view" mode, not "comment" mode — the underlying handler supports both).
+
+---
+
+### U-11 — Rooms can be resized to absurdly large values with no boundary check
+
+**Severity:** P2
+**Surface:** Room Properties panel, Room resize handle
+**Discovered during:** Phase 3 — Edge cases (very large rooms)
+
+**Repro:**
+1. Open the app. Default plot is 30' × 40' (1200 sq ft).
+2. Add a room (e.g., Bedroom 12' × 12').
+3. Open Room Properties. Change Width to 500 (the max allowed by the input).
+
+**Observed:** The room is silently resized to 500ft wide. The plot is only 30ft wide, so the room extends ~470ft past the right edge of the plot, going off the canvas entirely. The canvas auto-grows its `scrollWidth` to 10320px (33× the original plot width). The user can scroll the canvas for hundreds of pixels to find the room, with no visual indication of where the plot ends. No error, no warning, no clamp to the plot's buildable area (24' × 34' after setbacks). The room's interior measurements (after wall thickness) become negative for some dimensions (e.g., a 2ft room with 9" walls has `In: <0' x 0.5'>`).
+
+**Expected:** Either:
+- Clamp the room's width/height to the buildable area when resizing, OR
+- Show a visible warning ("This room extends past the plot boundary"), OR
+- At minimum, prevent the input from accepting values > buildable area.
+
+**Hypothesis:** The width/height `<input>` (`App.tsx:22_24` / `RoomPropertiesPanel`) uses `min={2} max={500}` without any cross-field check against `plan.plotWidth / plotHeight`. The drag resize handler in `useCanvasDrag` does not clamp to plot bounds either. The autosave accepts the value and the canvas re-flows.
+
+**Trace:** Room 500×12 at (3,3) in a 30×40 plot → canvas scrollWidth jumps from ~720 to 10320px. Room is rendered ~16× wider than the plot. No warning UI. Built-up sqft recalculates to 6000 (500×12) but it's the *floor built-up* label that updates, not the per-room "In:" inner dimension which is what would show a user they crossed a line.
+
+**Related:** U-1 (rooms stack invisibly at the same position) + U-11 (rooms can be resized past the plot) compound — a new user creates several rooms, all stacked at (3,3), and then makes one of them 500ft wide, then drags it past the plot. The canvas becomes a confusing mess.
+
+---
+
+### U-12 — 2nd-floor is selectable but renders no rooms; no empty-state hint on a fresh floor
+
+**Severity:** P3
+**Surface:** Floor selector, canvas
+**Discovered during:** Phase 2 — Multi-floor (between U-8 and U-11)
+
+**Repro:**
+1. Open the app. Default state, 0th floor active with two imported rooms visible.
+2. Click "1st" in the floor selector. The floor is now active; canvas shows no rooms. (The 0th-floor rooms are correctly hidden.)
+3. Click "2nd". Same — no rooms, no hint.
+
+**Observed:** The canvas is completely empty (besides the plot outline and Vastu grid). There's no message like "1st floor is empty. Add a room from the left panel." The user may think the app is broken — "where did my rooms go?" Combined with the "Vastu Score: 40/100" badge in the header, the user might think the score went down because they switched floors.
+
+**Expected:** A small empty-state hint inside the canvas: "No rooms on this floor yet. Drag from the left panel, or switch back to 0th floor."
+
+**Hypothesis:** `Canvas.tsx` renders `{showVastuGrid && <VastuGrid />}` and the plot/road, but no `plan.rooms.length === 0` (or `plan.rooms.filter(r => r.floor === currentFloor).length === 0`) empty state. The `Ruler` tool and `Toggle Vastu Grid` work, but the canvas is otherwise blank.
+
+**Trace:** Switching to 1st floor (which has no rooms) → canvas has only the plot outline, road, and Vastu grid overlay. No text. Compare with the 0th floor which renders the 2 imported rooms.
+
+**Related:** U-2 (Add Rooms panel below the fold) compounds — the user can't see the Add Rooms panel without scrolling, and the empty canvas has no hint to do so.
+
+---
+
+### U-13 — "Floor" buttons have no visual "current floor" affordance for the floor count
+
+**Severity:** P3
+**Surface:** Floor selector (0th / 1st / 2nd)
+**Discovered during:** Phase 2 — Multi-floor
+
+**Repro:**
+1. Open the app.
+2. Look at the Floor selector. It shows three buttons: "0th", "1st", "2nd".
+
+**Observed:** The app supports any number of floors (a user can drag a room to "2nd" and beyond by setting `room.floor`). But the selector only shows three fixed buttons. If a user has a 5-floor building, they're stuck — the only way to access floors 3, 4, 5 is to add rooms with `room.floor >= 3` via the JSON import, but the floor selector will never show those buttons. (Verified: importing a JSON with `room.floor: 4` works, but the user has no way to switch to floor 4 to see/edit those rooms.)
+
+**Expected:** Either:
+- The floor selector should dynamically add a button for the highest floor used, OR
+- A "Custom floor…" picker, OR
+- Drop the "0th/1st/2nd" fixed triplet and use a dropdown/adder.
+
+**Hypothesis:** `App.tsx`'s Floor section (around the 0th/1st/2nd button group) hardcodes the three buttons. `clearFloor` is per-current-floor, but there's no way to add a new floor or jump to one above 2.
+
+**Trace:** Importing a JSON with `room.floor: 4` succeeds — the room is in the autosave. But the floor selector still only shows 0th/1st/2nd. The user can never see floor 4. (Discovered accidentally while writing this finding; not retested with an actual JSON file, but the code structure makes it clear.)
+
+**Downgraded from P2 to P3:** This is an architectural limitation, not a regression. The app was originally designed around 3 floors. The import is more flexible than the UI, but the discrepancy is silent.
