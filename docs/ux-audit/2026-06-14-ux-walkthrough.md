@@ -156,3 +156,86 @@ The `handleShare` function in `App.tsx:468` accepts a `mode: 'view' | 'comment'`
 **Hypothesis:** Looking at `Header.tsx:71-86`, the entire "VIEW MODE" indicator block is wrapped in `{appMode !== 'edit' && (...)}`, which is the *only* place `appMode` shows up in the header. There is no input that ever sets `appMode` to a non-edit value (other than the URL loader). The app was designed with sharing in mind, but the affordance for *generating* a shareable link is only the Share View-Only button — the user can share a view-only link but cannot easily experience the view mode themselves.
 
 **Trace:** `Array.from(document.querySelectorAll('button')).filter(b => b.textContent?.match(/view|edit|comment/i))` returns only "AI Image Editor" (a false-positive substring match). The header has 5 buttons (dark toggle, keyboard shortcuts, Projects, Floor Plan, AI Image Editor) and 1 dropdown — none of them set `appMode`.
+
+---
+
+### U-6 — PDF Export always fails with cryptic "Failed to export PDF" alert
+
+**Severity:** P0
+**Surface:** export toolbar, "PDF Export" button
+**Discovered during:** Phase 2 — PDF Export
+
+**Repro:**
+1. Add at least one room to the floor (e.g., Bedroom 12'x12').
+2. Click "PDF Export" in the toolbar.
+3. Presentation Export modal opens. Fill in Project Name / Client Name / Consultant Name.
+4. Click "Generate PDF" (with or without a logo — the bug is independent of the logo).
+
+**Observed:** A native `alert()` pops up: `Failed to export PDF.` The modal stays open but does nothing useful. No PDF is downloaded. The alert is the only feedback. After dismissing it, the modal is still there — clicking "Generate PDF" again produces the same alert.
+
+**Expected:** Either the PDF downloads successfully (the user has done everything the modal asks for), or the user gets a specific, actionable error message like "Could not capture canvas: the canvas is empty or hidden" — not a generic "Failed".
+
+**Hypothesis:** `PresentationExport.tsx:131-132` catches an exception from `jsPDF.addImage()` and shows a generic alert. The real error in the console is:
+
+```
+[error] PDF Export failed: Error: addImage does not support files of type 'UNKNOWN',
+       please ensure that a plugin for 'UNKNOWN' support is added.
+```
+
+The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` at line 71. `toPng()` returns an empty/invalid data URL because the canvas being captured is the **hidden print-only canvas**, not the visible one. The root cause: `App.tsx:1248` and `App.tsx:1276` both assign `ref={canvasContainerRef}` to different `<div>` elements. React's ref collides — the second mount wins, and that div is wrapped in `class="hidden print-area print:block"`, which makes it `display: none` outside print mode. `toPng()` on a `display: none` element returns nothing useful.
+
+**Trace:** `Array.from(document.querySelectorAll('[ref]'))` (or reading `canvasContainerRef.current` via the React fiber) shows the ref points to a `<div class="print-only">` ancestor. That div is inside `<div class="hidden print-area print:block">`, so its bounding box is 0×0. After clicking "Generate PDF", console shows the addImage error and the alert fires.
+
+**Related:** U-7 (the button label is misleading). U-6 is the actual broken behavior; U-7 is the discoverability gap that hides it.
+
+---
+
+### U-7 — "PDF Export" button label is misleading; opens a "Presentation Export" modal
+
+**Severity:** P2
+**Surface:** export toolbar, button copy
+**Discovered during:** Phase 2 — PDF Export (after U-6)
+
+**Repro:**
+1. Open the app. Look at the toolbar buttons in the bottom-right of the canvas.
+2. Read the button label: "PDF Export".
+3. Click it.
+
+**Observed:** The button opens a **modal titled "Presentation Export"** (not "PDF Export") with form fields for Project Name / Client Name / Consultant / Logo. The user expected a PDF; they got a presentation builder. A user who just wants a quick PDF of the floor plan has to fill in three text fields they may not care about before the export runs.
+
+**Expected:** Either:
+- Rename the button to "Presentation Export" so the label matches what opens, OR
+- Have a plain "PDF Export" that immediately generates a PDF with sensible defaults (project name = "Untitled", client = "N/A") and a separate "Customize Presentation…" path, OR
+- Add a "Skip — use defaults" link in the modal for users who don't want to fill in anything.
+
+**Hypothesis:** The button label in `App.tsx` says "PDF Export" but the component it renders is `<PresentationExport>` (line 1407-1414), which is a richer client-facing document with title block + logo. The mismatch predates the audit (introduced when the component was first added).
+
+**Trace:** Toolbar text shows "PDF Export". The modal header text shows "Presentation Export". Two different product names for the same flow.
+
+**Related:** U-6 (the same flow is broken end-to-end).
+
+---
+
+### U-8 — Imported JSON plan cannot be undone
+
+**Severity:** P2
+**Surface:** Data Management, undo/redo
+**Discovered during:** Phase 2 — JSON import roundtrip
+
+**Repro:**
+1. Clear the floor. Verify the "Undo" button is disabled.
+2. Import a JSON file with rooms (via "Import JSON" → file picker).
+3. Rooms appear on the canvas. The success alert reads "Floor plan imported successfully!".
+4. Look at the "Undo" button.
+
+**Observed:** The "Undo" button is **disabled** even though the plan changed substantially (0 rooms → 2 rooms). Pressing Ctrl+Z does nothing. The user cannot undo a wrong-file import. If they import the wrong JSON, they have to:
+- Manually delete each room, OR
+- Click "Clear Floor" (which is also not undoable), losing everything.
+
+**Expected:** Importing a plan should push the previous plan to the undo stack so the user can revert with Ctrl+Z. At minimum, importing should warn "This will replace your current floor. Continue?" when the canvas has rooms — but the import is silent.
+
+**Hypothesis:** `App.tsx:491-516` (`handleImportJSON`) calls `resetPlan(result.plan)` and shows an alert. It does **not** call `commitHistory()` or push to the undo stack. The `resetPlan` reducer replaces the plan state, but the history (managed separately by the history hook) is not updated. Same applies to `Clear Floor` — it's not undoable.
+
+**Trace:** Before import: `Undo (Ctrl+Z) disabled`. After successful import (plan.rooms = 2): `Undo (Ctrl+Z)` still `disabled`. Pressing Ctrl+Z: plan.rooms remains 2.
+
+**Related:** U-1 (rooms stack invisibly) + U-8 (import without undo) compound — a user who imports a plan to "fix" the stacked rooms has no recovery if the import is wrong.
