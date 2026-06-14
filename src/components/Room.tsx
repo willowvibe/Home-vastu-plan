@@ -122,7 +122,15 @@ export const Room: React.FC<RoomProps> = React.memo(
           borderWidth: `${wallFt * pixelsPerFoot}px`,
           borderStyle: 'solid',
         }}
-        onPointerDown={(e) => onPointerDown(e, room, 'drag')}
+        onPointerDown={(e) => {
+          // B-20: only fire the drag branch when the user clicks the
+          // room body, not a child (resize handle, element, label).
+          // The handles' own onPointerDown will still fire for the
+          // resize branch.
+          if (e.target === e.currentTarget) {
+            onPointerDown(e, room, 'drag');
+          }
+        }}
       >
         <span className="text-xs font-medium text-slate-800 pointer-events-none px-1 text-center leading-tight">
           {room.type}

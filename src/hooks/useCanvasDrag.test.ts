@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { useCanvasDrag, getEffectiveWalls } from './useCanvasDrag';
+import { useCanvasDrag, getEffectiveWalls, endDrag } from './useCanvasDrag';
 import type { Room, FloorPlan } from '../types';
 
 const PLAN: FloorPlan = {
@@ -709,5 +709,168 @@ describe('getEffectiveWalls (S-9: shared walls)', () => {
     };
     const walls = getEffectiveWalls(r1, [farNeighbor]);
     expect(walls).toEqual({ top: WALL, right: WALL, bottom: WALL, left: WALL });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D1/D2/D3: pointer lifecycle cleanup
+// ---------------------------------------------------------------------------
+// D1: pointerup is missed (release outside window, palm rejection). The hook
+// must listen to pointercancel as a sibling cleanup path.
+// D2: canvasRef.current becomes null mid-drag (layout reflow). The hook
+// must end the drag defensively after 2 consecutive pointermove ticks.
+// D3: window blur or document visibility change mid-drag. The hook must
+// also end the drag.
+// ---------------------------------------------------------------------------
+
+describe('useCanvasDrag (pointer lifecycle cleanup)', () => {
+  const setup = (overrides: { plan?: FloorPlan } = {}) => {
+    const onUpdateRoom = vi.fn();
+    const onUpdateRoomEnd = vi.fn();
+    const ref = renderHook(() =>
+      useCanvasDrag({
+        plan: overrides.plan ?? PLAN,
+        currentFloor: 0,
+        pixelsPerFoot: 20,
+        snapToGrid: true,
+        canvasRef: canvasRef({ left: 0, top: 0, width: 1000, height: 1000 }),
+        onUpdateRoom,
+        onUpdateRoomEnd,
+        appMode: 'edit',
+      })
+    );
+    return { ...ref, onUpdateRoom, onUpdateRoomEnd };
+  };
+
+  function pointerCancel() {
+    act(() => {
+      window.dispatchEvent(new MouseEvent('pointercancel', { bubbles: true }));
+    });
+  }
+
+  function blur() {
+    act(() => {
+      window.dispatchEvent(new Event('blur'));
+    });
+  }
+
+  function visibilityHidden() {
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'hidden',
+      configurable: true,
+    });
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+  }
+
+  it('pointercancel mid-drag clears state and calls onUpdateRoomEnd (D1)', () => {
+    const { result, onUpdateRoomEnd } = setup();
+    act(() => {
+      result.current.handlePointerDown(
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        PLAN.rooms[0],
+        'drag'
+      );
+    });
+    expect(result.current.draggingRoom).toBe('r1');
+    pointerCancel();
+    expect(result.current.draggingRoom).toBeNull();
+    expect(result.current.resizingRoom).toBeNull();
+    expect(result.current.draggingElement).toBeNull();
+    expect(onUpdateRoomEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('blur mid-drag clears state and calls onUpdateRoomEnd (D3)', () => {
+    const { result, onUpdateRoomEnd } = setup();
+    act(() => {
+      result.current.handlePointerDown(
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        PLAN.rooms[0],
+        'drag'
+      );
+    });
+    blur();
+    expect(result.current.draggingRoom).toBeNull();
+    expect(onUpdateRoomEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('visibilitychange to hidden mid-drag clears state and calls onUpdateRoomEnd (D3)', () => {
+    const { result, onUpdateRoomEnd } = setup();
+    act(() => {
+      result.current.handlePointerDown(
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        PLAN.rooms[0],
+        'drag'
+      );
+    });
+    visibilityHidden();
+    expect(result.current.draggingRoom).toBeNull();
+    expect(onUpdateRoomEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('endDrag is exported and safe to call with no arguments', () => {
+    // The standalone export is a no-op; the real cleanup lives in the
+    // closure inside useCanvasDrag (the window listeners call that one).
+    // This test pins the export shape so consumers/tests can rely on it.
+    expect(typeof endDrag).toBe('function');
+    expect(() => endDrag()).not.toThrow();
+  });
+
+  describe('canvasRef becomes null mid-drag (D2)', () => {
+    it('ends the drag after 2 consecutive pointermove calls with a null ref', () => {
+      let ref: { current: HTMLDivElement | null } = canvasRef({
+        left: 0,
+        top: 0,
+        width: 1000,
+        height: 1000,
+      });
+      const onUpdateRoomEnd = vi.fn();
+      const { result, rerender } = renderHook(
+        ({ refVal }) =>
+          useCanvasDrag({
+            plan: PLAN,
+            currentFloor: 0,
+            pixelsPerFoot: 20,
+            snapToGrid: true,
+            canvasRef: refVal,
+            onUpdateRoom: vi.fn(),
+            onUpdateRoomEnd,
+            appMode: 'edit',
+          }),
+        { initialProps: { refVal: ref } }
+      );
+      act(() => {
+        result.current.handlePointerDown(
+          { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+          PLAN.rooms[0],
+          'drag'
+        );
+      });
+      expect(result.current.draggingRoom).toBe('r1');
+
+      // Make the ref null and re-render. The effect re-binds the
+      // window listener (it sees draggingRoom still set), but the
+      // listener's first move now sees a null ref.
+      ref = { current: null };
+      rerender({ refVal: ref });
+
+      // Move #1 with null ref: streak=1, no end.
+      act(() => {
+        window.dispatchEvent(
+          new MouseEvent('pointermove', { clientX: 0, clientY: 0, bubbles: true })
+        );
+      });
+      expect(result.current.draggingRoom).toBe('r1');
+
+      // Move #2 with null ref: streak=2, end.
+      act(() => {
+        window.dispatchEvent(
+          new MouseEvent('pointermove', { clientX: 0, clientY: 0, bubbles: true })
+        );
+      });
+      expect(result.current.draggingRoom).toBeNull();
+      expect(onUpdateRoomEnd).toHaveBeenCalledTimes(1);
+    });
   });
 });

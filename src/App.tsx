@@ -4,7 +4,7 @@ import { Canvas } from './components/Canvas';
 import { ImageEditor } from './components/ImageEditor';
 import { FloorPlan, Room, RoomType, AppMode } from './types';
 import { analyzeFloorPlan } from './services/gemini';
-import { analyzeRoomVastu, calculateOverallVastuScore } from './services/vastu';
+import { calculateOverallVastuScore } from './services/vastu';
 import { setUser, addBreadcrumb } from './services/sentry';
 import { trackEvent, EVENTS, EVENT_METADATA } from './services/analytics';
 import { OfflineIndicator } from './components/OfflineIndicator';
@@ -16,8 +16,6 @@ import {
   Sparkles,
   Loader2,
   Info,
-  RotateCw,
-  Compass,
   Map,
   Ruler,
   Download,
@@ -31,7 +29,6 @@ import {
   FolderOpen,
   Share2,
   FileText,
-  Copy,
   Search,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -42,8 +39,11 @@ import { Header } from './components/layout/Header';
 import { ShortcutHelp } from './components/ShortcutHelp';
 import { Onboarding } from './components/Onboarding';
 import { LayerManager } from './components/LayerManager';
+import { RoomPropertiesPanel } from './components/Properties/RoomPropertiesPanel';
 import { useFloorPlan } from './hooks/useFloorPlan';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useSelection } from './hooks/useSelection';
+import { useExportWithClearSelection } from './hooks/useExportWithClearSelection';
 import { useTheme } from './contexts/ThemeContext';
 import { getErrorMessage } from './utils';
 import {
@@ -58,8 +58,6 @@ import {
   ROOM_TYPES,
   INITIAL_PLAN,
   PLAN_TEMPLATES,
-  ROOM_ELEMENTS,
-  COMMON_ELEMENTS,
   ROOM_CATEGORIES,
   formatFloor,
 } from './constants/floorPlanConstants';
@@ -70,7 +68,24 @@ export default function App() {
     useFloorPlan(INITIAL_PLAN);
 
   const [currentFloor, setCurrentFloor] = useState(0);
-  const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
+  const {
+    selectedRoomIds,
+    select: handleSelectRoom,
+    clear: clearSelection,
+    replace: replaceSelection,
+  } = useSelection();
+  // P3: replaces the 50ms setTimeout in handleExport. The new hook
+  // uses requestAnimationFrame to synchronize the restore with the
+  // next paint, and detects deleted-mid-export rooms via
+  // isRoomStillPresent.
+  const { runExport } = useExportWithClearSelection({
+    exportFn: async () => {
+      if (!canvasContainerRef.current) return;
+      await exportToPNG(canvasContainerRef.current, `VastuPlan_Floor_${currentFloor}.png`);
+      addBreadcrumb('PNG Exported', 'export', { floor: currentFloor });
+    },
+    onStaleSelection: clearSelection,
+  });
   const [roomSearch, setRoomSearch] = useState('');
   const [roomCategoryFilter, setRoomCategoryFilter] = useState<string | null>(null);
 
@@ -172,19 +187,21 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSelectRoom = useCallback((roomId: string | null, isShiftKey: boolean = false) => {
-    if (roomId === null) {
-      if (!isShiftKey) setSelectedRoomIds([]);
-      return;
-    }
-    if (isShiftKey) {
-      setSelectedRoomIds((prev) =>
-        prev.includes(roomId) ? prev.filter((id) => id !== roomId) : [...prev, roomId]
-      );
-    } else {
-      setSelectedRoomIds([roomId]);
-    }
-  }, []);
+  // On a viewport change to mobile, default the right-sidebar tab to
+  // 'properties' so the freshly-added room's properties card is visible
+  // without the user having to tap a tab. This addresses the "room
+  // properties not showing" symptom on small screens.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(max-width: 768px)');
+    const onChange = (e: MediaQueryListEvent) => {
+      if (e.matches && selectedRoomIds.length > 0) {
+        setMobileTab('properties');
+      }
+    };
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [selectedRoomIds.length]);
 
   const addRoom = (type: RoomType, defaultW: number, defaultH: number) => {
     if (appMode !== 'edit') return;
@@ -200,7 +217,7 @@ export default function App() {
     };
     updatePlan((prev) => ({ ...prev, rooms: [...prev.rooms, newRoom] }));
     commitHistory();
-    setSelectedRoomIds([newRoom.id]);
+    handleSelectRoom(newRoom.id, false);
     // Sentry breadcrumb for room addition
     addBreadcrumb(`Room added: ${type}`, 'room', { floor: currentFloor });
     // Track room addition event
@@ -271,7 +288,7 @@ export default function App() {
       const room = plan.rooms.find((r) => r.id === id);
       if (!room) {
         commitHistory();
-        setSelectedRoomIds([]);
+        clearSelection();
         return;
       }
       updatePlan((prev) => ({
@@ -279,7 +296,7 @@ export default function App() {
         rooms: prev.rooms.filter((r) => r.id !== id),
       }));
       commitHistory();
-      setSelectedRoomIds([]);
+      clearSelection();
       // Track room deletion
       trackEvent(EVENTS.ROOM_DELETED, {
         props: {
@@ -288,7 +305,7 @@ export default function App() {
         },
       });
     },
-    [plan.rooms, updatePlan, commitHistory, appMode]
+    [plan.rooms, updatePlan, commitHistory, appMode, clearSelection]
   );
 
   const deleteSelectedRooms = useCallback(() => {
@@ -298,7 +315,7 @@ export default function App() {
       rooms: prev.rooms.filter((r) => !selectedRoomIds.includes(r.id)),
     }));
     commitHistory();
-    setSelectedRoomIds([]);
+    clearSelection();
     // Track room deletion for each deleted room
     selectedRoomIds.forEach((id) => {
       const room = plan.rooms.find((r) => r.id === id);
@@ -311,7 +328,7 @@ export default function App() {
         });
       }
     });
-  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode]);
+  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode, clearSelection]);
 
   const duplicateRoom = useCallback(
     (id: string) => {
@@ -332,9 +349,9 @@ export default function App() {
 
       updatePlan((prev) => ({ ...prev, rooms: [...prev.rooms, newRoom] }));
       commitHistory();
-      setSelectedRoomIds([newRoom.id]);
+      handleSelectRoom(newRoom.id, false);
     },
-    [plan.rooms, updatePlan, commitHistory, appMode]
+    [plan.rooms, updatePlan, commitHistory, appMode, handleSelectRoom]
   );
 
   const duplicateSelectedRooms = useCallback(() => {
@@ -357,8 +374,8 @@ export default function App() {
     if (newRooms.length === 0) return;
     updatePlan((prev) => ({ ...prev, rooms: [...prev.rooms, ...newRooms] }));
     commitHistory();
-    setSelectedRoomIds(newRooms.map((r) => r.id));
-  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode]);
+    replaceSelection(newRooms.map((r) => r.id));
+  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode, replaceSelection]);
 
   const rotateRoom = (id: string) => {
     if (appMode !== 'edit') return;
@@ -426,20 +443,24 @@ export default function App() {
   const handleExport = async () => {
     if (!canvasContainerRef.current) return;
     setIsExporting(true);
-
     const prevSelected = selectedRoomIds.length > 0 ? selectedRoomIds[0] : null;
-    setSelectedRoomIds([]);
-
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
     try {
-      await exportToPNG(canvasContainerRef.current, `VastuPlan_Floor_${currentFloor}.png`);
-      addBreadcrumb('PNG Exported', 'export', { floor: currentFloor });
+      await runExport({
+        prevSelectedId: prevSelected,
+        setSelectedRoomIds: (ids) => {
+          // The hook calls this with [] (clear) and [prevSelected] (restore).
+          if (ids.length === 0) {
+            clearSelection();
+          } else {
+            handleSelectRoom(ids[0], false);
+          }
+        },
+        isRoomStillPresent: (id) => plan.rooms.some((r) => r.id === id),
+      });
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export floor plan.');
     } finally {
-      if (prevSelected) setSelectedRoomIds([prevSelected]);
       setIsExporting(false);
     }
   };
@@ -996,7 +1017,7 @@ export default function App() {
                         rooms: prev.rooms.filter((r) => r.floor !== currentFloor),
                       }));
                       commitHistory();
-                      setSelectedRoomIds([]);
+                      clearSelection();
                     }
                   }}
                   className="w-full mt-2 py-2 text-xs font-medium text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200 rounded-lg transition-colors flex items-center justify-center gap-1"
@@ -1275,378 +1296,32 @@ export default function App() {
             <div
               className={`w-full md:w-80 flex-col overflow-hidden shrink-0 ${mobileTab === 'properties' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
             >
-              {selectedRoomIds.length > 0 ? (
-                <div
-                  className={`p-5 border-b border-slate-100 bg-blue-50/50 dark:border-slate-700 dark:bg-blue-900/20`}
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3
-                        className={`text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100`}
-                      >
-                        {selectedRoomIds.length === 1
-                          ? 'Room Properties'
-                          : `${selectedRoomIds.length} Rooms Selected`}
-                      </h3>
-                    </div>
-                    <div className="flex gap-1">
-                      {selectedRoomIds.length > 1 && (
-                        <button
-                          onClick={() => setSelectedRoomIds([])}
-                          className={`p-1.5 rounded-md transition-colors border border-transparent text-slate-500 hover:bg-slate-100 hover:border-slate-300 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:border-slate-600`}
-                          title="Clear Selection"
-                        >
-                          <span className="text-[10px] font-medium">Clear</span>
-                        </button>
-                      )}
-                      <button
-                        onClick={() =>
-                          selectedRoomIds.length === 1
-                            ? duplicateRoom(selectedRoomIds[0])
-                            : duplicateSelectedRooms()
-                        }
-                        className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-md transition-colors border border-transparent hover:border-slate-300"
-                        title="Duplicate Room"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() =>
-                          selectedRoomIds.length === 1
-                            ? rotateRoom(selectedRoomIds[0])
-                            : rotateSelectedRooms()
-                        }
-                        className="p-1.5 text-slate-600 hover:bg-white rounded-md transition-colors border border-transparent hover:border-slate-200"
-                        title="Rotate 90°"
-                      >
-                        <RotateCw className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() =>
-                          selectedRoomIds.length === 1
-                            ? deleteRoom(selectedRoomIds[0])
-                            : deleteSelectedRooms()
-                        }
-                        className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition-colors border border-transparent hover:border-red-200"
-                        title="Delete Room"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {(() => {
-                    const room = plan.rooms.find((r) => r.id === selectedRoomIds[0]);
-                    if (!room) return null;
-                    const vastu = analyzeRoomVastu(room, plan);
-
-                    return (
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-xs text-slate-500 block mb-1">Type</label>
-                          <div className="text-sm font-medium text-slate-900 bg-white border border-slate-200 rounded-md px-3 py-2">
-                            {room.type}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-1">Width (ft)</label>
-                            <input
-                              type="number"
-                              min="2"
-                              max="500"
-                              value={room.w}
-                              onChange={(e) =>
-                                updateRoom(room.id, {
-                                  w: Math.max(2, Math.min(500, Number(e.target.value) || 2)),
-                                })
-                              }
-                              onBlur={commitHistory}
-                              className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-1">Length (ft)</label>
-                            <input
-                              type="number"
-                              min="2"
-                              max="500"
-                              value={room.h}
-                              onChange={(e) =>
-                                updateRoom(room.id, {
-                                  h: Math.max(2, Math.min(500, Number(e.target.value) || 2)),
-                                })
-                              }
-                              onBlur={commitHistory}
-                              className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="text-xs text-slate-500 mb-1 block">
-                            Wall Thickness
-                          </label>
-                          <select
-                            value={room.wallThickness || DEFAULT_WALL_THICKNESS_IN}
-                            onChange={(e) => {
-                              updateRoom(room.id, {
-                                wallThickness: Number(e.target.value),
-                              });
-                              commitHistory();
-                            }}
-                            className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
-                          >
-                            <option value="4.5">4.5" (Partition)</option>
-                            <option value="6">6" (Internal)</option>
-                            <option value="9">9" (Standard)</option>
-                            <option value="12">12" (External)</option>
-                            <option value="14">14" (Load Bearing)</option>
-                          </select>
-                        </div>
-
-                        {/* Room Elements */}
-                        <div className="pt-2 border-t border-slate-200">
-                          {room.elements && room.elements.length > 0 && (
-                            <div className="mb-4">
-                              <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-slate-700">
-                                Current Elements
-                              </h4>
-                              <div className="space-y-1.5">
-                                {room.elements.map((el, idx) => (
-                                  <div
-                                    key={el.id}
-                                    className="flex items-center justify-between bg-slate-50 border border-slate-200 px-2 py-1.5 rounded-md"
-                                  >
-                                    <span className="text-xs font-medium text-slate-700">
-                                      {el.type} {idx + 1}
-                                    </span>
-                                    <div className="flex gap-1">
-                                      <button
-                                        onClick={() => {
-                                          const newRotation = (el.rotation + 90) % 360;
-                                          updateRoom(room.id, {
-                                            elements: room.elements!.map((e) =>
-                                              e.id === el.id
-                                                ? {
-                                                    ...e,
-                                                    rotation: newRotation,
-                                                  }
-                                                : e
-                                            ),
-                                          });
-                                          commitHistory();
-                                        }}
-                                        className="p-1 text-slate-400 hover:bg-white hover:text-indigo-600 rounded border border-transparent hover:border-slate-300 transition-colors"
-                                        title="Rotate 90°"
-                                      >
-                                        <RotateCw className="w-3 h-3" />
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          updateRoom(room.id, {
-                                            elements: [
-                                              ...(room.elements || []),
-                                              {
-                                                ...el,
-                                                id: uuidv4(),
-                                                x: el.x + 0.5,
-                                                y: el.y + 0.5,
-                                              },
-                                            ],
-                                          });
-                                          commitHistory();
-                                        }}
-                                        className="p-1 text-slate-400 hover:bg-white hover:text-indigo-600 rounded border border-transparent hover:border-slate-300 transition-colors"
-                                        title="Duplicate Element"
-                                      >
-                                        <Copy className="w-3 h-3" />
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          updateRoom(room.id, {
-                                            elements: room.elements!.filter((e) => e.id !== el.id),
-                                          });
-                                          commitHistory();
-                                        }}
-                                        className="p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded border border-transparent hover:border-red-200 transition-colors"
-                                        title="Delete"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-slate-700">
-                            Add Openings
-                          </h4>
-                          <div className="grid grid-cols-2 gap-2 mb-3">
-                            {COMMON_ELEMENTS.map((el) => (
-                              <button
-                                key={el.type}
-                                onClick={() => addRoomElement(room.id, el.type, el.w, el.h)}
-                                className="text-xs py-1.5 px-2 bg-indigo-50 border border-indigo-200 rounded hover:border-indigo-400 hover:bg-indigo-100 transition-colors text-indigo-700 font-medium"
-                              >
-                                + {el.type}
-                              </button>
-                            ))}
-                          </div>
-
-                          {ROOM_ELEMENTS[room.type] && ROOM_ELEMENTS[room.type].length > 0 && (
-                            <>
-                              <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-slate-700">
-                                Add Furniture
-                              </h4>
-                              <div className="grid grid-cols-2 gap-2">
-                                {ROOM_ELEMENTS[room.type].map((el) => (
-                                  <button
-                                    key={el.type}
-                                    onClick={() => addRoomElement(room.id, el.type, el.w, el.h)}
-                                    className="text-xs py-1.5 px-2 bg-white border border-slate-200 rounded hover:border-indigo-300 hover:bg-indigo-50 transition-colors text-slate-600"
-                                  >
-                                    + {el.type}
-                                  </button>
-                                ))}
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Room Organization */}
-                        <div className="pt-4 border-t border-slate-200">
-                          <h4
-                            className={`text-xs font-bold uppercase tracking-wider mb-3 text-slate-700 dark:text-slate-300`}
-                          >
-                            Organization
-                          </h4>
-                          {(plan.layers || []).length > 0 && (
-                            <div className="mb-3">
-                              <label
-                                className={`text-xs mb-1 block text-slate-500 dark:text-slate-400`}
-                              >
-                                Layer
-                              </label>
-                              <select
-                                value={room.category || ''}
-                                onChange={(e) => {
-                                  updateRoom(room.id, {
-                                    category: (e.target.value || undefined) as any,
-                                  });
-                                  commitHistory();
-                                }}
-                                className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
-                              >
-                                <option value="">No Layer</option>
-                                {(plan.layers || []).map((layer) => (
-                                  <option key={layer.id} value={layer.name}>
-                                    {layer.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
-                          <div className="mb-3">
-                            <label
-                              className={`text-xs mb-1 block text-slate-500 dark:text-slate-400`}
-                            >
-                              Category
-                            </label>
-                            <select
-                              value={room.category || 'Other'}
-                              onChange={(e) => {
-                                updateRoom(room.id, {
-                                  category: e.target.value as any,
-                                });
-                                commitHistory();
-                              }}
-                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
-                            >
-                              <option value="Living">Living</option>
-                              <option value="Sleeping">Sleeping</option>
-                              <option value="Kitchen">Kitchen</option>
-                              <option value="Bathroom">Bathroom</option>
-                              <option value="Utility">Utility</option>
-                              <option value="Special">Special</option>
-                              <option value="Parking">Parking</option>
-                              <option value="Other">Other</option>
-                            </select>
-                          </div>
-
-                          <div className="mb-3">
-                            <label className="text-[10px] text-slate-500 block mb-1">
-                              Tags (comma-separated)
-                            </label>
-                            <input
-                              type="text"
-                              value={
-                                Object.entries(room.tags || {})
-                                  .map(([k, v]) => `${k}:${v}`)
-                                  .join(', ') || ''
-                              }
-                              onChange={(e) => {
-                                const tags: any = {};
-                                e.target.value
-                                  .split(',')
-                                  .map((tag) => tag.trim())
-                                  .filter(Boolean)
-                                  .forEach((item) => {
-                                    const [key, value] = item.split(':');
-                                    tags[key.trim()] = value?.trim() || true;
-                                  });
-                                updateRoom(room.id, { tags });
-                                commitHistory();
-                              }}
-                              placeholder="vip:yes, entertainment:true"
-                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
-                            />
-                            <p className={`text-xs mt-1 text-slate-400 dark:text-slate-500`}>
-                              Format: key:value, key2:true
-                            </p>
-                          </div>
-
-                          <div className="mb-2">
-                            <label
-                              className={`text-xs mb-1 block text-slate-500 dark:text-slate-400`}
-                            >
-                              Notes
-                            </label>
-                            <textarea
-                              value={room.notes || ''}
-                              onChange={(e) => {
-                                updateRoom(room.id, { notes: e.target.value });
-                                commitHistory();
-                              }}
-                              placeholder="Add notes about this room..."
-                              className={`w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-20 bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white`}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Vastu Card */}
-                        <div
-                          className={`p-3 rounded-lg border ${vastu.status === 'good' ? 'bg-emerald-50 border-emerald-200' : vastu.status === 'average' ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'} dark:invert dark:filter`}
-                        >
-                          <h4 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1">
-                            <Compass className="w-3 h-3" /> Vastu Check
-                          </h4>
-                          <div className={`text-sm mb-2 text-slate-700 dark:text-slate-300`}>
-                            Current Zone: <strong>{vastu.currentDirection}</strong>
-                          </div>
-                          <p
-                            className={`text-xs leading-relaxed text-slate-600 dark:text-slate-400`}
-                          >
-                            {vastu.feedback}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              ) : null}
+              <RoomPropertiesPanel
+                selectedRoomIds={selectedRoomIds}
+                plan={plan}
+                appMode={appMode}
+                onUpdateRoom={updateRoom}
+                onCommitHistory={commitHistory}
+                onDuplicate={() =>
+                  selectedRoomIds.length === 1
+                    ? duplicateRoom(selectedRoomIds[0])
+                    : duplicateSelectedRooms()
+                }
+                onRotate={() =>
+                  selectedRoomIds.length === 1
+                    ? rotateRoom(selectedRoomIds[0])
+                    : rotateSelectedRooms()
+                }
+                onDelete={() =>
+                  selectedRoomIds.length === 1
+                    ? deleteRoom(selectedRoomIds[0])
+                    : deleteSelectedRooms()
+                }
+                onStaleSelection={clearSelection}
+                onClearSelection={clearSelection}
+                addRoomElement={addRoomElement}
+                updateRoomCategory={(roomId, category) => updateRoom(roomId, { category })}
+              />
 
               <div className="p-5 flex-1 overflow-y-auto flex flex-col custom-scrollbar">
                 <div className="flex items-center justify-between mb-4">
