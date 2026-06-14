@@ -59,3 +59,49 @@
 **Trace:** Browser dev tools: `main` is `flex-1 flex flex-col md:flex-row overflow-hidden relative` (1814×1755). Left sidebar is 288×1755 (no scroll). Viewport is 1830×829. Add Rooms section is at `y: ~1200` in page coordinates.
 
 ---
+
+### U-3 — Clicking a room on the canvas does not select it
+
+**Severity:** P0
+**Surface:** canvas, room-add flow, properties panel
+**Discovered during:** Phase 1 — Click room (after U-1, U-2)
+
+**Repro:**
+1. Open the app, default state, "0th" floor active.
+2. Click "Bedroom 12'x12'" in the Add Rooms panel. (A new room is added at `(setback.left, setback.top)` and is auto-selected; the right sidebar shows its properties.)
+3. Click on the bedroom in the canvas (or on any of the rooms that follows it).
+4. Click again on the canvas at a position that hits a different room.
+
+**Observed:** Rooms are not selectable by clicking. After step 2 the bedroom is selected (the blue ring + 4 resize handles appear). After step 3 the click does nothing — the same room stays selected. The right sidebar still shows the same bedroom's properties. There is no way to select a different room by clicking; the only selectable state is "the most recently added room" until you click on truly empty canvas, which deselects.
+
+Worse: in conjunction with U-1 (rooms stack at the same position), the user has no way to "discover" the rooms they added. The only currently selected room is the most recently added one (a Bedroom in the repro), and clicking on what looks like another room (the Bathroom at a different position) does nothing.
+
+**Expected:** Clicking on a room should:
+- If the room is not currently selected: select it (replacing the previous selection unless Shift is held), show the blue ring + 4 resize handles, update the right sidebar to that room's properties.
+- If the room is already selected and the click is on its body (not a handle): keep it selected.
+- Clicking on a resize handle should resize, not change selection.
+
+**Hypothesis:** `Room.tsx` has no `onSelectRoom` call in its `onPointerDown` handler. Looking at the file:
+- `Room.tsx:125-133` — the outer `onPointerDown` only calls the drag handler (`onPointerDown(e, room, 'drag')` if `e.target === e.currentTarget`); it never calls `onSelectRoom(roomId)`.
+- `Canvas.tsx:90-91` — the canvas's `onPointerDown` only calls `onSelectRoom(null)` to deselect; it never calls `onSelectRoom(roomId)` for clicks on a room.
+- `useCanvasDrag.ts` (entire file) — does not call `onSelectRoom` at all.
+
+So the only path that ever calls `onSelectRoom` with a non-null id is the post-`addRoom` call in `App.tsx:220` (`handleSelectRoom(newRoom.id, false)`). The click-to-select path has been broken since the original `Room` component was introduced (`72b8bfd` "Add Vastu-related components", before PR #50).
+
+**Fix sketch:**
+```tsx
+// Room.tsx:125
+onPointerDown={(e) => {
+  if (e.target === e.currentTarget) {
+    onSelectRoom?.(room.id, e.shiftKey);  // <-- new
+    onPointerDown(e, room, 'drag');
+  }
+}}
+```
+And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already has `onSelectRoom` in its prop interface; the wiring was just never done.)
+
+**Trace:** `document.querySelector('div.cursor-move.ring-blue-500')` shows the latest-added room. After `page.mouse.click(1050, 720)` (on a Bathroom at coordinates `(989, 643) - (1109, 803)`), `document.querySelectorAll('div.cursor-move.ring-blue-500')` returns 0 — the Bathroom did NOT become selected. `page.mouse.click(1100, 300)` (on empty canvas) does deselect (count drops to 0), confirming the deselect path works but the select path doesn't.
+
+**Related:** U-1 (rooms stack invisibly) makes U-3 worse — there's no way to "uncover" the buried rooms since clicking on them doesn't select.
+
+---
