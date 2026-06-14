@@ -35,3 +35,27 @@
 **Repro-able every time** (4 rooms, 0 visible behind the top one).
 
 ---
+
+### U-2 — "Add Rooms" panel is below the fold; you can add a room but not see the canvas
+
+**Severity:** P1
+**Surface:** layout, Add Rooms
+**Discovered during:** Phase 1 — Add room (after U-1)
+
+**Repro:**
+1. Open the app at viewport ~1830×829 (any desktop width 1024+).
+2. The left sidebar (288px wide) contains, top to bottom: Plot Settings, Data Management, Floor, Layers, **Add Rooms** (at the very bottom).
+3. The canvas is to the right of the left sidebar, occupying the same vertical space.
+
+**Observed:** The left sidebar is ~1755px tall, and the viewport is ~829px tall. To click an "Add Room" button the user must scroll the page (or the left sidebar) down to where the Add Rooms section is. The canvas is in the center column, so scrolling down pushes the canvas out of view. Result: the user clicks "+ Bedroom 12'x12'", the room is added (at position 60,60 per U-1), but the canvas is no longer visible. The user has no visual feedback until they scroll back up. Combined with U-1 (rooms stack invisibly), the new room is doubly hidden.
+
+**Expected:** Either:
+- The left sidebar should be sticky / viewport-constrained, with the Add Rooms section near the top (since it's the most-frequent interaction), or
+- The Add Rooms section should be in its own panel near the canvas (e.g., a floating "add" toolbar that stays visible while the canvas is in view), or
+- The page layout should be reworked so the canvas is always visible when the user is interacting with the Add Rooms.
+
+**Hypothesis:** The left sidebar at `App.tsx` ~line 1230 has `class="w-full md:w-72 flex-col overflow-y-auto shrink-0 ..."`. The `overflow-y-auto` only activates if the parent constrains height — but `main` has `flex-1` and inherits from the body, so the sidebar grows to its full content height (1755px) instead of being constrained to the viewport. The Add Rooms section is at the end of the sidebar's source order, so it lands at the bottom of the column.
+
+**Trace:** Browser dev tools: `main` is `flex-1 flex flex-col md:flex-row overflow-hidden relative` (1814×1755). Left sidebar is 288×1755 (no scroll). Viewport is 1830×829. Add Rooms section is at `y: ~1200` in page coordinates.
+
+---
