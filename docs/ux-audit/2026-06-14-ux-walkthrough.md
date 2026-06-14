@@ -239,3 +239,52 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Trace:** Before import: `Undo (Ctrl+Z) disabled`. After successful import (plan.rooms = 2): `Undo (Ctrl+Z)` still `disabled`. Pressing Ctrl+Z: plan.rooms remains 2.
 
 **Related:** U-1 (rooms stack invisibly) + U-8 (import without undo) compound — a user who imports a plan to "fix" the stacked rooms has no recovery if the import is wrong.
+
+---
+
+### U-9 — "Analyze Floor Plan" button silently fails with cryptic alert when API key is not configured
+
+**Severity:** P1
+**Surface:** AI Vastu & Build Guide sidebar
+**Discovered during:** Phase 3 — AI analysis
+
+**Repro:**
+1. Open a fresh checkout (or any environment without `VITE_GEMINI_API_KEY` set in `.env`).
+2. Add at least one room (the "Analyze Floor Plan" button is disabled until you do).
+3. Click "Analyze Floor Plan".
+
+**Observed:** A native `alert()` pops up: `Failed to analyze floor plan.` No PDF, no Vastu score panel, no progress indicator — just the alert. Dismissing it leaves the button enabled (so the user can click it again and get the same alert). The right sidebar's Vastu Score (visible in the header: "40/100") is a *static* placeholder, not a result of the analysis.
+
+**Expected:** Either:
+- The button should be disabled with a tooltip / hint "Set `VITE_GEMINI_API_KEY` in `.env` to enable AI analysis" when the key is missing, OR
+- The failure should show a useful error like "AI analysis is not configured. Add `VITE_GEMINI_API_KEY=...` to your `.env` file. See `.env.example`."
+
+**Hypothesis:** `App.tsx:1334-1338` disables the button only on `isAnalyzing || no rooms on floor`. It does **not** check whether `VITE_GEMINI_API_KEY` is set. `gemini.ts:18` throws `'VITE_GEMINI_API_KEY not configured. Set it in your .env file (see .env.example).'` on the first call. The catch at `App.tsx:436` swallows that message and replaces it with a generic `'Failed to analyze floor plan.'`.
+
+**Trace:** Console error: `[error] Error: VITE_GEMINI_API_KEY not configured. Set it in your .env file (see .env.example). (1 args)`. The user-facing alert says only: `Failed to analyze floor plan.`
+
+**Related:** The static "Vastu Score: 40/100" badge in the header looks like a result of the AI analysis but is actually a hardcoded/heuristic score. A new user could believe the AI is already working and the 40/100 is the result.
+
+---
+
+### U-10 — "Share View-Only Link" can claim success even when the clipboard write silently fails
+
+**Severity:** P3
+**Surface:** Share View-Only Link button
+**Discovered during:** Phase 2 — Share link (after U-5)
+
+**Repro:**
+1. Open the app on a non-secure context (e.g., `http://localhost:3001`) OR deny clipboard permission OR use a browser that blocks clipboard writes.
+2. Add a room. Click "Share View-Only Link".
+
+**Observed:** The alert says: `Share link (view mode) copied to clipboard!` — but the clipboard is empty (or the write was rejected). The user has no way to recover the link.
+
+**Expected:** Either:
+- `await navigator.clipboard.writeText(url)` and only show the success alert when the promise resolves. If it rejects, show the link in a modal with a "Copy" button as a fallback, OR
+- Always show the link in a modal with a "Copy" button (no reliance on the clipboard API).
+
+**Hypothesis:** `App.tsx:471` calls `navigator.clipboard.writeText(url)` without `await` and without `.catch()`. The function returns a Promise. If the browser blocks the write (insecure context, denied permission, focus not on the page, etc.), the promise rejects silently. The success alert at line 475 fires regardless.
+
+**Trace:** `navigator.clipboard.writeText` is a Promise; calling it without await means the success alert fires before the write completes. The `try/catch` at line 469 only catches synchronous errors, not promise rejections.
+
+**Related:** U-5 (the share button only supports "view" mode, not "comment" mode — the underlying handler supports both).
