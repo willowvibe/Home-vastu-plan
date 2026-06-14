@@ -305,7 +305,7 @@ export default function App() {
         },
       });
     },
-    [plan.rooms, updatePlan, commitHistory, appMode]
+    [plan.rooms, updatePlan, commitHistory, appMode, clearSelection]
   );
 
   const deleteSelectedRooms = useCallback(() => {
@@ -328,7 +328,7 @@ export default function App() {
         });
       }
     });
-  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode]);
+  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode, clearSelection]);
 
   const duplicateRoom = useCallback(
     (id: string) => {
@@ -351,7 +351,7 @@ export default function App() {
       commitHistory();
       handleSelectRoom(newRoom.id, false);
     },
-    [plan.rooms, updatePlan, commitHistory, appMode]
+    [plan.rooms, updatePlan, commitHistory, appMode, handleSelectRoom]
   );
 
   const duplicateSelectedRooms = useCallback(() => {
@@ -375,7 +375,7 @@ export default function App() {
     updatePlan((prev) => ({ ...prev, rooms: [...prev.rooms, ...newRooms] }));
     commitHistory();
     replaceSelection(newRooms.map((r) => r.id));
-  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode]);
+  }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode, replaceSelection]);
 
   const rotateRoom = (id: string) => {
     if (appMode !== 'edit') return;
