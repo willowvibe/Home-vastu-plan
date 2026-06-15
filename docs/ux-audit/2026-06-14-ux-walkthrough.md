@@ -383,6 +383,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Related:** U-2 (Add Rooms panel below the fold) compounds — the user can't see the Add Rooms panel without scrolling, and the empty canvas has no hint to do so.
 
+**Resolution (2026-06-15):** Added a hint block in `src/components/Canvas.tsx` keyed on `floorRooms.length === 0`. The hint points the user at the Add Rooms panel AND names the lowest-used floor (via `formatFloor(Math.min(...rooms.map(r => r.floor)))` from `src/constants/floorPlanConstants.ts`) — the cheapest fix is to switch back to a floor that already has rooms, so the hint names that floor instead of saying "0th floor" generically. 2 new tests in `src/components/Canvas.test.tsx` pin the contract (hint shows when empty, hidden when at least one room on the current floor). Combined with U-13 (next finding), the empty-state and the floor-selector expansion are wired up in the same PR.
+
 ---
 
 ### U-13 — "Floor" buttons have no visual "current floor" affordance for the floor count
