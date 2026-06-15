@@ -204,6 +204,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Related:** U-7 (the button label is misleading). U-6 is the actual broken behavior; U-7 is the discoverability gap that hides it.
 
+**Resolution (2026-06-14):** Fixed in `fix/room-props-and-drag-freeze` (commit pending — see KNOWN_ISSUES §"Recently Resolved (U-6 PDF / PNG export ref collision)" when it lands). The fix removes `ref={canvasContainerRef}` from the print-only `<div>` at `App.tsx:1276`. The print-only div had no programmatic use for the ref — `window.print()` captures DOM directly, no ref needed. The visible canvas container (line 1248) remains the sole owner of the ref, so `toPng()` and `pdf.addImage()` receive the live canvas, not the hidden 0×0 print-only one. The audit had only surfaced the PDF failure, but a quick recheck in the dev server with an `HTMLAnchorElement.click()` hook confirmed the same ref collision made **PNG export produce 6-byte empty `data:,` files**. The single one-line removal fixes both flows. Manual repro: add Bedroom → click PDF Export → fill the modal → click Generate PDF → PDF downloads, modal closes, no `Failed to export PDF.` alert. Manual repro: add Bedroom → click PNG → real PNG downloads (~250 KB), not 0 bytes.
+
 ---
 
 ### U-7 — "PDF Export" button label is misleading; opens a "Presentation Export" modal

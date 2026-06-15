@@ -1273,7 +1273,15 @@ export default function App() {
                 <p className="text-sm text-slate-600 mb-4">
                   Floor {formatFloor(currentFloor)} - {new Date().toLocaleDateString()}
                 </p>
-                <div className="print-only" ref={canvasContainerRef}>
+                {/* U-6: NO ref={canvasContainerRef} here. Two elements were
+                    sharing the same React ref; the print-only div (mounted
+                    second, hidden via parent `display: none`) won the
+                    collision, so canvasContainerRef.current pointed to a
+                    0×0 invisible element. PNG and PDF exports both
+                    called toPng() on it and produced empty/UNKNOWN images.
+                    The print path doesn't need a ref — it just renders
+                    DOM for the browser's `window.print()`. */}
+                <div className="print-only">
                   <Canvas
                     plan={plan}
                     currentFloor={currentFloor}
