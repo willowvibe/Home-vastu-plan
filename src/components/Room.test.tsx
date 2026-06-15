@@ -292,3 +292,52 @@ describe('Room (U-3: room-body click selects the room)', () => {
     ).not.toThrow();
   });
 });
+
+describe('Room (U-15: 8-direction resize handles)', () => {
+  // U-15 fix: 4 corner handles were tiny (12px) and had no edge
+  // companions. A user wanting to resize only the width had to drag
+  // a corner, which moves both dimensions. The fix renders 4 corners
+  // (bigger hit area) + 4 mid-edge handles for one-axis-only resize.
+  // The handles carry data-testid="resize-handle-{n,s,e,w,ne,nw,se,sw}"
+  // so tests can pin the exact set.
+
+  const renderSelected = () =>
+    render(
+      <Room
+        room={STABLE_ROOM}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        pixelsPerFoot={20}
+        isSelected={true}
+        floorRooms={[]}
+        onPointerDown={vi.fn()}
+        onElementPointerDown={vi.fn()}
+        onUpdateRoom={vi.fn()}
+      />
+    );
+
+  it('renders 4 corner + 4 edge handles (8 total) when the room is selected (U-15)', () => {
+    const { container } = renderSelected();
+    const corners = ['nw', 'ne', 'sw', 'se'] as const;
+    const edges = ['n', 's', 'e', 'w'] as const;
+    for (const c of corners) {
+      expect(container.querySelector(`[data-testid="resize-handle-${c}"]`)).not.toBeNull();
+    }
+    for (const e of edges) {
+      expect(container.querySelector(`[data-testid="resize-handle-${e}"]`)).not.toBeNull();
+    }
+  });
+
+  it('edge handles carry ns-resize / ew-resize cursor classes (U-15)', () => {
+    const { container } = renderSelected();
+    // N and S handles use cursor-ns-resize (vertical-only resize).
+    const n = container.querySelector('[data-testid="resize-handle-n"]') as HTMLElement;
+    const s = container.querySelector('[data-testid="resize-handle-s"]') as HTMLElement;
+    expect(n.className).toMatch(/cursor-ns-resize/);
+    expect(s.className).toMatch(/cursor-ns-resize/);
+    // E and W handles use cursor-ew-resize (horizontal-only resize).
+    const e = container.querySelector('[data-testid="resize-handle-e"]') as HTMLElement;
+    const w = container.querySelector('[data-testid="resize-handle-w"]') as HTMLElement;
+    expect(e.className).toMatch(/cursor-ew-resize/);
+    expect(w.className).toMatch(/cursor-ew-resize/);
+  });
+});

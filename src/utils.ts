@@ -200,7 +200,13 @@ export function clampRoomToBuildableArea<
   const h = Math.min(room.h, buildableHeight);
   const rightEdge = plan.plotWidth - plan.setbacks.right;
   const bottomEdge = plan.plotHeight - plan.setbacks.bottom;
-  // Step 2+3: clamp x and y so the room stays inside the buildable area.
+  // Clamp x and y so the room stays inside the buildable area.
+  // U-11 contract: a room must be fully inside the buildable area
+  // (between the setbacks on all four sides). If the new width
+  // would push the room past the right/bottom setback, shift
+  // x/y leftward/upward. The `Math.max(setbacks.X, room.X)`
+  // pulls any room that starts in the setback area forward to
+  // the setback boundary.
   let x = Math.max(plan.setbacks.left, room.x);
   let y = Math.max(plan.setbacks.top, room.y);
   if (x + w > rightEdge) x = rightEdge - w;
