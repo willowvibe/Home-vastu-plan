@@ -412,6 +412,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Downgraded from P2 to P3:** This is an architectural limitation, not a regression. The app was originally designed around 3 floors. The import is more flexible than the UI, but the discrepancy is silent.
 
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix replaces the hardcoded `[0, 1, 2].map` floor-selector set in `App.tsx` with a derived set: the union of `currentFloor` and the set of floors used in `plan.rooms`, sorted ascending. A "+ Add floor" button (capped at floor 9) bumps `currentFloor` to the next unused floor. Importing a JSON with `room.floor: 4` now shows a "4th" button in the selector so the user can switch to and edit that floor. The wrapper gained `flex-wrap` and the buttons gained `min-w-[3rem]` so the row doesn't overflow on small widths. Manual repro: import a JSON with `room.floor: 4` → floor selector shows 0th, 1st, 2nd, 4th buttons (sorted) → click 4th → that floor's rooms appear in the canvas. 223/223 tests pass, 0 tsc errors, build clean.
+
 ---
 
 ### U-14 — Mobile layout is broken: header lands at the bottom, canvas and sidebar are side-by-side, no tabs
