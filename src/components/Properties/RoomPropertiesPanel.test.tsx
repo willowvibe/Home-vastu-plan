@@ -144,17 +144,21 @@ describe('RoomPropertiesPanel', () => {
     const widthInput = container.querySelector('input[type="number"]') as HTMLElement;
     expect(widthInput).not.toBeNull();
     fireEvent.change(widthInput, { target: { value: '15' } });
-    expect(onUpdateRoom).toHaveBeenCalledWith('r1', { w: 15 });
+    // U-11: clampRoomToBuildableArea returns x along with w so the
+    // room can be shifted leftward to stay inside the buildable area.
+    expect(onUpdateRoom).toHaveBeenCalledWith('r1', { w: 15, x: 0 });
   });
 
-  it('clamps the width input to [2, 500]', () => {
+  it('clamps the width input to the buildable area (U-11: no more 500ft rooms past the plot)', () => {
     const onUpdateRoom = vi.fn();
     const { container } = render(
       <RoomPropertiesPanel {...baseProps()} onUpdateRoom={onUpdateRoom} selectedRoomIds={['r1']} />
     );
     const widthInput = container.querySelector('input[type="number"]') as HTMLElement;
-    // 1000 is over the 500 max.
+    // 1000 is over both the old 500 cap AND the new buildable cap (30ft
+    // in the base plan with no setbacks). U-11 makes the helper the
+    // single source of truth for "the largest legal room".
     fireEvent.change(widthInput, { target: { value: '1000' } });
-    expect(onUpdateRoom).toHaveBeenLastCalledWith('r1', { w: 500 });
+    expect(onUpdateRoom).toHaveBeenLastCalledWith('r1', { w: 30, x: 0 });
   });
 });

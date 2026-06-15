@@ -149,3 +149,63 @@ export function getAnalyzeButtonState(input: AnalyzeButtonStateInput): AnalyzeBu
   }
   return { disabled: false, title: 'Analyze floor plan for Vastu compliance + build guide' };
 }
+
+// --- U-11 room-clamp helper ----------------------------------------------
+
+/** Minimum shape for `clampRoomToBuildableArea`. */
+export interface ClampRoomPlan {
+  plotWidth: number;
+  plotHeight: number;
+  setbacks: { top: number; right: number; bottom: number; left: number };
+}
+
+/**
+ * Clamp a room's width/height/x/y so it never extends past the plan's
+ * buildable area (the area inside the setbacks).
+ *
+ * U-11: rooms used to be resizable to arbitrary values (e.g. 500ft
+ * wide in a 30ft plot) via the input or the drag handle, with no
+ * visual indication that the room had left the plot. This helper
+ * is the single source of truth for "the largest legal room" and
+ * is called from BOTH the input's onChange/onBlur AND
+ * `useCanvasDrag`'s resize branch.
+ *
+ * Algorithm:
+ *   1. width  = min(room.w, buildableWidth)
+ *      height = min(room.h, buildableHeight)
+ *   2. if x + width > rightEdge   → x = rightEdge - width
+ *      if y + height > bottomEdge → y = bottomEdge - height
+ *   3. if x < leftEdge   → x = leftEdge
+ *      if y < topEdge    → y = topEdge
+ *   4. if the buildable area is 0 (plot too small for setbacks),
+ *      return the input unchanged — a 0-size room is not useful.
+ *
+ * Returns a new object; never mutates the input.
+ */
+export function clampRoomToBuildableArea<
+  T extends { x: number; y: number; w: number; h: number }
+>(room: T, plan: ClampRoomPlan): T {
+  const buildableWidth = Math.max(
+    0,
+    plan.plotWidth - plan.setbacks.left - plan.setbacks.right
+  );
+  const buildableHeight = Math.max(
+    0,
+    plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom
+  );
+  if (buildableWidth <= 0 || buildableHeight <= 0) {
+    return room;
+  }
+  const w = Math.min(room.w, buildableWidth);
+  const h = Math.min(room.h, buildableHeight);
+  const rightEdge = plan.plotWidth - plan.setbacks.right;
+  const bottomEdge = plan.plotHeight - plan.setbacks.bottom;
+  // Step 2+3: clamp x and y so the room stays inside the buildable area.
+  let x = Math.max(plan.setbacks.left, room.x);
+  let y = Math.max(plan.setbacks.top, room.y);
+  if (x + w > rightEdge) x = rightEdge - w;
+  if (y + h > bottomEdge) y = bottomEdge - h;
+  if (x < plan.setbacks.left) x = plan.setbacks.left;
+  if (y < plan.setbacks.top) y = plan.setbacks.top;
+  return { ...room, x, y, w, h };
+}

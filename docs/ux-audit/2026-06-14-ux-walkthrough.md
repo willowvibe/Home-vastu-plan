@@ -353,6 +353,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Related:** U-1 (rooms stack invisibly at the same position) + U-11 (rooms can be resized past the plot) compound — a new user creates several rooms, all stacked at (3,3), and then makes one of them 500ft wide, then drags it past the plot. The canvas becomes a confusing mess.
 
+**Resolution (2026-06-15):** Added `clampRoomToBuildableArea` in `src/utils.ts` — the single source of truth for the "largest legal room". Both resize paths (number input + drag handle) call it. The input's `max` is now `Math.max(2, buildableWidth)` / `buildableHeight`, with a `title` tooltip explaining the cap. Drag-handle wiring is part of U-15 (Task 4) and will land in the same PR. 7 new tests in `src/utils.test.ts` pin the contract (no-op inside the area, clamp width/height, shift x/y, zero-buildable edge case). The old `max={500}` cap is gone; 500ft rooms are no longer possible via either surface.
+
 ---
 
 ### U-12 — 2nd-floor is selectable but renders no rooms; no empty-state hint on a fresh floor

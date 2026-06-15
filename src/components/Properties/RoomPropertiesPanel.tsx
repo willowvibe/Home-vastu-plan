@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FloorPlan, AppMode, RoomElement, RoomCategory } from '../../types';
 import { DEFAULT_WALL_THICKNESS_IN } from '../../constants/geometry';
 import { ROOM_ELEMENTS, COMMON_ELEMENTS } from '../../constants/floorPlanConstants';
+import { clampRoomToBuildableArea } from '../../utils';
 
 interface RoomPropertiesPanelProps {
   selectedRoomIds: string[];
@@ -75,6 +76,18 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
   }
 
   const isLocked = appMode !== 'edit';
+
+  // U-11: cap width/height inputs at the buildable area so the user
+  // can't blow a room past the setbacks via the number input. The
+  // drag handles get the same cap inside useCanvasDrag.
+  const buildableWidth = Math.max(
+    2,
+    plan.plotWidth - plan.setbacks.left - plan.setbacks.right
+  );
+  const buildableHeight = Math.max(
+    2,
+    plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom
+  );
 
   return (
     <div
@@ -151,13 +164,16 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
             <input
               type="number"
               min="2"
-              max="500"
+              max={buildableWidth}
+              title={`Width is capped at the buildable area (${buildableWidth}')`}
               value={room.w}
-              onChange={(e) =>
-                onUpdateRoom(room.id, {
-                  w: Math.max(2, Math.min(500, Number(e.target.value) || 2)),
-                })
-              }
+              onChange={(e) => {
+                const clamped = clampRoomToBuildableArea(
+                  { ...room, w: Math.max(2, Number(e.target.value) || 2) },
+                  plan
+                );
+                onUpdateRoom(room.id, { w: clamped.w, x: clamped.x });
+              }}
               onBlur={onCommitHistory}
               disabled={isLocked}
               className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
@@ -168,13 +184,16 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
             <input
               type="number"
               min="2"
-              max="500"
+              max={buildableHeight}
+              title={`Length is capped at the buildable area (${buildableHeight}')`}
               value={room.h}
-              onChange={(e) =>
-                onUpdateRoom(room.id, {
-                  h: Math.max(2, Math.min(500, Number(e.target.value) || 2)),
-                })
-              }
+              onChange={(e) => {
+                const clamped = clampRoomToBuildableArea(
+                  { ...room, h: Math.max(2, Number(e.target.value) || 2) },
+                  plan
+                );
+                onUpdateRoom(room.id, { h: clamped.h, y: clamped.y });
+              }}
               onBlur={onCommitHistory}
               disabled={isLocked}
               className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
