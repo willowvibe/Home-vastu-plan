@@ -28,6 +28,7 @@ import {
   Grid,
   FolderOpen,
   Share2,
+  MessageSquare,
   FileText,
   Search,
 } from 'lucide-react';
@@ -45,7 +46,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSelection } from './hooks/useSelection';
 import { useExportWithClearSelection } from './hooks/useExportWithClearSelection';
 import { useTheme } from './contexts/ThemeContext';
-import { getErrorMessage } from './utils';
+import { getAnalyzeButtonState, getErrorMessage, computeInitialRoomPosition } from './utils';
 import {
   exportToPNG,
   exportToJSON,
@@ -205,11 +206,14 @@ export default function App() {
 
   const addRoom = (type: RoomType, defaultW: number, defaultH: number) => {
     if (appMode !== 'edit') return;
+    // U-1: offset each new room so they don't stack invisibly. The pure
+    // helper lives in src/utils.ts and is unit-tested there.
+    const { x, y } = computeInitialRoomPosition(plan, plan.rooms, currentFloor);
     const newRoom: Room = {
       id: uuidv4(),
       type,
-      x: plan.setbacks.left,
-      y: plan.setbacks.top,
+      x,
+      y,
       w: defaultW,
       h: defaultH,
       floor: currentFloor,
@@ -433,7 +437,15 @@ export default function App() {
       }, 2000);
     } catch (error) {
       console.error(error);
-      alert('Failed to analyze floor plan.');
+      // U-9: surface the real error from gemini.ts when possible. The
+      // service throws 'VITE_GEMINI_API_KEY not configured...' with a
+      // clear actionable message, so the user sees that instead of a
+      // generic "Failed to analyze floor plan." (the button is also
+      // disabled in the no-key state, but defense-in-depth: if the env
+      // var is removed between page load and click, the message is
+      // still useful).
+      const message = getErrorMessage(error);
+      alert(message || 'Failed to analyze floor plan.');
       setAnalysisProgress(0);
     } finally {
       setIsAnalyzing(false);
@@ -630,10 +642,21 @@ export default function App() {
     .filter((r) => r.floor === currentFloor)
     .reduce((acc, r) => acc + r.w * r.h, 0);
   const vastuScore = calculateOverallVastuScore(plan);
+  // U-9: the Analyze button's disabled state + tooltip are derived via a
+  // pure helper (testable in utils.test.ts). The three states are:
+  // no API key, no rooms on current floor, and "analyzing" (in-flight).
+  const analyzeBtn = getAnalyzeButtonState({
+    isAnalyzing,
+    hasApiKey: Boolean(import.meta.env.VITE_GEMINI_API_KEY),
+    hasRoomsOnCurrentFloor: plan.rooms.filter((r) => r.floor === currentFloor).length > 0,
+  });
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100`}
+      // U-2: h-screen (not min-h-screen) so the main grid fills the
+      // viewport exactly; the left sidebar's overflow-y-auto can then
+      // scroll within the viewport instead of growing the whole page.
+      className={`h-screen flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100`}
     >
       {/* Header */}
       <Header
@@ -674,7 +697,14 @@ export default function App() {
           <>
             {/* Left Sidebar */}
             <div
-              className={`w-full md:w-72 flex-col overflow-y-auto shrink-0 custom-scrollbar ${mobileTab === 'settings' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
+              // U-2: flex-col-reverse so the Add Rooms section (which
+              // is last in source order) renders at the top of the
+              // sidebar. Combined with the root's h-screen, the sidebar
+              // scrolls within the viewport instead of forcing a page
+              // scroll. min-h-0 lets overflow-y-auto fire on a flex
+              // child (the standard "flexbox won't shrink past content"
+              // gotcha).
+              className={`w-full md:w-72 flex flex-col-reverse overflow-y-auto shrink-0 min-h-0 custom-scrollbar ${mobileTab === 'settings' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
             >
               <div className={`p-5 border-b border-slate-100 dark:border-slate-800`}>
                 <h3
@@ -1187,13 +1217,26 @@ export default function App() {
                 </div>
 
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => handleShare('view')}
-                    className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-sm transition-colors"
-                    title="Share View-Only Link"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
+                  {/* U-5: two share buttons (view + comment) instead of one. The
+                      underlying handleShare(mode) already supports both; the
+                      previous UI only wired `view`. Users who wanted to share a
+                      comment-mode link had no UI affordance. */}
+                  <div className="flex rounded-lg shadow-sm overflow-hidden border border-slate-200">
+                    <button
+                      onClick={() => handleShare('view')}
+                      className="flex items-center justify-center w-10 h-10 bg-white hover:bg-slate-50 text-slate-700 transition-colors"
+                      title="Share View-Only Link (read-only)"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleShare('comment')}
+                      className="flex items-center justify-center w-10 h-10 bg-white hover:bg-slate-50 text-slate-700 border-l border-slate-200 transition-colors"
+                      title="Share Comment-Enabled Link (reviewers can add notes)"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                    </button>
+                  </div>
                   <button
                     onClick={() => setShowPresentationExport(true)}
                     className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
@@ -1273,7 +1316,15 @@ export default function App() {
                 <p className="text-sm text-slate-600 mb-4">
                   Floor {formatFloor(currentFloor)} - {new Date().toLocaleDateString()}
                 </p>
-                <div className="print-only" ref={canvasContainerRef}>
+                {/* U-6: NO ref={canvasContainerRef} here. Two elements were
+                    sharing the same React ref; the print-only div (mounted
+                    second, hidden via parent `display: none`) won the
+                    collision, so canvasContainerRef.current pointed to a
+                    0×0 invisible element. PNG and PDF exports both
+                    called toPng() on it and produced empty/UNKNOWN images.
+                    The print path doesn't need a ref — it just renders
+                    DOM for the browser's `window.print()`. */}
+                <div className="print-only">
                   <Canvas
                     plan={plan}
                     currentFloor={currentFloor}
@@ -1333,9 +1384,8 @@ export default function App() {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={handleAnalyze}
-                    disabled={
-                      isAnalyzing || plan.rooms.filter((r) => r.floor === currentFloor).length === 0
-                    }
+                    disabled={analyzeBtn.disabled}
+                    title={analyzeBtn.title}
                     className={`w-full font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 shrink-0 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white`}
                   >
                     {isAnalyzing ? (

@@ -1,12 +1,14 @@
 /**
  * Tests for `src/utils.ts`. Pins the S-12 contract: any unknown thrown
- * value should be reduced to a safe string for surfacing to the user.
+ * value should be reduced to a safe string for surfacing to the user,
+ * and pins the U-1 contract: new rooms offset instead of stacking.
  *
- * If you change `getErrorMessage`, update the test cases here.
+ * If you change `getErrorMessage` or `computeInitialRoomPosition`,
+ * update the test cases here.
  */
 
 import { describe, it, expect } from 'vitest';
-import { cn, getErrorMessage } from './utils';
+import { cn, computeInitialRoomPosition, getAnalyzeButtonState, getErrorMessage } from './utils';
 
 describe('cn', () => {
   it('merges class names', () => {
@@ -58,5 +60,109 @@ describe('getErrorMessage', () => {
 
   it('returns an empty string for an array', () => {
     expect(getErrorMessage(['nope'])).toBe('');
+  });
+});
+
+describe('computeInitialRoomPosition (U-1: no more stacked rooms)', () => {
+  // Standard 30x40 plot with 3' setbacks on all sides = 24' x 34' buildable.
+  const plan = {
+    plotWidth: 30,
+    plotHeight: 40,
+    setbacks: { top: 3, right: 3, bottom: 3, left: 3 },
+  };
+
+  it('first room on an empty floor lands at the setback origin', () => {
+    expect(computeInitialRoomPosition(plan, [], 0)).toEqual({ x: 3, y: 3 });
+  });
+
+  it('second room on the same floor is offset by 0.5 ft on both axes', () => {
+    const rooms = [{ floor: 0 }];
+    expect(computeInitialRoomPosition(plan, rooms, 0)).toEqual({ x: 3.5, y: 3.5 });
+  });
+
+  it('fourth room on the same floor is offset by 1.5 ft on both axes (3 prior rooms × 0.5)', () => {
+    const rooms = [{ floor: 0 }, { floor: 0 }, { floor: 0 }];
+    expect(computeInitialRoomPosition(plan, rooms, 0)).toEqual({ x: 4.5, y: 4.5 });
+  });
+
+  it('rooms on other floors do not affect the offset for the current floor', () => {
+    // 3 rooms on floor 0 — but we are adding to floor 1, so we should
+    // still land at the setback origin.
+    const rooms = [{ floor: 0 }, { floor: 0 }, { floor: 0 }];
+    expect(computeInitialRoomPosition(plan, rooms, 1)).toEqual({ x: 3, y: 3 });
+  });
+
+  it('offsets cascade: each new room is +0.5 ft on both axes (pure diagonal)', () => {
+    // 24' buildable width / 0.5 ft step = 48 max steps on x.
+    // 34' buildable height / 0.5 ft step = 68 max steps on y.
+    // min(48, 68) = 48 — so every 48 rooms, the diagonal cascade wraps.
+    const rooms47 = Array.from({ length: 47 }, () => ({ floor: 0 }));
+    // The 48th room has 47 prior — dx=23.5, dy=23.5
+    expect(computeInitialRoomPosition(plan, rooms47, 0)).toEqual({ x: 26.5, y: 26.5 });
+    const rooms48 = Array.from({ length: 48 }, () => ({ floor: 0 }));
+    // The 49th room has 48 prior — wraps to (0, 0)
+    expect(computeInitialRoomPosition(plan, rooms48, 0)).toEqual({ x: 3, y: 3 });
+  });
+
+  it('uses the plan setbacks (not hard-coded zeros) as the origin', () => {
+    const bigSetback = {
+      plotWidth: 30,
+      plotHeight: 40,
+      setbacks: { top: 5, right: 5, bottom: 5, left: 7 },
+    };
+    expect(computeInitialRoomPosition(bigSetback, [], 0)).toEqual({ x: 7, y: 5 });
+  });
+});
+
+describe('getAnalyzeButtonState (U-9: helpful disabled state when API key is missing)', () => {
+  it('disables with a specific tooltip when the API key is missing', () => {
+    const state = getAnalyzeButtonState({
+      isAnalyzing: false,
+      hasApiKey: false,
+      hasRoomsOnCurrentFloor: true,
+    });
+    expect(state.disabled).toBe(true);
+    expect(state.title).toMatch(/VITE_GEMINI_API_KEY/);
+  });
+
+  it('disables with a "no rooms" tooltip when there are no rooms on the current floor', () => {
+    const state = getAnalyzeButtonState({
+      isAnalyzing: false,
+      hasApiKey: true,
+      hasRoomsOnCurrentFloor: false,
+    });
+    expect(state.disabled).toBe(true);
+    expect(state.title).toMatch(/Add at least one room/);
+  });
+
+  it('disables while analyzing', () => {
+    const state = getAnalyzeButtonState({
+      isAnalyzing: true,
+      hasApiKey: true,
+      hasRoomsOnCurrentFloor: true,
+    });
+    expect(state.disabled).toBe(true);
+    expect(state.title).toMatch(/Analyzing/);
+  });
+
+  it('enables when API key is set + rooms exist + not analyzing', () => {
+    const state = getAnalyzeButtonState({
+      isAnalyzing: false,
+      hasApiKey: true,
+      hasRoomsOnCurrentFloor: true,
+    });
+    expect(state.disabled).toBe(false);
+    expect(state.title).toMatch(/Analyze/);
+  });
+
+  it('prefers the API-key-missing message over the no-rooms message when both are wrong', () => {
+    // The most common scenario in a fresh checkout: no API key + no
+    // rooms. The API-key message is more actionable, so it wins.
+    const state = getAnalyzeButtonState({
+      isAnalyzing: false,
+      hasApiKey: false,
+      hasRoomsOnCurrentFloor: false,
+    });
+    expect(state.title).toMatch(/VITE_GEMINI_API_KEY/);
   });
 });

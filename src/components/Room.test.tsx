@@ -167,3 +167,128 @@ describe('Room (B-20: outer onPointerDown bails on child click)', () => {
     expect(resizeCalls.length).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe('Room (U-3: room-body click selects the room)', () => {
+  // The audit found that clicking a room did nothing — the room-body
+  // onPointerDown only fired the drag branch, never onSelectRoom.
+  // The fix: when the user clicks the room body (target === currentTarget),
+  // also call onSelectRoom(room.id, e.shiftKey). The shift branch
+  // toggles the room in/out of multi-select (B-8 hook contract), so
+  // plain click replaces selection and shift+click adds.
+
+  it('room-body click calls onSelectRoom(room.id, false)', () => {
+    const onSelectRoom = vi.fn();
+    const { container } = render(
+      <Room
+        room={STABLE_ROOM}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        pixelsPerFoot={20}
+        isSelected={false}
+        floorRooms={[]}
+        onPointerDown={vi.fn()}
+        onElementPointerDown={vi.fn()}
+        onUpdateRoom={vi.fn()}
+        onSelectRoom={onSelectRoom}
+      />
+    );
+    const roomDiv = container.querySelector('.cursor-move') as HTMLElement;
+    expect(roomDiv).not.toBeNull();
+    // Plain click — no shift modifier.
+    fireEvent.pointerDown(roomDiv, { clientX: 100, clientY: 100, shiftKey: false });
+    expect(onSelectRoom).toHaveBeenCalledTimes(1);
+    expect(onSelectRoom).toHaveBeenCalledWith('r1', false);
+  });
+
+  it('shift+click on room body calls onSelectRoom(room.id, true)', () => {
+    const onSelectRoom = vi.fn();
+    const { container } = render(
+      <Room
+        room={STABLE_ROOM}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        pixelsPerFoot={20}
+        isSelected={false}
+        floorRooms={[]}
+        onPointerDown={vi.fn()}
+        onElementPointerDown={vi.fn()}
+        onUpdateRoom={vi.fn()}
+        onSelectRoom={onSelectRoom}
+      />
+    );
+    const roomDiv = container.querySelector('.cursor-move') as HTMLElement;
+    fireEvent.pointerDown(roomDiv, { clientX: 100, clientY: 100, shiftKey: true });
+    expect(onSelectRoom).toHaveBeenCalledTimes(1);
+    expect(onSelectRoom).toHaveBeenCalledWith('r1', true);
+  });
+
+  it('resize-handle click does NOT call onSelectRoom', () => {
+    // Resize handles are children of the room div. The room-body handler
+    // bails when target !== currentTarget, so the select path must not
+    // fire on a handle click — only on a true body click.
+    const onSelectRoom = vi.fn();
+    const { container } = render(
+      <Room
+        room={STABLE_ROOM}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        pixelsPerFoot={20}
+        isSelected={true}
+        floorRooms={[]}
+        onPointerDown={vi.fn()}
+        onElementPointerDown={vi.fn()}
+        onUpdateRoom={vi.fn()}
+        onSelectRoom={onSelectRoom}
+      />
+    );
+    const handle = container.querySelector('.cursor-nw-resize') as HTMLElement;
+    expect(handle).not.toBeNull();
+    fireEvent.pointerDown(handle, { clientX: 100, clientY: 100, shiftKey: false });
+    expect(onSelectRoom).not.toHaveBeenCalled();
+  });
+
+  it('label-span click does NOT call onSelectRoom', () => {
+    // The label span is also a child of the room div. Clicks on the
+    // label should not be treated as "select room" — the room-body
+    // pointerdown must bail when target is the label, not the room.
+    const onSelectRoom = vi.fn();
+    const { container } = render(
+      <Room
+        room={STABLE_ROOM}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        pixelsPerFoot={20}
+        isSelected={false}
+        floorRooms={[]}
+        onPointerDown={vi.fn()}
+        onElementPointerDown={vi.fn()}
+        onUpdateRoom={vi.fn()}
+        onSelectRoom={onSelectRoom}
+      />
+    );
+    // The first .text-xs inside the room is the type label.
+    const label = container.querySelector('.text-xs') as HTMLElement;
+    expect(label).not.toBeNull();
+    fireEvent.pointerDown(label, { clientX: 100, clientY: 100, shiftKey: false });
+    expect(onSelectRoom).not.toHaveBeenCalled();
+  });
+
+  it('does not throw if onSelectRoom is omitted (optional prop)', () => {
+    // Backwards-compat: callers (e.g. the print-only Canvas in App.tsx)
+    // may not wire onSelectRoom. The handler must use optional-call
+    // so the room-body click is still safe in that case.
+    const { container } = render(
+      <Room
+        room={STABLE_ROOM}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        pixelsPerFoot={20}
+        isSelected={false}
+        floorRooms={[]}
+        onPointerDown={vi.fn()}
+        onElementPointerDown={vi.fn()}
+        onUpdateRoom={vi.fn()}
+        // onSelectRoom intentionally omitted
+      />
+    );
+    const roomDiv = container.querySelector('.cursor-move') as HTMLElement;
+    expect(() =>
+      fireEvent.pointerDown(roomDiv, { clientX: 100, clientY: 100, shiftKey: false })
+    ).not.toThrow();
+  });
+});
