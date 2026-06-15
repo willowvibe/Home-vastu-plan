@@ -1288,7 +1288,7 @@ export default function App() {
                     className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
                   >
                     <FileText className="w-4 h-4" />
-                    <span className="hidden sm:inline">PDF Export</span>
+                    <span className="hidden sm:inline">Presentation Export</span>
                   </button>
                   <button
                     onClick={handleExport}

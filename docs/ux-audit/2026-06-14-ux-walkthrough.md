@@ -242,6 +242,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Related:** U-6 (the same flow is broken end-to-end).
 
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix renames the toolbar button from "PDF Export" to "Presentation Export" (matches the modal title the button opens) — one string change in `src/App.tsx`. 223/223 tests pass (unchanged), 0 tsc errors, build clean. Manual repro: open app → look at the toolbar in the bottom-right of the canvas → button label is "Presentation Export" (not "PDF Export"); click it → modal opens with the same title.
+
 ---
 
 ### U-8 — Imported JSON plan cannot be undone
