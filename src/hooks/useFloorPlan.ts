@@ -97,6 +97,26 @@ export function useFloorPlan(initialPlan: FloorPlan) {
     }
   }, []);
 
+  // U-8: replace the current plan but preserve the pre-plan in the
+  // undo history so Ctrl+Z can revert an import (or any other
+  // bulk-replace flow that wants to remain undoable). Behavior matches
+  // `resetPlan` (set the plan, persist to localStorage) but builds
+  // the new history as [prePlan, newPlan] with index 1 — Ctrl+Z
+  // restores the pre-plan; Ctrl+Y re-applies the new plan.
+  const replacePlanPreservingHistory = useCallback((newPlan: FloorPlan) => {
+    setPlan((currentPlan) => {
+      const prePlan = currentPlan;
+      setHistory([prePlan, newPlan]);
+      setHistoryIndex(1);
+      try {
+        localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(newPlan));
+      } catch {
+        // ignore — same fallback resetPlan uses
+      }
+      return newPlan;
+    });
+  }, []);
+
   // Auto-save plan to localStorage whenever it changes
   useEffect(() => {
     try {
@@ -111,14 +131,16 @@ export function useFloorPlan(initialPlan: FloorPlan) {
     // S-3: setPlan removed from the public API. The hook only exposes
     // `updatePlan` (which accepts a value OR an updater function) plus
     // the history controls. The internal `setPlan` is still used by
-    // `undo` / `redo` / `resetPlan` / `commitHistory` — those are the
-    // only legitimate non-functional sites, because they already know
-    // the exact target value (a history snapshot or a loaded plan).
+    // `undo` / `redo` / `resetPlan` / `commitHistory` /
+    // `replacePlanPreservingHistory` — those are the only legitimate
+    // non-functional sites, because they already know the exact target
+    // value (a history snapshot or a loaded plan).
     updatePlan,
     commitHistory,
     undo,
     redo,
     resetPlan,
+    replacePlanPreservingHistory,
     historyIndex,
     historyLength: history.length,
   };

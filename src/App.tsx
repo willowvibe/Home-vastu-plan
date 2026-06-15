@@ -46,7 +46,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSelection } from './hooks/useSelection';
 import { useExportWithClearSelection } from './hooks/useExportWithClearSelection';
 import { useTheme } from './contexts/ThemeContext';
-import { getAnalyzeButtonState, getErrorMessage, computeInitialRoomPosition } from './utils';
+import { getAnalyzeButtonState, getErrorMessage, computeInitialRoomPosition, copyToClipboardWithFallback } from './utils';
 import {
   exportToPNG,
   exportToJSON,
@@ -65,7 +65,7 @@ import {
 import { INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from './constants/geometry';
 
 export default function App() {
-  const { plan, updatePlan, commitHistory, undo, redo, resetPlan, historyIndex, historyLength } =
+  const { plan, updatePlan, commitHistory, undo, redo, resetPlan, replacePlanPreservingHistory, historyIndex, historyLength } =
     useFloorPlan(INITIAL_PLAN);
 
   const [currentFloor, setCurrentFloor] = useState(0);
@@ -477,17 +477,32 @@ export default function App() {
     }
   };
 
-  const handleShare = (mode: 'view' | 'comment') => {
+  const handleShare = async (mode: 'view' | 'comment') => {
+    let url: string;
     try {
-      const url = generateShareLink(plan, analysis, mode);
-      navigator.clipboard.writeText(url);
+      url = generateShareLink(plan, analysis, mode);
+    } catch (error) {
+      console.error('Failed to generate share link', error);
+      alert(getErrorMessage(error) || 'Failed to generate share link. Plan might be too large.');
+      return;
+    }
+    // U-10: await the clipboard write. The previous version called
+    // `navigator.clipboard.writeText(url)` without await, so a
+    // silently-rejected promise (insecure context, denied permission,
+    // focus not on the page) made the success alert fire even when
+    // nothing was copied. copyToClipboardWithFallback awaits the
+    // write and falls back to a hidden <textarea> + execCommand.
+    const result = await copyToClipboardWithFallback(url);
+    if (result.ok) {
       trackEvent(mode === 'view' ? EVENTS.SHARE_VIEW_MODE : EVENTS.SHARE_COMMENT_MODE, {
         props: { floor: currentFloor, mode },
       });
       alert(`Share link (${mode} mode) copied to clipboard!`);
-    } catch (error) {
-      console.error('Failed to generate share link', error);
-      alert(getErrorMessage(error) || 'Failed to generate share link. Plan might be too large.');
+    } else {
+      // Both the async clipboard and the textarea fallback failed.
+      // Show the URL itself so the user can copy it manually instead
+      // of the misleading "copied to clipboard" message.
+      alert(`Couldn't copy the link. Here's the URL: ${url}`);
     }
   };
 
@@ -511,7 +526,11 @@ export default function App() {
       try {
         const result = await importJSONFile(file);
         if (result) {
-          resetPlan(result.plan);
+          // U-8: replacePlanPreservingHistory keeps the pre-import
+          // plan in the undo history so Ctrl+Z reverts the import.
+          // resetPlan would wipe the history; replacePlanPreservingHistory
+          // builds a [pre, imported] history with index 1.
+          replacePlanPreservingHistory(result.plan);
           if (result.analysis) {
             setAnalysis(result.analysis);
           }
@@ -1020,16 +1039,43 @@ export default function App() {
                 <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Layers className="w-4 h-4 text-slate-400" /> Floor
                 </h3>
-                <div className="flex gap-2">
-                  {[0, 1, 2].map((floor) => (
-                    <button
-                      key={floor}
-                      onClick={() => setCurrentFloor(floor)}
-                      className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-colors ${currentFloor === floor ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                    >
-                      {formatFloor(floor)}
-                    </button>
-                  ))}
+                <div className="flex gap-2 flex-wrap">
+                  {(() => {
+                    // U-13: derive the floor-button set from the union of
+                    // currentFloor and the floors used by rooms. Previously
+                    // hardcoded [0, 1, 2] — a JSON import with room.floor: 4
+                    // was invisible to the user. Sorted ascending so the
+                    // current floor is always in-range; a "+ Add floor"
+                    // button (capped at floor 9) bumps currentFloor to the
+                    // next unused slot.
+                    const floorsUsed = Array.from(
+                      new Set([currentFloor, ...plan.rooms.map((r) => r.floor)])
+                    ).sort((a, b) => a - b);
+                    const maxFloor = 9;
+                    const lastFloor = floorsUsed[floorsUsed.length - 1];
+                    return (
+                      <>
+                        {floorsUsed.map((floor) => (
+                          <button
+                            key={floor}
+                            onClick={() => setCurrentFloor(floor)}
+                            className={`flex-1 min-w-[3rem] py-2 text-sm font-medium rounded-lg border transition-colors ${currentFloor === floor ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                          >
+                            {formatFloor(floor)}
+                          </button>
+                        ))}
+                        {lastFloor < maxFloor && (
+                          <button
+                            onClick={() => setCurrentFloor(lastFloor + 1)}
+                            title="Add floor"
+                            className="px-3 py-2 text-sm font-medium rounded-lg border bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                          >
+                            +
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 <button
                   onClick={() => {
@@ -1242,7 +1288,7 @@ export default function App() {
                     className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
                   >
                     <FileText className="w-4 h-4" />
-                    <span className="hidden sm:inline">PDF Export</span>
+                    <span className="hidden sm:inline">Presentation Export</span>
                   </button>
                   <button
                     onClick={handleExport}

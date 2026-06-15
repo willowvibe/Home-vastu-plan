@@ -6,6 +6,7 @@ import { VastuGrid } from './VastuGrid';
 import { Compass } from './Compass';
 import { RulerOverlay } from './RulerOverlay';
 import { RoadIndicator } from './RoadIndicator';
+import { formatFloor } from '../constants/floorPlanConstants';
 
 interface CanvasProps {
   plan: FloorPlan;
@@ -128,6 +129,23 @@ export const Canvas: React.FC<CanvasProps> = ({
           northAngle={plan.northAngle}
           pixelsPerFoot={PIXELS_PER_FOOT}
         />
+      )}
+
+      {/* U-12: empty-state hint shown when no rooms are on the
+          current floor. Without this, switching to a fresh floor
+          looks like the app is broken ("where did my rooms go?").
+          The hint points the user at the Add Rooms panel and the
+          lowest-used floor (usually the default 0th). */}
+      {floorRooms.length === 0 && (
+        <div
+          data-testid="canvas-empty-state"
+          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+        >
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            No rooms on this floor yet. Add a room from the left panel, or switch back to{' '}
+            {formatFloor(plan.rooms.length > 0 ? Math.min(...plan.rooms.map((r) => r.floor)) : 0)}.
+          </p>
+        </div>
       )}
 
       {/* Rooms */}

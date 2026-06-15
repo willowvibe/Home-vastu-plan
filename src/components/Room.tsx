@@ -4,6 +4,7 @@ import { cn } from '../utils';
 import { analyzeRoomVastu } from '../services/vastu';
 import { RoomElement } from './RoomElement';
 import { TOLERANCE_FT, INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from '../constants/geometry';
+import type { ResizeHandle } from '../hooks/useCanvasDrag';
 
 interface RoomProps {
   room: RoomType;
@@ -20,7 +21,7 @@ interface RoomProps {
     e: React.PointerEvent,
     room: RoomType,
     type: 'drag' | 'resize',
-    handle?: 'se' | 'sw' | 'ne' | 'nw'
+    handle?: ResizeHandle
   ) => void;
   onElementPointerDown: (
     e: React.PointerEvent,
@@ -171,22 +172,69 @@ export const Room: React.FC<RoomProps> = React.memo(
 
         {isSelected && (
           <>
+            {/* U-15: 4 corner handles (20px visual + 28px transparent
+                hit area) + 4 mid-edge handles (20px hit area).
+                The corner hit area is larger than the visual so
+                high-DPI / mobile users can grab the handle. The
+                edge handles give one-axis-only resize. */}
+            {/* Corners */}
             <div
-              className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-blue-500 rounded-full cursor-nw-resize"
+              className="absolute -top-1.5 -left-1.5 w-7 h-7 flex items-center justify-center cursor-nw-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'nw')}
-            />
+              data-testid="resize-handle-nw"
+            >
+              <div className="w-5 h-5 bg-blue-500 rounded-full pointer-events-none" />
+            </div>
             <div
-              className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-blue-500 rounded-full cursor-ne-resize"
+              className="absolute -top-1.5 -right-1.5 w-7 h-7 flex items-center justify-center cursor-ne-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'ne')}
-            />
+              data-testid="resize-handle-ne"
+            >
+              <div className="w-5 h-5 bg-blue-500 rounded-full pointer-events-none" />
+            </div>
             <div
-              className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-blue-500 rounded-full cursor-sw-resize"
+              className="absolute -bottom-1.5 -left-1.5 w-7 h-7 flex items-center justify-center cursor-sw-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'sw')}
-            />
+              data-testid="resize-handle-sw"
+            >
+              <div className="w-5 h-5 bg-blue-500 rounded-full pointer-events-none" />
+            </div>
             <div
-              className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-blue-500 rounded-full cursor-se-resize"
+              className="absolute -bottom-1.5 -right-1.5 w-7 h-7 flex items-center justify-center cursor-se-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'se')}
-            />
+              data-testid="resize-handle-se"
+            >
+              <div className="w-5 h-5 bg-blue-500 rounded-full pointer-events-none" />
+            </div>
+            {/* Edges */}
+            <div
+              className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center cursor-ns-resize"
+              onPointerDown={(e) => onPointerDown(e, room, 'resize', 'n')}
+              data-testid="resize-handle-n"
+            >
+              <div className="w-3 h-3 bg-blue-500 rounded-full pointer-events-none" />
+            </div>
+            <div
+              className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center cursor-ns-resize"
+              onPointerDown={(e) => onPointerDown(e, room, 'resize', 's')}
+              data-testid="resize-handle-s"
+            >
+              <div className="w-3 h-3 bg-blue-500 rounded-full pointer-events-none" />
+            </div>
+            <div
+              className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center cursor-ew-resize"
+              onPointerDown={(e) => onPointerDown(e, room, 'resize', 'e')}
+              data-testid="resize-handle-e"
+            >
+              <div className="w-3 h-3 bg-blue-500 rounded-full pointer-events-none" />
+            </div>
+            <div
+              className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center cursor-ew-resize"
+              onPointerDown={(e) => onPointerDown(e, room, 'resize', 'w')}
+              data-testid="resize-handle-w"
+            >
+              <div className="w-3 h-3 bg-blue-500 rounded-full pointer-events-none" />
+            </div>
           </>
         )}
       </div>

@@ -148,6 +148,8 @@ And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already ha
 
 **Downgraded from initial P2 to P3:** the button exists and has a `title` attribute, so it's discoverable on hover. The main discoverability gap is the empty help dialog.
 
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix adds `<span className="text-xs">` text labels next to the 3 icon buttons in `RoomPropertiesPanel` ("Duplicate", "Rotate", "Delete") so the function is readable without hovering for the `title` tooltip. Labels are shortened to fit the narrow panel header; the `title` attribute retains the full "Duplicate Room" / "Rotate 90°" / "Delete Room" wording. The Keyboard Shortcuts help dialog (`src/components/ShortcutHelp.tsx`) was already populated with the 7+ key bindings across Navigation, Room Management, View Controls, and Export — the audit's "empty help dialog" claim was based on a stale build. 221/221 tests pass (unchanged), 0 tsc errors, 0 new lint warnings. Manual repro: add Bedroom → look at Room Properties panel header → "Duplicate" / "Rotate" / "Delete" labels are visible next to their icons.
+
 ---
 
 ### U-5 — View / Comment mode is unreachable from the UI
@@ -240,6 +242,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Related:** U-6 (the same flow is broken end-to-end).
 
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix renames the toolbar button from "PDF Export" to "Presentation Export" (matches the modal title the button opens) — one string change in `src/App.tsx`. 223/223 tests pass (unchanged), 0 tsc errors, build clean. Manual repro: open app → look at the toolbar in the bottom-right of the canvas → button label is "Presentation Export" (not "PDF Export"); click it → modal opens with the same title.
+
 ---
 
 ### U-8 — Imported JSON plan cannot be undone
@@ -267,6 +271,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Trace:** Before import: `Undo (Ctrl+Z) disabled`. After successful import (plan.rooms = 2): `Undo (Ctrl+Z)` still `disabled`. Pressing Ctrl+Z: plan.rooms remains 2.
 
 **Related:** U-1 (rooms stack invisibly) + U-8 (import without undo) compound — a user who imports a plan to "fix" the stacked rooms has no recovery if the import is wrong.
+
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix adds a new `replacePlanPreservingHistory(newPlan)` function to `useFloorPlan` (sets the new plan, persists to localStorage, but builds the new history as `[prePlan, newPlan]` with `historyIndex = 1` — Ctrl+Z restores the pre-plan, Ctrl+Y re-applies the new plan). The function is wired into `App.tsx`'s `handleImportJSON`. `handleClearFloor` already used `updatePlan` + `commitHistory` and so was already undoable. 2 new tests in `useFloorPlan.test.ts` (× the function exists in the public API; × replace + undo restores the pre-plan + redo re-applies the new plan). 208/208 tests pass (was 206), 0 tsc errors, build clean. Manual repro: add a room → import a JSON with 2 rooms → Ctrl+Z → back to the 1-room plan → Ctrl+Y → back to the imported 2-room plan.
 
 ---
 
@@ -321,6 +327,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Trace:** `navigator.clipboard.writeText` is a Promise; calling it without await means the success alert fires before the write completes. The `try/catch` at line 469 only catches synchronous errors, not promise rejections.
 
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix extracts a `copyToClipboardWithFallback(text)` helper to `src/utils.ts` that awaits `navigator.clipboard.writeText`, and on rejection falls back to a hidden `<textarea>` + `document.execCommand('copy')`. On total failure the helper returns `{ok: false}` and `handleShare` shows an alert with the URL itself ("Couldn't copy the link. Here's the URL: …") instead of the misleading success. The success path also defers the analytics `trackEvent` until after the copy resolves — a silent failure no longer counts as a share event. 3 new tests in `utils.test.ts` (× clipboard resolves → `{ok: true, method: 'clipboard'}` / × clipboard rejects + fallback succeeds → `{ok: true, method: 'fallback'}` / × both fail → `{ok: false}`). 218/218 tests pass (was 215), 0 tsc errors, 0 new lint warnings. Manual repro: deny clipboard permission in DevTools → click "Share View-Only Link" → alert shows the URL (not "copied to clipboard"); grant clipboard permission → click again → "copied to clipboard!" alert.
+
 **Related:** U-5 (the share button only supports "view" mode, not "comment" mode — the underlying handler supports both).
 
 ---
@@ -351,6 +359,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Related:** U-1 (rooms stack invisibly at the same position) + U-11 (rooms can be resized past the plot) compound — a new user creates several rooms, all stacked at (3,3), and then makes one of them 500ft wide, then drags it past the plot. The canvas becomes a confusing mess.
 
+**Resolution (2026-06-15):** Added `clampRoomToBuildableArea` in `src/utils.ts` — the single source of truth for the "largest legal room". Both resize paths (number input + drag handle) call it. The input's `max` is now `Math.max(2, buildableWidth)` / `buildableHeight`, with a `title` tooltip explaining the cap. Drag-handle wiring is part of U-15 (Task 4) and will land in the same PR. 7 new tests in `src/utils.test.ts` pin the contract (no-op inside the area, clamp width/height, shift x/y, zero-buildable edge case). The old `max={500}` cap is gone; 500ft rooms are no longer possible via either surface.
+
 ---
 
 ### U-12 — 2nd-floor is selectable but renders no rooms; no empty-state hint on a fresh floor
@@ -374,6 +384,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Trace:** Switching to 1st floor (which has no rooms) → canvas has only the plot outline, road, and Vastu grid overlay. No text. Compare with the 0th floor which renders the 2 imported rooms.
 
 **Related:** U-2 (Add Rooms panel below the fold) compounds — the user can't see the Add Rooms panel without scrolling, and the empty canvas has no hint to do so.
+
+**Resolution (2026-06-15):** Added a hint block in `src/components/Canvas.tsx` keyed on `floorRooms.length === 0`. The hint points the user at the Add Rooms panel AND names the lowest-used floor (via `formatFloor(Math.min(...rooms.map(r => r.floor)))` from `src/constants/floorPlanConstants.ts`) — the cheapest fix is to switch back to a floor that already has rooms, so the hint names that floor instead of saying "0th floor" generically. 2 new tests in `src/components/Canvas.test.tsx` pin the contract (hint shows when empty, hidden when at least one room on the current floor). Combined with U-13 (next finding), the empty-state and the floor-selector expansion are wired up in the same PR.
 
 ---
 
@@ -401,6 +413,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 **Trace:** Importing a JSON with `room.floor: 4` succeeds — the room is in the autosave. But the floor selector still only shows 0th/1st/2nd. The user can never see floor 4. (Discovered accidentally while writing this finding; not retested with an actual JSON file, but the code structure makes it clear.)
 
 **Downgraded from P2 to P3:** This is an architectural limitation, not a regression. The app was originally designed around 3 floors. The import is more flexible than the UI, but the discrepancy is silent.
+
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix replaces the hardcoded `[0, 1, 2].map` floor-selector set in `App.tsx` with a derived set: the union of `currentFloor` and the set of floors used in `plan.rooms`, sorted ascending. A "+ Add floor" button (capped at floor 9) bumps `currentFloor` to the next unused floor. Importing a JSON with `room.floor: 4` now shows a "4th" button in the selector so the user can switch to and edit that floor. The wrapper gained `flex-wrap` and the buttons gained `min-w-[3rem]` so the row doesn't overflow on small widths. Manual repro: import a JSON with `room.floor: 4` → floor selector shows 0th, 1st, 2nd, 4th buttons (sorted) → click 4th → that floor's rooms appear in the canvas. 223/223 tests pass, 0 tsc errors, build clean.
 
 ---
 
@@ -468,5 +482,7 @@ The result is an unusable layout on a phone or small tablet. There is no respons
 **Trace:** Read `Room.tsx:160-178` and `useCanvasDrag.ts`. Both confirm 4 corner handles, no edge handles.
 
 **Downgraded from initial P2 to P3:** the 4 corner handles do exist; this is mostly a polish / discoverability issue, not a broken flow.
+
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix widens `useCanvasDrag`'s `resizeHandle` type from a 4-corner union (`'se' | 'sw' | 'ne' | 'nw'`) to an 8-direction union (`'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'`) — exported as a `ResizeHandle` type that `Room.tsx` and the hook share. The existing `.includes('e' | 's' | 'w' | 'n')` axis-resize checks at lines 294-341 work for the new edge directions without further changes (an edge handle's `includes('s')` is `false`, so the height stays the same — one-axis resize "just works"). `Room.tsx` renders 4 new mid-edge handles (20px hit area, 12px visual, `cursor-ns-resize` on N/S and `cursor-ew-resize` on E/W, all with `data-testid="resize-handle-{n,s,e,w,ne,nw,se,sw}"`). The 4 corner handles grow from 12px to 20px visual + 28px transparent hit area (the `pointerdown` is on the outer wrapper; the inner visual is `pointer-events-none`). The commit also wires `clampRoomToBuildableArea` (U-11's helper) into the drag branch as a defensive final-pass — the existing per-axis `maxX - room.x` math is unchanged, but the helper is now in the call chain as a documented hook for any future "I forgot to clamp" refactor. 2 new tests in `Room.test.tsx` (× 8 handles render when room is selected, queryable by `data-testid` / × edge handles carry the right cursor classes) + 1 new test in `useCanvasDrag.test.ts` (× defensive clamp at the buildable-area boundary on a 30×40 plot with 3' setbacks, room at the buildable origin). 221/221 tests pass (was 218), 0 tsc errors, 0 new lint warnings. Manual repro: add Bedroom 12'×12' → click to select → drag the south edge down by 50px → only the height changes (not the width); drag the SE corner past the plot's right edge → room width is clamped to the buildable width.
 
 **Related:** U-3 (clicks on a room don't currently select it, so the user can't even see the resize handles without the U-3 fix landing first).

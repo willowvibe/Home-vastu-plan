@@ -7,8 +7,15 @@
  * update the test cases here.
  */
 
-import { describe, it, expect } from 'vitest';
-import { cn, computeInitialRoomPosition, getAnalyzeButtonState, getErrorMessage } from './utils';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import {
+  clampRoomToBuildableArea,
+  cn,
+  computeInitialRoomPosition,
+  copyToClipboardWithFallback,
+  getAnalyzeButtonState,
+  getErrorMessage,
+} from './utils';
 
 describe('cn', () => {
   it('merges class names', () => {
@@ -164,5 +171,132 @@ describe('getAnalyzeButtonState (U-9: helpful disabled state when API key is mis
       hasRoomsOnCurrentFloor: false,
     });
     expect(state.title).toMatch(/VITE_GEMINI_API_KEY/);
+  });
+});
+
+describe('clampRoomToBuildableArea (U-11: no more 500ft rooms past the plot)', () => {
+  const plan = {
+    plotWidth: 30,
+    plotHeight: 40,
+    setbacks: { top: 3, right: 3, bottom: 3, left: 3 },
+  };
+  // Buildable area: 24' x 34' (plot minus setbacks on each side).
+  const room = (
+    overrides: Partial<{ x: number; y: number; w: number; h: number }> = {}
+  ) => ({
+    id: 'r1',
+    type: 'bedroom',
+    floor: 0,
+    wallThickness: 9,
+    x: 3,
+    y: 3,
+    w: 12,
+    h: 12,
+    ...overrides,
+  });
+
+  it('returns a room unchanged when it is inside the buildable area', () => {
+    const r = room();
+    expect(clampRoomToBuildableArea(r, plan)).toEqual(r);
+  });
+
+  it('clamps width when the room is too wide', () => {
+    const r = room({ w: 500 });
+    const clamped = clampRoomToBuildableArea(r, plan);
+    expect(clamped.w).toBe(24);
+  });
+
+  it('clamps height when the room is too tall', () => {
+    const r = room({ h: 500 });
+    const clamped = clampRoomToBuildableArea(r, plan);
+    expect(clamped.h).toBe(34);
+  });
+
+  it('shifts x leftward when the room extends past the right setback', () => {
+    // Room at x=20, w=20 → right edge at 40 (10 past the 27 right setback).
+    const r = room({ x: 20, w: 20 });
+    const clamped = clampRoomToBuildableArea(r, plan);
+    // Right edge should not exceed plotWidth - setbacks.right = 27.
+    expect(clamped.x + clamped.w).toBeLessThanOrEqual(27);
+  });
+
+  it('shifts y upward when the room extends past the bottom setback', () => {
+    const r = room({ y: 30, h: 20 });
+    const clamped = clampRoomToBuildableArea(r, plan);
+    expect(clamped.y + clamped.h).toBeLessThanOrEqual(37);
+  });
+
+  it('clamps both axes when the room exceeds the buildable area in both', () => {
+    const r = room({ x: 0, y: 0, w: 500, h: 500 });
+    const clamped = clampRoomToBuildableArea(r, plan);
+    expect(clamped.w).toBe(24);
+    expect(clamped.h).toBe(34);
+    expect(clamped.x + clamped.w).toBeLessThanOrEqual(27);
+    expect(clamped.y + clamped.h).toBeLessThanOrEqual(37);
+  });
+
+  it('returns the original room when the buildable area is zero (edge case)', () => {
+    // Plot is exactly the size of the setbacks on each axis, so the
+    // buildable area is 0. Clamping would produce a 0-size room, which
+    // is useless, so the helper returns the input unchanged.
+    const tinyPlan = {
+      plotWidth: 6,
+      plotHeight: 8,
+      setbacks: { top: 3, right: 3, bottom: 3, left: 3 },
+    };
+    const r = room();
+    expect(clampRoomToBuildableArea(r, tinyPlan)).toEqual(r);
+  });
+});
+
+describe('copyToClipboardWithFallback (U-10: handle clipboard rejection)', () => {
+  const originalClipboard = navigator.clipboard;
+  const originalExecCommand = document.execCommand;
+
+  afterEach(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+      writable: true,
+      configurable: true,
+    });
+    document.execCommand = originalExecCommand;
+  });
+
+  it('uses the clipboard API when it resolves', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+    const result = await copyToClipboardWithFallback('https://example.com/plan');
+    expect(writeText).toHaveBeenCalledWith('https://example.com/plan');
+    expect(result).toEqual({ ok: true, method: 'clipboard' });
+  });
+
+  it('falls back to a textarea + execCommand when the clipboard API rejects', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('NotAllowedError'));
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+    document.execCommand = vi.fn().mockReturnValue(true);
+    const result = await copyToClipboardWithFallback('https://example.com/plan');
+    expect(writeText).toHaveBeenCalled();
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
+    expect(result).toEqual({ ok: true, method: 'fallback' });
+  });
+
+  it('returns { ok: false } when both the clipboard and the fallback fail', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('NotAllowedError'));
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+    document.execCommand = vi.fn().mockReturnValue(false);
+    const result = await copyToClipboardWithFallback('https://example.com/plan');
+    expect(result).toEqual({ ok: false });
   });
 });

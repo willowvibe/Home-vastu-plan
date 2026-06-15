@@ -149,3 +149,126 @@ export function getAnalyzeButtonState(input: AnalyzeButtonStateInput): AnalyzeBu
   }
   return { disabled: false, title: 'Analyze floor plan for Vastu compliance + build guide' };
 }
+
+// --- U-11 room-clamp helper ----------------------------------------------
+
+/** Minimum shape for `clampRoomToBuildableArea`. */
+export interface ClampRoomPlan {
+  plotWidth: number;
+  plotHeight: number;
+  setbacks: { top: number; right: number; bottom: number; left: number };
+}
+
+/**
+ * Clamp a room's width/height/x/y so it never extends past the plan's
+ * buildable area (the area inside the setbacks).
+ *
+ * U-11: rooms used to be resizable to arbitrary values (e.g. 500ft
+ * wide in a 30ft plot) via the input or the drag handle, with no
+ * visual indication that the room had left the plot. This helper
+ * is the single source of truth for "the largest legal room" and
+ * is called from BOTH the input's onChange/onBlur AND
+ * `useCanvasDrag`'s resize branch.
+ *
+ * Algorithm:
+ *   1. width  = min(room.w, buildableWidth)
+ *      height = min(room.h, buildableHeight)
+ *   2. if x + width > rightEdge   → x = rightEdge - width
+ *      if y + height > bottomEdge → y = bottomEdge - height
+ *   3. if x < leftEdge   → x = leftEdge
+ *      if y < topEdge    → y = topEdge
+ *   4. if the buildable area is 0 (plot too small for setbacks),
+ *      return the input unchanged — a 0-size room is not useful.
+ *
+ * Returns a new object; never mutates the input.
+ */
+export function clampRoomToBuildableArea<
+  T extends { x: number; y: number; w: number; h: number }
+>(room: T, plan: ClampRoomPlan): T {
+  const buildableWidth = Math.max(
+    0,
+    plan.plotWidth - plan.setbacks.left - plan.setbacks.right
+  );
+  const buildableHeight = Math.max(
+    0,
+    plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom
+  );
+  if (buildableWidth <= 0 || buildableHeight <= 0) {
+    return room;
+  }
+  const w = Math.min(room.w, buildableWidth);
+  const h = Math.min(room.h, buildableHeight);
+  const rightEdge = plan.plotWidth - plan.setbacks.right;
+  const bottomEdge = plan.plotHeight - plan.setbacks.bottom;
+  // Clamp x and y so the room stays inside the buildable area.
+  // U-11 contract: a room must be fully inside the buildable area
+  // (between the setbacks on all four sides). If the new width
+  // would push the room past the right/bottom setback, shift
+  // x/y leftward/upward. The `Math.max(setbacks.X, room.X)`
+  // pulls any room that starts in the setback area forward to
+  // the setback boundary.
+  let x = Math.max(plan.setbacks.left, room.x);
+  let y = Math.max(plan.setbacks.top, room.y);
+  if (x + w > rightEdge) x = rightEdge - w;
+  if (y + h > bottomEdge) y = bottomEdge - h;
+  if (x < plan.setbacks.left) x = plan.setbacks.left;
+  if (y < plan.setbacks.top) y = plan.setbacks.top;
+  return { ...room, x, y, w, h };
+}
+
+// --- U-10 clipboard-with-fallback helper -------------------------------
+
+export type CopyToClipboardResult =
+  | { ok: true; method: 'clipboard' }
+  | { ok: true; method: 'fallback' }
+  | { ok: false };
+
+/**
+ * Try to copy `text` to the clipboard, with a fallback for browsers
+ * that block the async clipboard API.
+ *
+ * U-10 fix: the previous `handleShare` called `navigator.clipboard
+ * .writeText(url)` WITHOUT `await` and without `.catch`. The function
+ * returns a Promise; if the browser blocks the write (insecure context,
+ * denied permission, focus not on the page), the promise rejects
+ * silently and the success alert fires regardless. This helper awaits
+ * the result, and on rejection falls back to creating a hidden
+ * `<textarea>`, selecting its content, and calling
+ * `document.execCommand('copy')` — the only cross-browser synchronous
+ * copy mechanism that still works in 2026.
+ *
+ * Returns:
+ *   - { ok: true, method: 'clipboard' } when the async API succeeds
+ *   - { ok: true, method: 'fallback' }  when the fallback succeeds
+ *   - { ok: false }                     when both fail (caller should
+ *                                        show the URL in an error toast)
+ */
+export async function copyToClipboardWithFallback(text: string): Promise<CopyToClipboardResult> {
+  // Try the async clipboard API.
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return { ok: true, method: 'clipboard' };
+    } catch {
+      // Fall through to the fallback path.
+    }
+  }
+  // Fallback: hidden textarea + execCommand('copy').
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) return { ok: true, method: 'fallback' };
+  } catch {
+    // Fall through.
+  }
+  return { ok: false };
+}

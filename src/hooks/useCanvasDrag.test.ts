@@ -439,6 +439,42 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
     expect(onUpdateRoom).toHaveBeenLastCalledWith('r1', { w: 25, h: 2, x: 0, y: 0 });
   });
 
+  it('SE handle: defensive clamp via clampRoomToBuildableArea (U-11 drag wiring)', () => {
+    // 30x40 plot, 3' setbacks on every side => 24' x 34' buildable.
+    // Buildable origin is (3, 3). Try to grow the room past the
+    // buildable width; per-axis math caps at 27 (= plotWidth -
+    // setbacks.right - room.x), the helper re-asserts the
+    // buildable-width cap (24), and the final write matches. This
+    // is the user-facing "no more 500ft rooms past the plot"
+    // invariant for the drag path.
+    const planWithFullSetback = {
+      ...PLAN,
+      setbacks: { top: 3, bottom: 3, left: 3, right: 3 },
+      plotWidth: 30,
+      plotHeight: 40,
+      // Place the room at the buildable origin so the helper is a
+      // no-op on x/y and we can pin just the w/h cap.
+      rooms: [
+        { ...PLAN.rooms[0], x: 3, y: 3 },
+      ],
+    };
+    const { result, onUpdateRoom } = setup({ plan: planWithFullSetback });
+    act(() => {
+      result.current.handlePointerDown(
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        planWithFullSetback.rooms[0],
+        'resize',
+        'se'
+      );
+    });
+    // mouseX = round(2000/20) = 100; per-axis clamp = 30 - 3 - 3 = 24
+    // (= buildable width exactly). The defensive clampRoomToBuildableArea
+    // pass leaves the result unchanged — pinning that the helper
+    // and the per-axis math agree.
+    pointerMove(2000, 0);
+    expect(onUpdateRoom).toHaveBeenLastCalledWith('r1', { w: 24, h: 2, x: 3, y: 3 });
+  });
+
   it('SW handle: resize west+down shrinks from the left, adjusting x and w', () => {
     const { result, onUpdateRoom } = setup();
     act(() => {

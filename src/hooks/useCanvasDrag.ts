@@ -7,6 +7,7 @@ import {
   SNAP_GRID_FT,
   SNAP_GRID_SUB_FT,
 } from '../constants/geometry';
+import { clampRoomToBuildableArea } from '../utils';
 
 interface UseCanvasDragOptions {
   plan: FloorPlan;
@@ -18,6 +19,11 @@ interface UseCanvasDragOptions {
   onUpdateRoomEnd?: () => void;
   appMode: AppMode;
 }
+
+// U-15: 8 directions — the 4 corners plus the 4 mid-edges. Exported
+// so Room.tsx (and any future resize-handle renderer) can pin the
+// same union without redeclaring it.
+export type ResizeHandle = 'se' | 'sw' | 'ne' | 'nw' | 'n' | 's' | 'e' | 'w';
 
 // S-9: when a room shares a wall with a neighbor, the wall thickness on
 // the shared side is halved (the wall is "absorbed" by the room-to-room
@@ -66,7 +72,7 @@ export function useCanvasDrag({
 }: UseCanvasDragOptions) {
   const [draggingRoom, setDraggingRoom] = useState<string | null>(null);
   const [resizingRoom, setResizingRoom] = useState<string | null>(null);
-  const [resizeHandle, setResizeHandle] = useState<'se' | 'sw' | 'ne' | 'nw' | null>(null);
+  const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [draggingElement, setDraggingElement] = useState<{
     roomId: string;
@@ -114,12 +120,7 @@ export function useCanvasDrag({
   }, [draggingRoom, resizingRoom, resizeHandle, dragOffset, draggingElement, elementDragOffset]);
 
   const handlePointerDown = useCallback(
-    (
-      e: React.PointerEvent,
-      room: Room,
-      type: 'drag' | 'resize',
-      handle?: 'se' | 'sw' | 'ne' | 'nw'
-    ) => {
+    (e: React.PointerEvent, room: Room, type: 'drag' | 'resize', handle?: ResizeHandle) => {
       // B-5: lock pointer drag in non-edit modes.
       if (appModeRef.current !== 'edit') return;
       e.stopPropagation();
@@ -340,7 +341,22 @@ export function useCanvasDrag({
           }
         }
 
-        updateRoom(currentState.resizingRoom, { w: newW, h: newH, x: newX, y: newY });
+        // U-11 defensive final-pass clamp. The per-axis math above
+        // already caps width at (maxX - room.x) and similar, so this
+        // is a no-op for the simple case. It exists to (a) document
+        // the contract in one place, (b) catch any future refactor
+        // that forgets a clamp, and (c) keep the resize path aligned
+        // with the input's onChange (which calls the same helper).
+        const clamped = clampRoomToBuildableArea(
+          { ...room, x: newX, y: newY, w: newW, h: newH },
+          currentPlan
+        );
+        updateRoom(currentState.resizingRoom, {
+          w: clamped.w,
+          h: clamped.h,
+          x: clamped.x,
+          y: clamped.y,
+        });
       } else if (currentState.draggingElement) {
         const room = currentPlan.rooms.find((r) => r.id === currentState.draggingElement!.roomId);
         if (!room) return;
