@@ -295,6 +295,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Related:** The static "Vastu Score: 40/100" badge in the header looks like a result of the AI analysis but is actually a hardcoded/heuristic score. A new user could believe the AI is already working and the 40/100 is the result.
 
+**Resolution (2026-06-14):** Fixed in `fix/room-props-and-drag-freeze` (commit pending — see KNOWN_ISSUES §"Recently Resolved (U-9 analyze button affordance)" when it lands). Two changes to `App.tsx`: (1) extract a pure `getAnalyzeButtonState({ isAnalyzing, hasApiKey, hasRoomsOnCurrentFloor })` helper to `src/utils.ts` and call it from the AI sidebar's button render path. The button is now disabled with a specific tooltip when `VITE_GEMINI_API_KEY` is missing (the tooltip names the env var and points to `.env.example`). (2) Defense-in-depth: the `handleAnalyze` catch block now surfaces the real error message from `gemini.ts` (e.g. `'VITE_GEMINI_API_KEY not configured. Set it in your .env file (see .env.example).'`) instead of the generic `'Failed to analyze floor plan.'`, in case the env var is removed between page load and click. 5 new tests in `utils.test.ts` (× no API key → disabled + specific tooltip / × no rooms → disabled + rooms tooltip / × analyzing → disabled + analyzing tooltip / × all good → enabled / × no-API-key wins over no-rooms when both are wrong). 206/206 tests pass (was 201), 0 tsc errors, build clean. Manual repro: open a fresh checkout → add Bedroom → click "Analyze Floor Plan" → button is disabled with tooltip "Set VITE_GEMINI_API_KEY in .env to enable AI analysis (see .env.example)".
+
 ---
 
 ### U-10 — "Share View-Only Link" can claim success even when the clipboard write silently fails

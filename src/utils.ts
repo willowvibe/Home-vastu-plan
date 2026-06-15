@@ -104,3 +104,48 @@ export function computeInitialRoomPosition<T extends RoomPositionRoom>(
     y: plan.setbacks.top + dy,
   };
 }
+
+// --- U-9 Analyze button affordance helper --------------------------------
+
+export interface AnalyzeButtonStateInput {
+  isAnalyzing: boolean;
+  hasApiKey: boolean;
+  hasRoomsOnCurrentFloor: boolean;
+}
+
+export interface AnalyzeButtonState {
+  disabled: boolean;
+  /** Tooltip / aria-label for the button in the current state. */
+  title: string;
+}
+
+/**
+ * Whether the "Analyze Floor Plan" button should be disabled and what
+ * tooltip to show. Extracted from App.tsx so the contract is unit-testable
+ * without mounting the full App.
+ *
+ * U-9 fix: the previous behaviour was: button enabled when rooms exist
+ * on the current floor, click fires, gemini.ts throws
+ * 'VITE_GEMINI_API_KEY not configured', catch shows a generic
+ * 'Failed to analyze floor plan.' alert. Cleaner UX: disable the
+ * button at the source with a specific tooltip that names the missing
+ * config.
+ */
+export function getAnalyzeButtonState(input: AnalyzeButtonStateInput): AnalyzeButtonState {
+  if (!input.hasApiKey) {
+    return {
+      disabled: true,
+      title: 'Set VITE_GEMINI_API_KEY in .env to enable AI analysis (see .env.example)',
+    };
+  }
+  if (!input.hasRoomsOnCurrentFloor) {
+    return {
+      disabled: true,
+      title: 'Add at least one room on the current floor to enable analysis',
+    };
+  }
+  if (input.isAnalyzing) {
+    return { disabled: true, title: 'Analyzing…' };
+  }
+  return { disabled: false, title: 'Analyze floor plan for Vastu compliance + build guide' };
+}

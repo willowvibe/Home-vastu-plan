@@ -46,7 +46,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSelection } from './hooks/useSelection';
 import { useExportWithClearSelection } from './hooks/useExportWithClearSelection';
 import { useTheme } from './contexts/ThemeContext';
-import { getErrorMessage, computeInitialRoomPosition } from './utils';
+import { getAnalyzeButtonState, getErrorMessage, computeInitialRoomPosition } from './utils';
 import {
   exportToPNG,
   exportToJSON,
@@ -437,7 +437,15 @@ export default function App() {
       }, 2000);
     } catch (error) {
       console.error(error);
-      alert('Failed to analyze floor plan.');
+      // U-9: surface the real error from gemini.ts when possible. The
+      // service throws 'VITE_GEMINI_API_KEY not configured...' with a
+      // clear actionable message, so the user sees that instead of a
+      // generic "Failed to analyze floor plan." (the button is also
+      // disabled in the no-key state, but defense-in-depth: if the env
+      // var is removed between page load and click, the message is
+      // still useful).
+      const message = getErrorMessage(error);
+      alert(message || 'Failed to analyze floor plan.');
       setAnalysisProgress(0);
     } finally {
       setIsAnalyzing(false);
@@ -634,6 +642,14 @@ export default function App() {
     .filter((r) => r.floor === currentFloor)
     .reduce((acc, r) => acc + r.w * r.h, 0);
   const vastuScore = calculateOverallVastuScore(plan);
+  // U-9: the Analyze button's disabled state + tooltip are derived via a
+  // pure helper (testable in utils.test.ts). The three states are:
+  // no API key, no rooms on current floor, and "analyzing" (in-flight).
+  const analyzeBtn = getAnalyzeButtonState({
+    isAnalyzing,
+    hasApiKey: Boolean(import.meta.env.VITE_GEMINI_API_KEY),
+    hasRoomsOnCurrentFloor: plan.rooms.filter((r) => r.floor === currentFloor).length > 0,
+  });
 
   return (
     <div
@@ -1368,9 +1384,8 @@ export default function App() {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={handleAnalyze}
-                    disabled={
-                      isAnalyzing || plan.rooms.filter((r) => r.floor === currentFloor).length === 0
-                    }
+                    disabled={analyzeBtn.disabled}
+                    title={analyzeBtn.title}
                     className={`w-full font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 shrink-0 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white`}
                   >
                     {isAnalyzing ? (
