@@ -323,6 +323,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Trace:** `navigator.clipboard.writeText` is a Promise; calling it without await means the success alert fires before the write completes. The `try/catch` at line 469 only catches synchronous errors, not promise rejections.
 
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix extracts a `copyToClipboardWithFallback(text)` helper to `src/utils.ts` that awaits `navigator.clipboard.writeText`, and on rejection falls back to a hidden `<textarea>` + `document.execCommand('copy')`. On total failure the helper returns `{ok: false}` and `handleShare` shows an alert with the URL itself ("Couldn't copy the link. Here's the URL: …") instead of the misleading success. The success path also defers the analytics `trackEvent` until after the copy resolves — a silent failure no longer counts as a share event. 3 new tests in `utils.test.ts` (× clipboard resolves → `{ok: true, method: 'clipboard'}` / × clipboard rejects + fallback succeeds → `{ok: true, method: 'fallback'}` / × both fail → `{ok: false}`). 218/218 tests pass (was 215), 0 tsc errors, 0 new lint warnings. Manual repro: deny clipboard permission in DevTools → click "Share View-Only Link" → alert shows the URL (not "copied to clipboard"); grant clipboard permission → click again → "copied to clipboard!" alert.
+
 **Related:** U-5 (the share button only supports "view" mode, not "comment" mode — the underlying handler supports both).
 
 ---

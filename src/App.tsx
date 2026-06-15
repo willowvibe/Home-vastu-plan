@@ -46,7 +46,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSelection } from './hooks/useSelection';
 import { useExportWithClearSelection } from './hooks/useExportWithClearSelection';
 import { useTheme } from './contexts/ThemeContext';
-import { getAnalyzeButtonState, getErrorMessage, computeInitialRoomPosition } from './utils';
+import { getAnalyzeButtonState, getErrorMessage, computeInitialRoomPosition, copyToClipboardWithFallback } from './utils';
 import {
   exportToPNG,
   exportToJSON,
@@ -477,17 +477,32 @@ export default function App() {
     }
   };
 
-  const handleShare = (mode: 'view' | 'comment') => {
+  const handleShare = async (mode: 'view' | 'comment') => {
+    let url: string;
     try {
-      const url = generateShareLink(plan, analysis, mode);
-      navigator.clipboard.writeText(url);
+      url = generateShareLink(plan, analysis, mode);
+    } catch (error) {
+      console.error('Failed to generate share link', error);
+      alert(getErrorMessage(error) || 'Failed to generate share link. Plan might be too large.');
+      return;
+    }
+    // U-10: await the clipboard write. The previous version called
+    // `navigator.clipboard.writeText(url)` without await, so a
+    // silently-rejected promise (insecure context, denied permission,
+    // focus not on the page) made the success alert fire even when
+    // nothing was copied. copyToClipboardWithFallback awaits the
+    // write and falls back to a hidden <textarea> + execCommand.
+    const result = await copyToClipboardWithFallback(url);
+    if (result.ok) {
       trackEvent(mode === 'view' ? EVENTS.SHARE_VIEW_MODE : EVENTS.SHARE_COMMENT_MODE, {
         props: { floor: currentFloor, mode },
       });
       alert(`Share link (${mode} mode) copied to clipboard!`);
-    } catch (error) {
-      console.error('Failed to generate share link', error);
-      alert(getErrorMessage(error) || 'Failed to generate share link. Plan might be too large.');
+    } else {
+      // Both the async clipboard and the textarea fallback failed.
+      // Show the URL itself so the user can copy it manually instead
+      // of the misleading "copied to clipboard" message.
+      alert(`Couldn't copy the link. Here's the URL: ${url}`);
     }
   };
 

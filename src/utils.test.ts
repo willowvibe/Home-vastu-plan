@@ -7,11 +7,12 @@
  * update the test cases here.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import {
   clampRoomToBuildableArea,
   cn,
   computeInitialRoomPosition,
+  copyToClipboardWithFallback,
   getAnalyzeButtonState,
   getErrorMessage,
 } from './utils';
@@ -245,5 +246,57 @@ describe('clampRoomToBuildableArea (U-11: no more 500ft rooms past the plot)', (
     };
     const r = room();
     expect(clampRoomToBuildableArea(r, tinyPlan)).toEqual(r);
+  });
+});
+
+describe('copyToClipboardWithFallback (U-10: handle clipboard rejection)', () => {
+  const originalClipboard = navigator.clipboard;
+  const originalExecCommand = document.execCommand;
+
+  afterEach(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+      writable: true,
+      configurable: true,
+    });
+    document.execCommand = originalExecCommand;
+  });
+
+  it('uses the clipboard API when it resolves', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+    const result = await copyToClipboardWithFallback('https://example.com/plan');
+    expect(writeText).toHaveBeenCalledWith('https://example.com/plan');
+    expect(result).toEqual({ ok: true, method: 'clipboard' });
+  });
+
+  it('falls back to a textarea + execCommand when the clipboard API rejects', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('NotAllowedError'));
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+    document.execCommand = vi.fn().mockReturnValue(true);
+    const result = await copyToClipboardWithFallback('https://example.com/plan');
+    expect(writeText).toHaveBeenCalled();
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
+    expect(result).toEqual({ ok: true, method: 'fallback' });
+  });
+
+  it('returns { ok: false } when both the clipboard and the fallback fail', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('NotAllowedError'));
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+    document.execCommand = vi.fn().mockReturnValue(false);
+    const result = await copyToClipboardWithFallback('https://example.com/plan');
+    expect(result).toEqual({ ok: false });
   });
 });

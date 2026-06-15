@@ -209,3 +209,60 @@ export function clampRoomToBuildableArea<
   if (y < plan.setbacks.top) y = plan.setbacks.top;
   return { ...room, x, y, w, h };
 }
+
+// --- U-10 clipboard-with-fallback helper -------------------------------
+
+export type CopyToClipboardResult =
+  | { ok: true; method: 'clipboard' }
+  | { ok: true; method: 'fallback' }
+  | { ok: false };
+
+/**
+ * Try to copy `text` to the clipboard, with a fallback for browsers
+ * that block the async clipboard API.
+ *
+ * U-10 fix: the previous `handleShare` called `navigator.clipboard
+ * .writeText(url)` WITHOUT `await` and without `.catch`. The function
+ * returns a Promise; if the browser blocks the write (insecure context,
+ * denied permission, focus not on the page), the promise rejects
+ * silently and the success alert fires regardless. This helper awaits
+ * the result, and on rejection falls back to creating a hidden
+ * `<textarea>`, selecting its content, and calling
+ * `document.execCommand('copy')` — the only cross-browser synchronous
+ * copy mechanism that still works in 2026.
+ *
+ * Returns:
+ *   - { ok: true, method: 'clipboard' } when the async API succeeds
+ *   - { ok: true, method: 'fallback' }  when the fallback succeeds
+ *   - { ok: false }                     when both fail (caller should
+ *                                        show the URL in an error toast)
+ */
+export async function copyToClipboardWithFallback(text: string): Promise<CopyToClipboardResult> {
+  // Try the async clipboard API.
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return { ok: true, method: 'clipboard' };
+    } catch {
+      // Fall through to the fallback path.
+    }
+  }
+  // Fallback: hidden textarea + execCommand('copy').
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) return { ok: true, method: 'fallback' };
+  } catch {
+    // Fall through.
+  }
+  return { ok: false };
+}
