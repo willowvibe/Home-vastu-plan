@@ -148,6 +148,8 @@ And pass `onSelectRoom` from `Canvas.tsx` → `Room.tsx`. (The Canvas already ha
 
 **Downgraded from initial P2 to P3:** the button exists and has a `title` attribute, so it's discoverable on hover. The main discoverability gap is the empty help dialog.
 
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix adds `<span className="text-xs">` text labels next to the 3 icon buttons in `RoomPropertiesPanel` ("Duplicate", "Rotate", "Delete") so the function is readable without hovering for the `title` tooltip. Labels are shortened to fit the narrow panel header; the `title` attribute retains the full "Duplicate Room" / "Rotate 90°" / "Delete Room" wording. The Keyboard Shortcuts help dialog (`src/components/ShortcutHelp.tsx`) was already populated with the 7+ key bindings across Navigation, Room Management, View Controls, and Export — the audit's "empty help dialog" claim was based on a stale build. 221/221 tests pass (unchanged), 0 tsc errors, 0 new lint warnings. Manual repro: add Bedroom → look at Room Properties panel header → "Duplicate" / "Rotate" / "Delete" labels are visible next to their icons.
+
 ---
 
 ### U-5 — View / Comment mode is unreachable from the UI

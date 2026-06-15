@@ -123,27 +123,32 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
           )}
           <button
             onClick={onDuplicate}
-            className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-md transition-colors border border-transparent hover:border-slate-300"
+            className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-md transition-colors border border-transparent hover:border-slate-300 flex items-center gap-1.5"
             title="Duplicate Room"
             disabled={isLocked}
           >
             <Copy className="w-4 h-4" />
+            {/* U-4: text label next to the icon so the function is
+                readable without hovering for the title tooltip. */}
+            <span className="text-xs">Duplicate</span>
           </button>
           <button
             onClick={onRotate}
-            className="p-1.5 text-slate-600 hover:bg-white rounded-md transition-colors border border-transparent hover:border-slate-200"
+            className="p-1.5 text-slate-600 hover:bg-white rounded-md transition-colors border border-transparent hover:border-slate-200 flex items-center gap-1.5"
             title="Rotate 90°"
             disabled={isLocked}
           >
             <RotateCw className="w-4 h-4" />
+            <span className="text-xs">Rotate</span>
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition-colors border border-transparent hover:border-red-200"
+            className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition-colors border border-transparent hover:border-red-200 flex items-center gap-1.5"
             title="Delete Room"
             disabled={isLocked}
           >
             <Trash2 className="w-4 h-4" />
+            <span className="text-xs">Delete</span>
           </button>
         </div>
       </div>
