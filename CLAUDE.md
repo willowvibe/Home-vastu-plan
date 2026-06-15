@@ -5,7 +5,7 @@
 ## What this is
 
 - VastuPlan 2D: React 19 + Vite 6 + Tailwind v4 SPA for Indian home design with Vastu compliance scoring. TypeScript strict. Optional Socket.io collab server in `server/`. See [README.md](./README.md).
-- Version 0.1.0 (alpha). Production: Vercel (auto-deploys on push to main).
+- Version 0.1.1 (alpha). Production: Vercel (auto-deploys on push to main).
 
 ## Dev environment
 
@@ -43,12 +43,13 @@
 
 ## Known issues
 
-- P0/P1: all resolved. P1 backlog: **B-8** (multi-select rooms with shift+click). P2: **S-1** (split `App.tsx` into Sidebar / Properties / Toolbar modules, 8-12h), **S-4** (property tests for the Vastu matrix, 4h). See [KNOWN_ISSUES.md](./docs/KNOWN_ISSUES.md) and [CODE_REVIEW.md](./docs/CODE_REVIEW.md).
+- P0/P1: all resolved. P1 backlog: **B-8** (multi-select rooms with shift+click — the shift+click toggle is wired, marquee select is still unimplemented). P2: **S-1** (split `App.tsx` into Sidebar / Properties / Toolbar modules, 8-12h), **S-4** (property tests for the Vastu matrix, 4h). See [KNOWN_ISSUES.md](./docs/KNOWN_ISSUES.md) and [CODE_REVIEW.md](./docs/CODE_REVIEW.md).
 
 ## Things future Claude should know
 
 - `App.tsx` is ~1,850 lines. **S-1 will split it.** Coordinate with the user before starting a 1,000+-line diff — its own branch.
 - Wall thickness is in **inches**, not feet. Snap-to-grid is 1ft; sub-grid drag is 0.1ft. The `useCanvasDrag` hook early-returns on null `canvasRef.current` — silent. See [vital-pitfalls.md](./memory/vital-pitfalls.md).
-- Floor labels are ordinals: `0th`, `1st`, `2nd`, …. Use `formatFloor(n)` from `src/constants/floorPlanConstants.ts`, not a hardcoded `Ground / First / Second` ternary.
+- Floor labels are ordinals: `0th`, `1st`, `2nd`, …. Use `formatFloor(n)` from `src/constants/floorPlanConstants.ts`, not a hardcoded `Ground / First / Second` ternary. The floor selector is **dynamic** (U-13): the button set is the union of `currentFloor` and the floors used by `plan.rooms`, sorted ascending, with a "+ Add floor" button capped at floor 9. Don't reintroduce a hardcoded `[0, 1, 2].map`.
 - Deployed to Vercel via Git integration. `willowvibe` org admin did the one-time UI setup. Per-PR previews + main→Prod are automatic. See [vercel-deployment-shipped.md](./memory/vercel-deployment-shipped.md).
 - The theme system uses `<html class="dark">` + Tailwind's `dark:` variant. Don't use the JS `prefers-color-scheme: dark` media query — the user wants the toggle to win.
+- Pure helpers in `src/utils.ts` (added in 0.1.1): `clampRoomToBuildableArea(room, plan)` for room-boundary enforcement (wired into BOTH the width/length inputs in `RoomPropertiesPanel` and the drag-handle branch in `useCanvasDrag` — don't re-introduce per-surface clamp logic), `copyToClipboardWithFallback(text)` for the share-link copy flow, `computeInitialRoomPosition(plan, rooms, currentFloor)` for the diagonal-cascade room-add positioning. `useFloorPlan` exposes `replacePlanPreservingHistory(newPlan)` for plan replacements that should land at the top of the undo stack (vs `resetPlan` which wipes history).
