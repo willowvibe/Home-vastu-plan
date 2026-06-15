@@ -1,6 +1,6 @@
 # VastuPlan 2D
 
-> **0.1.0 (alpha)** — see [`CHANGELOG.md`](./CHANGELOG.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md) for the current state and the active backlog.
+> **0.1.1 (alpha)** — see [`CHANGELOG.md`](./CHANGELOG.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md) for the current state and the active backlog. Latest release: the P2/P3 UX sweep (5 PRs since `0.1.0`, 8 UX-walkthrough findings resolved).
 
 VastuPlan 2D is a modern, interactive web application designed to help users create, visualize, and analyze floor plans based on traditional Indian Vastu Shastra principles. Built with React 19 and Tailwind CSS v4, it offers a seamless drag-and-drop interface combined with intelligent AI-driven analysis. This release includes bug fixes and usability improvements including keyboard navigation, multi-floor management, and enhanced export options.
 
@@ -11,7 +11,7 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
 - **Drag & Drop Interface**: Easily add rooms (Bedroom, Kitchen, Living Room, Pooja Room, etc.) to your plot and drag them into position.
 - **Smart Resizing**: Resize rooms using intuitive corner handles.
 - **Collision Detection**: Rooms automatically snap and slide against each other, preventing unrealistic overlaps.
-- **Multi-Floor Support**: Design Ground, First, and Second floors independently.
+- **Multi-Floor Support**: Design `0th / 1st / 2nd / …` floors independently. The floor selector is dynamic — it grows when you add rooms to higher floors, and exposes a "+ Add floor" button (capped at floor 9). Switching to an empty floor shows a hint pointing back to the lowest-used floor.
 - **Zoom & Pan**: Zoom in and out of the canvas for precise detailing.
 - **Room Management**: Clear entire floors, duplicate rooms, and manage elements with keyboard shortcuts.
 
@@ -70,7 +70,7 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
 1.  **Setup Plot**: Start by adjusting the Plot Width, Length, and North Angle in the left sidebar (or "Settings" tab on mobile).
 2.  **Adjust Setbacks**: Set your required margins from the plot boundary.
 3.  **Add Rooms**: Click on room types in the left sidebar to add them to the canvas.
-4.  **Arrange**: Drag rooms into the green buildable area. Resize them using the blue handle in the bottom-right corner.
+4.  **Arrange**: Drag rooms into the green buildable area. Resize them using the 8 corner + edge handles (4 corners for two-axis resize, 4 edge handles for one-axis-only). Rooms are clamped to the buildable area, so a resize that would push a room past a setback is automatically shifted.
 5.  **Add Furniture**: Click a room to select it. In the right sidebar (or "Properties" tab on mobile), click elements to add them. Drag them around or double-click to rotate.
 6.  **Keyboard Shortcuts**: Use shortcuts for faster workflow:
     - `Ctrl+Z` / `Ctrl+Y` for Undo/Redo
@@ -82,13 +82,48 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
     - `Ctrl+S` to save as PNG
 7.  **Check Vastu**: Toggle the "Vastu Grid" on the canvas toolbar to see the zones. Watch the overall Vastu Score update as you move rooms.
 8.  **Analyze**: Click "Analyze with AI" in the right sidebar for a detailed review.
-9.  **Export**: Click "Export PNG" to save your design.
+9.  **Export**: Click "Export PNG" to save your design, "Presentation Export" to generate a branded PDF with project name / client / consultant / logo, or "Export JSON" for a portable backup. JSON exports are undoable on re-import (so you can revert an accidental import with `Ctrl+Z`).
 
 ## 🧠 Vastu Logic Explained
 
 The app uses a coordinate system relative to the center of the buildable area. It calculates the angle of each room from the center, adjusts it by the user-defined North Angle, and maps it to one of the 8 cardinal/ordinal directions.
 
 For example, a Kitchen placed in the South-East zone will receive a high score, while a Kitchen in the North-East will receive a lower score and a warning, adhering to traditional Vastu guidelines.
+
+## 🆕 What's in 0.1.1 (alpha)
+
+The five PRs since `0.1.0` are all polish / UX-sweep work — no new features, no breaking changes, no new dependencies. Highlights:
+
+### UX walkthrough fixes (PRs #50, #51, #52)
+
+- **P0 — Click-to-select rooms** (U-3): clicking a room now selects it. Shift+click is the multi-select toggle (B-8 hook contract).
+- **P0 — PDF Export** (U-6): the print-only `<div>` had a redundant `canvasContainerRef` binding, so `toPng()` ran on a 0×0 hidden element. One-line fix repairs both PDF and PNG export.
+- **P1 — Room stacking** (U-1): new rooms are now offset by 0.5 ft on a diagonal cascade, so adding four rooms in a row puts them in a visible cascade rather than all at (60, 60).
+- **P1 — Sidebar layout** (U-2): the "Add Rooms" panel is now at the top of the left sidebar; the page itself is `h-screen` (was `min-h-screen`) and the sidebar scrolls internally.
+- **P1 — Share buttons** (U-5): the single Share button is now a view / comment pair, each with an explicit tooltip.
+- **P1 — Analyze button** (U-9): the button is disabled with a helpful tooltip when the Gemini API key is missing.
+- **P2 — JSON import is undoable** (U-8): imports land at the top of the undo stack via the new `replacePlanPreservingHistory()`.
+- **P2 — Room size clamp** (U-11): width/length inputs and drag handles share a single `clampRoomToBuildableArea()` helper; rooms can no longer be resized past the setbacks.
+- **P3 — Icon-button labels** (U-4): Duplicate / Rotate / Delete in Room Properties now have inline text labels.
+- **P3 — Button rename** (U-7): "PDF Export" → "Presentation Export" (matches the modal title the button opens).
+- **P3 — Share fallback** (U-10): the share handler now awaits `navigator.clipboard.writeText` and falls back to a hidden-textarea `execCommand('copy')` if it rejects; the "Copied!" toast only fires on real success.
+- **P3 — Empty-floor hint** (U-12): switching to a floor with no rooms shows a hint pointing back to the lowest-used floor.
+- **P3 — Dynamic floor selector** (U-13): the selector grows when you add rooms to higher floors; "+ Add floor" caps at floor 9.
+- **P3 — 8-direction resize handles** (U-15): 4 corners (28 px hit area) + 4 edge handles (20 px hit area) for one-axis-only resize.
+
+### Architecture
+
+- **`RoomPropertiesPanel`** extracted from `App.tsx` (~195 lines out of the ~1,850-line monolith; S-1 is the next structural pass).
+- **`useSelection`** hook — reducer-based, paves the way for the remaining B-8 multi-select work.
+- **`useExportWithClearSelection`** — replaces the `setTimeout(50)`-based clear-then-restore dance in `handleExport`.
+
+### Tooling
+
+- `formatFloor()` helper in `src/constants/floorPlanConstants.ts` — `0th / 1st / 2nd / …` everywhere.
+- `<ThemeProvider>` + `useTheme()` + Tailwind v4 `dark:` variant — 53 ternary class strings migrated, section-shade table documented in `CLAUDE.md`.
+- Test count: **200 → 223** (+23 new tests across the batch).
+
+For the full per-PR commit list, see [`CHANGELOG.md`](./CHANGELOG.md) §`[0.1.1]`.
 
 ## 🆕 What's in 0.1.0 (alpha)
 
@@ -156,6 +191,6 @@ via `.github/workflows/deploy-server.yml` to Render + Railway.
 - **Drag/resize**: `useCanvasDrag` — shared-wall aware element placement, snap-to-grid, sub-foot precision
 - **Collaboration**: `useCollaboration` Socket.io client, stable socket effect (no reconnect storm), functional `onPlanChange`
 - **PWA**: service worker with per-deploy `CACHE_NAME` (bumped by SHA-256 of `index.html`), bundled to `dist/sw.js`
-- **Tests**: 55 unit/integration (Vitest) + 7 happy-path E2E (Playwright). Coverage gate in `vitest.config.ts`.
+- **Tests**: 223 unit/integration (Vitest) + 7 happy-path E2E (Playwright). Coverage gate in `vitest.config.ts`.
 - **CI**: lint + tsc + prettier + vitest + build + `npm audit` (see [`.github/workflows/ci.yml`](./.github/workflows/ci.yml))
 - **Backlog**: see [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md)

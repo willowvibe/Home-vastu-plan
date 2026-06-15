@@ -7,23 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Versioning note (2026-06-11):** Earlier entries referenced `2.0.0` / `2.1.0` even though the code was pre-release. This CHANGELOG has been collapsed onto the actual release line (`0.1.x` alpha, per the `VERSION` file) so that `VERSION`, `package.json`, `CHANGELOG.md`, and `README.md` all agree. The P0 sweep, P1 quick-wins, P1 batch #2, and P2 hygiene batch are all rolled up under `0.1.0`. For the active backlog, see [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md).
 
-## [Unreleased] — 2026-06-12
+## [Unreleased]
 
-> Post-deploy polish batch on `fix/post-deploy-polish` (3 commits, awaiting PR).
+_Nothing in flight. Last release: **0.1.1** (2026-06-15)._
+
+## [0.1.1] - 2026-06-15 — Polish & UX sweep
+
+> Five PRs merged between 2026-06-12 and 2026-06-15: Vercel deployment, post-deploy polish (theme system + floor labels), the room-props-and-drag-freeze P1 batch, and the P2/P3 UX batch (8 findings from the 2026-06-14 UX walkthrough). Cumulative scope: 1 feature extraction (`RoomPropertiesPanel`), 1 P0 fix (U-6 export ref collision), 4 P1 fixes (U-1, U-2, U-3, U-5), 2 P2 fixes (U-8, U-11), and 5 P3 fixes (U-4, U-7, U-10, U-12, U-13, U-15 — 6 P3s). Test count grew from 200 → 223 (+23 new tests). Per-bug resolutions are in [`docs/ux-audit/2026-06-14-ux-walkthrough.md`](./docs/ux-audit/2026-06-14-ux-walkthrough.md) and [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md).
 
 ### Added
 
-- Vercel deployment via Git integration (`vercel.json` + README pointer). Every push to `main` → Production; every PR → Preview URL. See `docs/superpowers/specs/2026-06-12-vercel-deployment-design.md`.
-- New `formatFloor()` helper in `src/constants/floorPlanConstants.ts`. Floor labels now use ordinals: `0th / 1st / 2nd / …`.
-- `<ThemeProvider>` + `useTheme()` in `src/contexts/ThemeContext.tsx`, plus a `useDarkMode()` hook in `src/hooks/useDarkMode.ts`. The Tailwind v4 `dark:` variant is now enabled via `@custom-variant dark (...);` in `src/index.css`.
-- New `CLAUDE.md` at the repo root with project conventions, theme system rules, and pitfalls.
+- **Vercel deployment** (PR #48). `vercel.json` + `vercel-build.sh` + a README pointer. Every push to `main` → Production; every PR → Preview URL. The willowvibe org admin did the one-time UI setup on 2026-06-12. See `docs/superpowers/specs/2026-06-12-vercel-deployment-design.md`.
+- **Theme system** (PR #49). New `<ThemeProvider>` + `useTheme()` in `src/contexts/ThemeContext.tsx`; new `useDarkMode()` hook in `src/hooks/useDarkMode.ts`. 53 ternary class strings migrated to Tailwind v4's `dark:` variant. Section-specific light/dark shades for visual sectioning (header / sidebar / canvas / properties / modals each get their own shade). `<html class="dark">` toggles the whole app. `App.tsx`'s local `darkMode` state is gone.
+- **`RoomPropertiesPanel`** (PR #50, P1). The right-sidebar room properties card is now a focused component (`src/components/Properties/RoomPropertiesPanel.tsx`) instead of inlined into `App.tsx`. Public props: `selectedRoomIds`, `plan`, `appMode`, `onUpdateRoom`, `onCommitHistory`, `onDuplicate`, `onRotate`, `onDelete`, `onStaleSelection`, `onClearSelection`, `addRoomElement`, `updateRoomCategory`. `App.tsx` is now ~1,850 lines (still S-1's biggest target).
+- **`useSelection` hook** (PR #50, P2). New reducer-based selection hook (`src/hooks/useSelection.ts`) replacing `useState<string[]>` in `App.tsx`. Returns `{selectedRoomIds, select, clear, replace}`. Paves the way for the remaining B-8 multi-select work.
+- **`useExportWithClearSelection` hook** (PR #50, P2). Replaces the `setTimeout(50)`-based clear-selection-then-restore dance in `handleExport` with a `requestAnimationFrame`-synchronized `runExport` that detects deleted-mid-export rooms via `isRoomStillPresent`.
+- **`clampRoomToBuildableArea` helper** (PR #52, U-11). New pure helper in `src/utils.ts` — never mutates, returns a new room with `w`/`h` clamped to the buildable area and `x`/`y` shifted to stay inside the setbacks. Wired into BOTH the width/length number inputs in `RoomPropertiesPanel` (with `max={buildableWidth}` and a `title` tooltip) AND the drag-handle branch in `useCanvasDrag` (defensive final pass).
+- **`copyToClipboardWithFallback` helper** (PR #52, U-10). New helper in `src/utils.ts` — awaits `navigator.clipboard.writeText`, falls back to a hidden textarea + `document.execCommand('copy')`, returns `{ok: false}` on total failure. `App.tsx`'s `handleShare` is now async; the "Copied!" toast only fires on `{ok: true}`; on failure shows "Couldn't copy the link. Here's the URL: …".
+- **`replacePlanPreservingHistory` on `useFloorPlan`** (PR #52, U-8). New hook method that lands a plan-replacement at the top of the undo stack (the existing `resetPlan` was wiping history). `App.tsx`'s `handleImportJSON` now uses it, so JSON imports are undoable.
+- **Dynamic floor selector** (PR #52, U-13). `App.tsx`'s floor selector now derives its button set from the union of `currentFloor` and `plan.rooms.map(r => r.floor)` (sorted ascending), capped at floor 9 with a "+ Add floor" button. A JSON import with `room.floor: 4` now shows a "4th" button.
+- **8-direction resize handles** (PR #52, U-15). `Room.tsx` renders 4 corners (28 px hit area, 20 px visual, `data-testid="resize-handle-{nw,ne,sw,se}"`) + 4 edge handles (20 px hit area, 12 px visual, `cursor-ns-resize`/`ew-resize`, `data-testid="resize-handle-{n,s,e,w}"`). The `ResizeHandle` type widened from 4 → 8 directions; the existing `.includes('e' | 's' | 'w' | 'n')` axis-resize branches in `useCanvasDrag` handle 8 directions with no per-direction code.
+- **`Canvas.test.tsx`** (PR #52, U-12). New test file for the empty-state hint regression — 2 tests pin the contract.
 
 ### Changed
 
-- **Theme system refactor:** migrated 53 ternary class strings to Tailwind v4's `dark:` variant. `<html class="dark">` toggles the whole app. Section-specific light/dark shades for visual sectioning (header / sidebar / canvas / properties / modals each get their own shade). `App.tsx`'s local `darkMode` state is gone; components consume `useTheme()`.
-- Floor label wording: `Ground / First / Second` → `0th / 1st / 2nd`.
+- **Floor labels** (PR #49). `Ground / First / Second` → `0th / 1st / 2nd / …` via the new `formatFloor()` helper in `src/constants/floorPlanConstants.ts`. 5 call sites in `App.tsx` + 1 in `types.ts` (doc comment) updated.
+- **`App.tsx` is now ~1,850 lines** (was ~1,655 before PR #50). The `RoomPropertiesPanel` extraction is the partial P1/P2 step; S-1 (full Sidebar / Properties / Toolbar split) is the next structural pass.
+- **README** — added a Vercel deployment section pointing at the Vercel UI and the GitHub integration.
+- **`CLAUDE.md` (new, at the repo root)** — project conventions, theme system rules, section-shade table, things-future-Claude-should-know (wall thickness in inches, `formatFloor()` semantics, the Vercel deploy context).
 
-> The 2026-06-11 test-coverage batch ships 2 P2 items in branch `fix/q-2-q-3-hook-tests` (awaiting PR). Test count grew from 97 to 128 (+31). Per-item detail below.
+### Fixed
+
+- **U-6 (P0)**: PDF Export always failed with cryptic "Failed to export PDF" alert. The print-only `<div>` in `App.tsx` had bound `canvasContainerRef` redundantly; `toPng()` on the 0×0 hidden print div returned an empty dataURL. Removed the redundant ref — `window.print()` captures the DOM directly. **Bonus:** the same ref collision made PNG export silently produce 6-byte empty files; the single fix repairs both flows.
+- **U-3 (P0)**: Clicking a room on the canvas did not select it. `Room.tsx`'s room-body `onPointerDown` only fired the drag branch, never `onSelectRoom`. Fix: added optional `onSelectRoom?: (roomId, isShiftKey) => void` prop, called from the room-body handler (guarded by `e.target === e.currentTarget` so child clicks still bail). 5 new tests in `Room.test.tsx`.
+- **U-1 (P1)**: All new rooms spawned at the same position (60px, 60px), completely overlapping. New pure `computeInitialRoomPosition(plan, rooms, currentFloor)` helper in `src/utils.ts`; each new room is offset by 0.5 ft on both axes (a pure diagonal cascade). 6 new tests.
+- **U-2 (P1)**: "Add Rooms" panel was below the fold; users could add a room but not see the canvas. Two CSS-only changes to `App.tsx`: (a) root container `min-h-screen` → `h-screen`; (b) left sidebar `flex-col` → `flex flex-col-reverse min-h-0`. `flex-col-reverse` inverts the visual order so Add Rooms renders at the top of the sidebar.
+- **U-5 (P1)**: View-only / comment-mode share buttons were collapsed into one icon. Split into a 2-button group: view (Share2) and comment (MessageSquare). Both carry explicit `title` tooltips.
+- **U-9 (P1)**: Analyze button fired and failed with a generic error when the Gemini API key was missing. Disabled with a helpful tooltip when `VITE_GEMINI_API_KEY` is absent.
+- **U-8 (P2)**: Imported JSON plan could not be undone. Fixed via the new `replacePlanPreservingHistory()` (see Added).
+- **U-11 (P2)**: Width/Length number inputs and resize handles could produce rooms larger than the buildable area. Fixed via the new `clampRoomToBuildableArea()` (see Added).
+- **U-4 (P3)**: Icon-only Duplicate / Rotate / Delete buttons in Room Properties — function invisible without a hover title. Added inline text labels (button keeps the `title` attribute for the long form).
+- **U-7 (P3)**: "PDF Export" button label was misleading; opens a "Presentation Export" modal. Renamed the button to match the modal title.
+- **U-10 (P3)**: "Copied!" toast on Share fired even when clipboard write was rejected. Fixed via the new `copyToClipboardWithFallback()` (see Added).
+- **U-12 (P3)**: 2nd-floor was selectable but rendered no rooms; no empty-state hint. New hint block in `Canvas.tsx` keyed on `floorRooms.length === 0`, names the lowest-used floor via `formatFloor()`. 2 new tests in `Canvas.test.tsx`.
+- **U-13 (P3)**: Floor buttons were a fixed `[0, 1, 2]` set. Fixed via the dynamic floor selector (see Added).
+- **U-15 (P3)**: 4 tiny corner resize handles with no edge companions. Fixed via 8-direction handles (see Added).
+- **B-20**: `Room.tsx`'s outer `onPointerDown` no longer fires the drag branch on child clicks (label / element / resize handle). Guard: `e.target === e.currentTarget`.
+- **D1/D2/D3**: `useCanvasDrag` now cleans up on `pointercancel`, `blur`, and `visibilitychange` so a drag in flight doesn't leave the canvas stuck in a dragged state.
+
+### Test count
+
+- **200 → 223** (+23 new tests across the batch). All passing. 0 tsc errors. Build clean.
+
+
 
 ## [0.1.0] - 2026-06-11 — First alpha (with follow-up fixes)
 
