@@ -435,6 +435,8 @@ The result is an unusable layout on a phone or small tablet. There is no respons
 
 **Related:** U-2 (left sidebar is below the fold on desktop) — U-14 confirms the sidebar / canvas / properties panel layout was never designed for small viewports. A mobile fix is likely a redesign of `App.tsx`'s main grid, which is part of the S-1 split.
 
+**Resolution (2026-06-14):** Already resolved in the current `fix/room-props-and-drag-freeze` branch (predates the audit; the audit's findings describe an earlier state of the code). The mobile tab bar lives at `App.tsx:675-694` (`<div className="md:hidden flex border-b border-slate-200 ...">` with three buttons: Settings / Canvas / Properties). The sidebar/canvas/properties visibility is controlled by `mobileTab` state (`'settings' | 'canvas' | 'properties'`, default `'canvas'`) — each panel is rendered with `${mobileTab === 'X' ? 'flex' : 'hidden md:flex'}` so on mobile only the active tab's panel is shown. The header is rendered first (above main), so it never "lands at the bottom" — the audit was looking at a stale or differently-configured build. The "Quick mobile tab bar" approach in `docs/superpowers/specs/2026-06-14-p1-fixes-design.md` was the intended fix; it turns out the tab bar already exists. No code change needed. 206/206 tests pass (unchanged). Manual repro: open app at 500×812 viewport → top mobile tab bar shows Settings / Canvas / Properties → tap Settings to see the left sidebar's content (with U-2's sticky Add Rooms at the top) → tap Canvas to see the canvas (default) → tap Properties to see the right sidebar's content.
+
 ---
 
 ### U-15 — Resize handles exist on all 4 corners (NW, NE, SE, SW) but no edge handles; the SE handle requires precise click target
