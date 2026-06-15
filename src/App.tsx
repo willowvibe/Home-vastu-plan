@@ -636,7 +636,10 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100`}
+      // U-2: h-screen (not min-h-screen) so the main grid fills the
+      // viewport exactly; the left sidebar's overflow-y-auto can then
+      // scroll within the viewport instead of growing the whole page.
+      className={`h-screen flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100`}
     >
       {/* Header */}
       <Header
@@ -677,7 +680,14 @@ export default function App() {
           <>
             {/* Left Sidebar */}
             <div
-              className={`w-full md:w-72 flex-col overflow-y-auto shrink-0 custom-scrollbar ${mobileTab === 'settings' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
+              // U-2: flex-col-reverse so the Add Rooms section (which
+              // is last in source order) renders at the top of the
+              // sidebar. Combined with the root's h-screen, the sidebar
+              // scrolls within the viewport instead of forcing a page
+              // scroll. min-h-0 lets overflow-y-auto fire on a flex
+              // child (the standard "flexbox won't shrink past content"
+              // gotcha).
+              className={`w-full md:w-72 flex flex-col-reverse overflow-y-auto shrink-0 min-h-0 custom-scrollbar ${mobileTab === 'settings' ? 'flex' : 'hidden md:flex'} ${appMode !== 'edit' ? 'opacity-50 pointer-events-none' : ''} bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
             >
               <div className={`p-5 border-b border-slate-100 dark:border-slate-800`}>
                 <h3
