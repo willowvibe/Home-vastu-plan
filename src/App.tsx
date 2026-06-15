@@ -65,7 +65,7 @@ import {
 import { INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from './constants/geometry';
 
 export default function App() {
-  const { plan, updatePlan, commitHistory, undo, redo, resetPlan, historyIndex, historyLength } =
+  const { plan, updatePlan, commitHistory, undo, redo, resetPlan, replacePlanPreservingHistory, historyIndex, historyLength } =
     useFloorPlan(INITIAL_PLAN);
 
   const [currentFloor, setCurrentFloor] = useState(0);
@@ -511,7 +511,11 @@ export default function App() {
       try {
         const result = await importJSONFile(file);
         if (result) {
-          resetPlan(result.plan);
+          // U-8: replacePlanPreservingHistory keeps the pre-import
+          // plan in the undo history so Ctrl+Z reverts the import.
+          // resetPlan would wipe the history; replacePlanPreservingHistory
+          // builds a [pre, imported] history with index 1.
+          replacePlanPreservingHistory(result.plan);
           if (result.analysis) {
             setAnalysis(result.analysis);
           }

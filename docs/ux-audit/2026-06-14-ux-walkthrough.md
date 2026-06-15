@@ -268,6 +268,8 @@ The `'UNKNOWN'` is `imgData` — the result of `toPng(canvasRef.current, ...)` a
 
 **Related:** U-1 (rooms stack invisibly) + U-8 (import without undo) compound — a user who imports a plan to "fix" the stacked rooms has no recovery if the import is wrong.
 
+**Resolution (2026-06-15):** Fixed on `fix/p2-p3-ux-batch` (pending PR). The fix adds a new `replacePlanPreservingHistory(newPlan)` function to `useFloorPlan` (sets the new plan, persists to localStorage, but builds the new history as `[prePlan, newPlan]` with `historyIndex = 1` — Ctrl+Z restores the pre-plan, Ctrl+Y re-applies the new plan). The function is wired into `App.tsx`'s `handleImportJSON`. `handleClearFloor` already used `updatePlan` + `commitHistory` and so was already undoable. 2 new tests in `useFloorPlan.test.ts` (× the function exists in the public API; × replace + undo restores the pre-plan + redo re-applies the new plan). 208/208 tests pass (was 206), 0 tsc errors, build clean. Manual repro: add a room → import a JSON with 2 rooms → Ctrl+Z → back to the 1-room plan → Ctrl+Y → back to the imported 2-room plan.
+
 ---
 
 ### U-9 — "Analyze Floor Plan" button silently fails with cryptic alert when API key is not configured

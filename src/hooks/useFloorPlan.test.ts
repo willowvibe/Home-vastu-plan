@@ -60,7 +60,7 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('useFloorPlan public API (S-3)', () => {
-  it('exposes plan, updatePlan, commitHistory, undo, redo, resetPlan, historyIndex, historyLength', () => {
+  it('exposes plan, updatePlan, commitHistory, undo, redo, resetPlan, replacePlanPreservingHistory, historyIndex, historyLength', () => {
     const { result } = renderHook(() => useFloorPlan(INITIAL_PLAN));
     const keys = Object.keys(result.current).sort();
     expect(keys).toEqual(
@@ -70,6 +70,7 @@ describe('useFloorPlan public API (S-3)', () => {
         'historyLength',
         'plan',
         'redo',
+        'replacePlanPreservingHistory',
         'resetPlan',
         'undo',
         'updatePlan',
@@ -270,5 +271,63 @@ describe('useFloorPlan history (Q-2)', () => {
 
     expect(result.current.plan.plotWidth).toBe(99);
     expect(result.current.plan.plotHeight).toBe(88);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// U-8: replacePlanPreservingHistory — Ctrl+Z reverts the import
+// ---------------------------------------------------------------------------
+
+describe('useFloorPlan replacePlanPreservingHistory (U-8)', () => {
+  it('exposes replacePlanPreservingHistory in the public API', () => {
+    const { result } = renderHook(() => useFloorPlan(INITIAL_PLAN));
+    expect(typeof result.current.replacePlanPreservingHistory).toBe('function');
+  });
+
+  it('replaces the plan AND keeps the pre-plan in history so undo restores it', () => {
+    const { result } = renderHook(() => useFloorPlan(INITIAL_PLAN));
+
+    // Build a pre-plan with one room and commit it (history = [initial, pre]).
+    const prePlan = makePlanWithRooms([makeRoom('r1', 3, 3)]);
+    act(() => {
+      result.current.updatePlan(prePlan);
+    });
+    act(() => {
+      result.current.commitHistory();
+    });
+    expect(result.current.historyLength).toBe(2);
+    expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['r1']);
+
+    // Replace with an imported plan.
+    const importedPlan = makePlanWithRooms([
+      makeRoom('r2', 3, 3),
+      makeRoom('r3', 14, 3),
+    ]);
+    act(() => {
+      result.current.replacePlanPreservingHistory(importedPlan);
+    });
+
+    // Current plan is the imported one; history has 2 entries
+    // [pre, imported] with index 1. (Note: `updatePlan(prePlan)` did
+    // NOT push to history; only `commitHistory()` did. The replacement
+    // discards the initial plan and re-anchors history to [pre,
+    // imported] — the pre-plan is what Ctrl+Z restores.)
+    expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['r2', 'r3']);
+    expect(result.current.historyLength).toBe(2);
+    expect(result.current.historyIndex).toBe(1);
+
+    // Undo restores the pre-plan.
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['r1']);
+    expect(result.current.historyIndex).toBe(0);
+
+    // Redo re-applies the imported plan.
+    act(() => {
+      result.current.redo();
+    });
+    expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['r2', 'r3']);
+    expect(result.current.historyIndex).toBe(1);
   });
 });
