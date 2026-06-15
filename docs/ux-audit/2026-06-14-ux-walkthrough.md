@@ -36,6 +36,8 @@
 
 **Repro-able every time** (4 rooms, 0 visible behind the top one).
 
+**Resolution (2026-06-14):** Fixed in `fix/room-props-and-drag-freeze` (commit pending — see KNOWN_ISSUES §"Recently Resolved (U-1 room stacking)" when it lands). The fix extracts a pure `computeInitialRoomPosition(plan, rooms, currentFloor)` helper to `src/utils.ts` and uses it in `App.tsx`'s `addRoom` handler. Each new room is offset by `0.5 ft` on both axes (a pure diagonal cascade), with wrap when the offset would push past the buildable area. The 0.5 ft step is intentionally _off-grid_ (snap-to-grid is 1 ft) so the new room is always visible and the user can snap-drag it to its final position. 6 new tests in `utils.test.ts` (first room at setback origin / 2nd room at +0.5 on both axes / 4th room at +1.5 on both axes / rooms on other floors do not affect the current floor's offset / diagonal cascade wraps after 48 rooms / uses plan setbacks not hard-coded zeros). 201/201 tests pass (was 195), 0 tsc errors, build clean. Manual repro: open app → add Bedroom 12x12 → click Kitchen 10x10 → click Living Room 16x16 → click Bathroom 6x8 → four rooms visible in a diagonal cascade from the setback origin, none stacked.
+
 ---
 
 ### U-2 — "Add Rooms" panel is below the fold; you can add a room but not see the canvas

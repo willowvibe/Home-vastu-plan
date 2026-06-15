@@ -45,7 +45,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSelection } from './hooks/useSelection';
 import { useExportWithClearSelection } from './hooks/useExportWithClearSelection';
 import { useTheme } from './contexts/ThemeContext';
-import { getErrorMessage } from './utils';
+import { getErrorMessage, computeInitialRoomPosition } from './utils';
 import {
   exportToPNG,
   exportToJSON,
@@ -205,11 +205,14 @@ export default function App() {
 
   const addRoom = (type: RoomType, defaultW: number, defaultH: number) => {
     if (appMode !== 'edit') return;
+    // U-1: offset each new room so they don't stack invisibly. The pure
+    // helper lives in src/utils.ts and is unit-tested there.
+    const { x, y } = computeInitialRoomPosition(plan, plan.rooms, currentFloor);
     const newRoom: Room = {
       id: uuidv4(),
       type,
-      x: plan.setbacks.left,
-      y: plan.setbacks.top,
+      x,
+      y,
       w: defaultW,
       h: defaultH,
       floor: currentFloor,
