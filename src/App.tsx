@@ -28,6 +28,7 @@ import {
   Grid,
   FolderOpen,
   Share2,
+  MessageSquare,
   FileText,
   Search,
 } from 'lucide-react';
@@ -1200,13 +1201,26 @@ export default function App() {
                 </div>
 
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => handleShare('view')}
-                    className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-sm transition-colors"
-                    title="Share View-Only Link"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
+                  {/* U-5: two share buttons (view + comment) instead of one. The
+                      underlying handleShare(mode) already supports both; the
+                      previous UI only wired `view`. Users who wanted to share a
+                      comment-mode link had no UI affordance. */}
+                  <div className="flex rounded-lg shadow-sm overflow-hidden border border-slate-200">
+                    <button
+                      onClick={() => handleShare('view')}
+                      className="flex items-center justify-center w-10 h-10 bg-white hover:bg-slate-50 text-slate-700 transition-colors"
+                      title="Share View-Only Link (read-only)"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleShare('comment')}
+                      className="flex items-center justify-center w-10 h-10 bg-white hover:bg-slate-50 text-slate-700 border-l border-slate-200 transition-colors"
+                      title="Share Comment-Enabled Link (reviewers can add notes)"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                    </button>
+                  </div>
                   <button
                     onClick={() => setShowPresentationExport(true)}
                     className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"

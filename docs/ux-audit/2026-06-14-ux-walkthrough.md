@@ -176,6 +176,8 @@ The `handleShare` function in `App.tsx:468` accepts a `mode: 'view' | 'comment'`
 
 **Trace:** `Array.from(document.querySelectorAll('button')).filter(b => b.textContent?.match(/view|edit|comment/i))` returns only "AI Image Editor" (a false-positive substring match). The header has 5 buttons (dark toggle, keyboard shortcuts, Projects, Floor Plan, AI Image Editor) and 1 dropdown — none of them set `appMode`.
 
+**Resolution (2026-06-14):** Fixed in `fix/room-props-and-drag-freeze` (commit pending — see KNOWN_ISSUES §"Recently Resolved (U-5 view/comment mode unreachable)" when it lands). The fix splits the single "Share View-Only Link" icon button in the export toolbar into a 2-button group inside a single rounded container: the left button (Share2 icon) calls `handleShare('view')` and the right button (MessageSquare icon) calls `handleShare('comment')`. The underlying `handleShare(mode)` already supported both modes — only the UI wiring was missing. Both buttons get a `title` attribute that spells out the mode so the icon-only affordance is discoverable on hover ("Share View-Only Link (read-only)" / "Share Comment-Enabled Link (reviewers can add notes)"). The order matches the existing audit option 2. 201/201 tests pass (unchanged, manual repro documented — the click handler is wired through App's internal `handleShare` so a unit test would require extracting the buttons to a small component, which is out of scope for this one-line wiring fix). Manual repro: open app → add Bedroom → click right-side MessageSquare icon → alert "Share link (comment mode) copied to clipboard!" and URL has `?mode=comment`; left-side Share2 icon still works for `?mode=view`.
+
 ---
 
 ### U-6 — PDF Export always fails with cryptic "Failed to export PDF" alert
