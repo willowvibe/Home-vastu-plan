@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Nothing in flight. Last release: **0.1.1** (2026-06-15)._
+### Added
+
+- **E2E tests in CI** (Q-4). New `e2e` job in `.github/workflows/ci.yml` installs Playwright Chromium deps and runs `npm run test:e2e` on every PR. Playwright report is uploaded as an artifact on failure. `playwright-report/` and `test-results/` are now ignored by git; previously tracked generated files were removed from the index.
+
+### Fixed
+
+- **E2E selectors post-0.1.1** (`tests/e2e/basic.spec.ts`). Updated the dynamic-floor-selector assertion for U-13 (the "+ Add floor" button moves `currentFloor` to the next slot, so the previous floor button disappears). Hardened the B-10 shared-link autosave test by clearing `vastuplan_autosave` before adding the verification room, making the 144 sq ft built-up assertion deterministic.
+
+_Nothing else in flight. Last release: **0.1.1** (2026-06-15)._
 
 ## [0.1.1] - 2026-06-15 — Polish & UX sweep
 
@@ -58,8 +66,6 @@ _Nothing in flight. Last release: **0.1.1** (2026-06-15)._
 ### Test count
 
 - **200 → 223** (+23 new tests across the batch). All passing. 0 tsc errors. Build clean.
-
-
 
 ## [0.1.0] - 2026-06-11 — First alpha (with follow-up fixes)
 
