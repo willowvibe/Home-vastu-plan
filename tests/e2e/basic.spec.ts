@@ -56,10 +56,12 @@ test('has floor selector controls (dynamic — U-13)', async ({ page }) => {
   await expect(page.getByRole('button', { name: '2nd' })).toHaveCount(0);
 
   // The "+ Add floor" button (rendered as a literal "+" with title="Add floor")
-  // grows the floor set: clicking it should reveal a new floor button (1st).
+  // bumps currentFloor to the next unused slot. With no rooms, the floor set
+  // becomes just [1], so 1st appears and 0th disappears until a room is added
+  // back to floor 0.
   await page.getByTitle('Add floor').click();
   await expect(page.getByRole('button', { name: '1st' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '0th' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '0th' })).toHaveCount(0);
 });
 
 test('can add a room via sidebar', async ({ page }) => {
@@ -183,17 +185,21 @@ test('shared link URL is stripped after first load (B-10)', async ({ page }) => 
   await page.waitForFunction(() => window.location.search === '', null, { timeout: 5000 });
   expect(page.url()).toMatch(/\/$|\/\?$/);
 
-  // Now navigate to a state with no shared plan and add a room.
+  // Now navigate to a state with no shared plan and add a room. The shared
+  // plan was persisted to localStorage by resetPlan(), so clear it and reload
+  // so the in-memory plan starts empty. Otherwise the previously-loaded 10'x10'
+  // room would still be present when we add the bedroom, making the built-up
+  // area non-deterministic.
   await page.goto('/');
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
+  await page.evaluate(() => localStorage.removeItem('vastuplan_autosave'));
+  await page.reload();
   await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
   await page.getByRole('button', { name: "Bedroom 12'x12'" }).click();
 
   // Refresh — the added room should still be there (autosave to localStorage).
-  // INITIAL_PLAN.rooms is [] on a fresh install (post-0.1.1), so adding
-  // our 12'x12' bedroom is the only built-up: 12 × 12 = 144 sq ft.
-  // (Pre-0.1.1 the default plan also contained a 10'x10' room, which is
-  // why the original test asserted 244 = 144 + 100. U-13 + U-8 made the
-  // default plan start empty so users see the empty-floor hint at first.)
+  // With the autosave cleared and INITIAL_PLAN.rooms === [] (post-0.1.1), the
+  // 12'x12' bedroom is the only built-up: 12 × 12 = 144 sq ft.
   // We assert on the built-up area which is visible in the left sidebar,
   // rather than the right "Room Properties" panel which only appears for a
   // selected room (selection isn't persisted across reloads).
