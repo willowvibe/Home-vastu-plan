@@ -117,6 +117,36 @@ export function useFloorPlan(initialPlan: FloorPlan) {
     });
   }, []);
 
+  // G-1: apply a functional update and immediately commit the result to the
+  // undo history. Used for remote collaboration edits so peers' changes are
+  // undoable locally (and can be redone).
+  const commitHistoryUpdate = useCallback(
+    (updater: FloorPlan | ((prev: FloorPlan) => FloorPlan)) => {
+      setPlan((currentPlan) => {
+        const nextPlan =
+          typeof updater === 'function'
+            ? (updater as (prev: FloorPlan) => FloorPlan)(currentPlan)
+            : updater;
+        const currentIndex = historyIndexRef.current;
+        const currentHistory = historyRef.current;
+        const lastHistory = currentHistory[currentIndex];
+        if (JSON.stringify(lastHistory) !== JSON.stringify(nextPlan)) {
+          const newHistory = currentHistory.slice(0, currentIndex + 1);
+          newHistory.push(nextPlan);
+          if (newHistory.length > MAX_HISTORY_SIZE) {
+            newHistory.shift();
+            setHistoryIndex(MAX_HISTORY_SIZE - 1);
+          } else {
+            setHistoryIndex(newHistory.length - 1);
+          }
+          setHistory(newHistory);
+        }
+        return nextPlan;
+      });
+    },
+    []
+  );
+
   // Auto-save plan to localStorage whenever it changes
   useEffect(() => {
     try {
@@ -141,6 +171,7 @@ export function useFloorPlan(initialPlan: FloorPlan) {
     redo,
     resetPlan,
     replacePlanPreservingHistory,
+    commitHistoryUpdate,
     historyIndex,
     historyLength: history.length,
   };

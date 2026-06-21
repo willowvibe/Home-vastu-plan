@@ -7,6 +7,7 @@ import {
   ZoomOut,
   Share2,
   MessageSquare,
+  Lock,
   FileText,
   FileCheck,
   Download,
@@ -24,7 +25,7 @@ export interface ToolbarProps {
   historyLength: number;
   showVastuGrid: boolean;
   onToggleGrid: () => void;
-  onShare: (mode: 'view' | 'comment') => void;
+  onShare: (mode: 'view' | 'comment', password?: string) => void;
   onExport: () => void;
   isExporting: boolean;
   onPrint: () => void;
@@ -122,6 +123,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             title="Share Comment-Enabled Link (reviewers can add notes)"
           >
             <MessageSquare className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => {
+              const password = window.prompt(
+                'Set a password for this protected share link (view-only):'
+              );
+              if (password) onShare('view', password);
+            }}
+            className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-l border-slate-200 dark:border-slate-600 transition-colors"
+            title="Password-Protected Share Link (view-only)"
+          >
+            <Lock className="w-4 h-4" />
           </button>
         </div>
         <button

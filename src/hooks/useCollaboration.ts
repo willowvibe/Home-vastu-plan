@@ -5,7 +5,18 @@ import { getErrorMessage } from '../utils';
 
 const SERVER_URL = import.meta.env.VITE_COLLAB_SERVER_URL || 'http://localhost:3001';
 
-export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan) => void) {
+export interface UseCollaborationOptions {
+  /** Called when a peer requests an undo in this room. */
+  onUndoRequest?: () => void;
+  /** Called when a peer requests a redo in this room. */
+  onRedoRequest?: () => void;
+}
+
+export function useCollaboration(
+  plan: FloorPlan,
+  onPlanChange: (plan: FloorPlan) => void,
+  options: UseCollaborationOptions = {}
+) {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [roomId, setRoomId] = useState<string | null>(null);
@@ -22,6 +33,13 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
   const socketRef = useRef<Socket | null>(null);
   const pendingUpdatesRef = useRef<PlanUpdateEvent[]>([]);
   const isLocalUpdateRef = useRef(false);
+
+  // Ref to the latest optional callbacks so undo/redo request listeners
+  // never need the effect to re-run when a callback identity changes.
+  const optionsRef = useRef(options);
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
 
   // Refs that always point at the latest plan / userId, so socket callbacks
   // and `applyRemoteUpdate` never read from a stale closure. Kept in sync
@@ -201,6 +219,14 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
       setMessages((prev) => [...prev.slice(-99), message]);
     });
 
+    socket.on('undo-requested', (_data: { userId: string; userName: string }) => {
+      optionsRef.current.onUndoRequest?.();
+    });
+
+    socket.on('redo-requested', (_data: { userId: string; userName: string }) => {
+      optionsRef.current.onRedoRequest?.();
+    });
+
     return () => {
       socket.disconnect();
     };
@@ -272,6 +298,16 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
     [roomId]
   );
 
+  const requestUndo = useCallback(() => {
+    if (!socketRef.current || !roomId) return;
+    socketRef.current.emit('undo-request');
+  }, [roomId]);
+
+  const requestRedo = useCallback(() => {
+    if (!socketRef.current || !roomId) return;
+    socketRef.current.emit('redo-request');
+  }, [roomId]);
+
   return {
     isConnected,
     isConnecting,
@@ -290,5 +326,7 @@ export function useCollaboration(plan: FloorPlan, onPlanChange: (plan: FloorPlan
     syncPlan,
     broadcastCursor,
     sendMessage,
+    requestUndo,
+    requestRedo,
   };
 }

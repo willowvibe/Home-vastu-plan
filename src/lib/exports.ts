@@ -18,5 +18,14 @@
 export { exportToPNG } from './exportPng';
 export { exportToSVG } from './exportSvg';
 export { exportToJSON, importJSONFile } from './exportJson';
-export { generateShareLink, checkPlanSize, compressPlan, decompressPlan } from './shareLink';
+export {
+  generateShareLink,
+  generateProtectedShareLink,
+  checkPlanSize,
+  compressPlan,
+  decompressPlan,
+  encryptPlan,
+  decryptPlan,
+  isEncryptedShare,
+} from './shareLink';
 export { printCanvas } from './printPlan';

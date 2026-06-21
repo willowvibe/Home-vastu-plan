@@ -1,16 +1,27 @@
 /**
  * Tests for `src/lib/shareLink.ts`. Pins the Q-12 contract that the
  * share link's encode/decode round-trip is lossless for any plan the
- * user could plausibly share.
+ * user could plausibly share, plus the G-14 password-protected share
+ * encryption contract.
  *
- * If you change `compressPlan` / `decompressPlan`, update the test
- * cases here. If you change `MAX_SHARE_BYTES`, the "rejects over-size"
- * test will need to know the new number.
+ * If you change `compressPlan` / `decompressPlan` / `encryptPlan` /
+ * `decryptPlan`, update the test cases here. If you change
+ * `MAX_SHARE_BYTES`, the "rejects over-size" tests will need to know
+ * the new number.
  */
 
 import { describe, it, expect } from 'vitest';
 import { FloorPlan } from '../types';
-import { compressPlan, decompressPlan, checkPlanSize } from './shareLink';
+import {
+  compressPlan,
+  decompressPlan,
+  checkPlanSize,
+  encryptPlan,
+  decryptPlan,
+  isEncryptedShare,
+  generateShareLink,
+  generateProtectedShareLink,
+} from './shareLink';
 import LZString from 'lz-string';
 
 const PLAN: FloorPlan = {
@@ -78,6 +89,62 @@ describe('shareLink round-trip', () => {
   it('returns null for an encoded plan that has no rooms array', () => {
     const encoded = LZString.compressToEncodedURIComponent(JSON.stringify({ foo: 'bar' }));
     expect(decompressPlan(encoded)).toBeNull();
+  });
+});
+
+describe('password-protected share links (G-14)', () => {
+  it('encrypts and decrypts a plan with a password', async () => {
+    const encrypted = await encryptPlan(PLAN, 'protected analysis', 'secret123');
+    expect(isEncryptedShare(encrypted)).toBe(true);
+
+    const restored = await decryptPlan(encrypted, 'secret123');
+    expect(restored?.plan).toEqual(PLAN);
+    expect(restored?.analysis).toBe('protected analysis');
+  });
+
+  it('returns null when decrypting with a wrong password', async () => {
+    const encrypted = await encryptPlan(PLAN, null, 'secret123');
+    const restored = await decryptPlan(encrypted, 'wrong');
+    expect(restored).toBeNull();
+  });
+
+  it('returns null for a corrupted encrypted payload', async () => {
+    const encrypted = await encryptPlan(PLAN, null, 'secret123');
+    const tampered = `${encrypted.slice(0, -4)}XXXX`;
+    expect(await decryptPlan(tampered, 'secret123')).toBeNull();
+  });
+
+  it('detects non-encrypted payloads', () => {
+    expect(isEncryptedShare('plain-lz-string')).toBe(false);
+  });
+
+  it('generates a plain share link', () => {
+    const link = generateShareLink(PLAN, null, 'view');
+    expect(link).toContain('mode=view');
+    expect(link).toContain('plan=');
+    expect(isEncryptedShare(link)).toBe(false);
+  });
+
+  it('generates a password-protected share link', async () => {
+    const link = await generateProtectedShareLink(PLAN, 'analysis', 'comment', 'my-pass');
+    expect(link).toContain('mode=comment');
+    const planParam = new URL(link, 'http://localhost').searchParams.get('plan');
+    expect(planParam).not.toBeNull();
+    expect(isEncryptedShare(planParam!)).toBe(true);
+  });
+
+  it('throws for oversized plans in protected share links', async () => {
+    const hugePlan: FloorPlan = {
+      ...PLAN,
+      rooms: Array.from({ length: 5000 }, (_, i) => ({
+        ...PLAN.rooms[0],
+        id: `room-${i}`,
+      })),
+    };
+    const bigAnalysis = 'x'.repeat(1_100_000);
+    await expect(generateProtectedShareLink(hugePlan, bigAnalysis, 'view', 'pass')).rejects.toThrow(
+      /too large/
+    );
   });
 });
 

@@ -106,11 +106,22 @@ function makeRoom(id: string) {
   return { id, type: 'Bedroom' as const, x: 0, y: 0, w: 10, h: 10, floor: 0, wallThickness: 9 };
 }
 
-function setupHook(overrides: { onPlanChange?: (p: FloorPlan) => void; plan?: FloorPlan } = {}) {
+function setupHook(
+  overrides: {
+    onPlanChange?: (p: FloorPlan) => void;
+    plan?: FloorPlan;
+    onUndoRequest?: () => void;
+    onRedoRequest?: () => void;
+  } = {}
+) {
   const onPlanChange = overrides.onPlanChange ?? vi.fn();
+  const onUndoRequest = overrides.onUndoRequest ?? vi.fn();
+  const onRedoRequest = overrides.onRedoRequest ?? vi.fn();
   const plan = overrides.plan ?? PLAN_A;
-  const { result } = renderHook(() => useCollaboration(plan, onPlanChange));
-  return { result, onPlanChange };
+  const { result } = renderHook(() =>
+    useCollaboration(plan, onPlanChange, { onUndoRequest, onRedoRequest })
+  );
+  return { result, onPlanChange, onUndoRequest, onRedoRequest };
 }
 
 beforeEach(() => {
@@ -346,7 +357,7 @@ describe('useCollaboration socket lifecycle (Q-3)', () => {
 
   it('plan-updated applies a remote room-add (B-2 functional setter)', () => {
     const onPlanChange = vi.fn();
-    const { result } = setupHook({ onPlanChange });
+    void setupHook({ onPlanChange });
 
     // First, join so isLocalUpdateRef is in its default state.
     act(() => {
@@ -386,7 +397,7 @@ describe('useCollaboration socket lifecycle (Q-3)', () => {
 
   it('plan-updated from the local user is NOT applied (local-echo guard)', () => {
     const onPlanChange = vi.fn();
-    setupHook({ onPlanChange });
+    void setupHook({ onPlanChange });
 
     act(() => {
       socketState.current!.__dispatch('room-joined', {
@@ -620,5 +631,77 @@ describe('useCollaboration socket lifecycle (Q-3)', () => {
     expect(socketState.current).not.toBeNull();
     unmount();
     expect(socketState.current!.disconnect).toHaveBeenCalled();
+  });
+
+  it('requestUndo emits undo-request after joining a room', () => {
+    const { result } = setupHook();
+
+    act(() => {
+      socketState.current!.__dispatch('connect');
+    });
+    act(() => {
+      socketState.current!.__dispatch('room-joined', {
+        roomId: 'r1',
+        userId: 'me',
+        users: [],
+        plan: null,
+        messages: [],
+      });
+    });
+
+    socketState.current!.emit.mockClear();
+    act(() => {
+      result.current.requestUndo();
+    });
+    expect(socketState.current!.emit).toHaveBeenCalledWith('undo-request');
+  });
+
+  it('requestRedo emits redo-request after joining a room', () => {
+    const { result } = setupHook();
+
+    act(() => {
+      socketState.current!.__dispatch('connect');
+    });
+    act(() => {
+      socketState.current!.__dispatch('room-joined', {
+        roomId: 'r1',
+        userId: 'me',
+        users: [],
+        plan: null,
+        messages: [],
+      });
+    });
+
+    socketState.current!.emit.mockClear();
+    act(() => {
+      result.current.requestRedo();
+    });
+    expect(socketState.current!.emit).toHaveBeenCalledWith('redo-request');
+  });
+
+  it('undo-requested invokes the onUndoRequest callback', () => {
+    const { onUndoRequest } = setupHook();
+
+    act(() => {
+      socketState.current!.__dispatch('undo-requested', {
+        userId: 'peer',
+        userName: 'Alice',
+      });
+    });
+
+    expect(onUndoRequest).toHaveBeenCalled();
+  });
+
+  it('redo-requested invokes the onRedoRequest callback', () => {
+    const { onRedoRequest } = setupHook();
+
+    act(() => {
+      socketState.current!.__dispatch('redo-requested', {
+        userId: 'peer',
+        userName: 'Alice',
+      });
+    });
+
+    expect(onRedoRequest).toHaveBeenCalled();
   });
 });

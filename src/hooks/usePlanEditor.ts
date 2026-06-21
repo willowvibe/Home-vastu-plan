@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type RefObject } from 'react';
-import LZString from 'lz-string';
+import { decompressPlan, decryptPlan, isEncryptedShare } from '../lib/shareLink';
 import { v4 as uuidv4 } from 'uuid';
 import { AppMode, FloorPlan, Room, RoomCategory, RoomType } from '../types';
 import { analyzeFloorPlan } from '../services/gemini';
@@ -9,6 +9,7 @@ import { trackEvent, EVENTS, EVENT_METADATA } from '../services/analytics';
 import { useToast } from '../components/Toast';
 import { useFloorPlan } from './useFloorPlan';
 import { useSelection } from './useSelection';
+import { useCollaboration } from './useCollaboration';
 import { useExportWithClearSelection } from './useExportWithClearSelection';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 import { useTheme } from '../contexts/ThemeContext';
@@ -24,6 +25,7 @@ import {
   importJSONFile,
   exportToSVG,
   generateShareLink,
+  generateProtectedShareLink,
   checkPlanSize,
 } from '../lib/exports';
 import { INITIAL_PLAN, PLAN_TEMPLATES, formatFloor } from '../constants/floorPlanConstants';
@@ -43,11 +45,21 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     redo,
     resetPlan,
     replacePlanPreservingHistory,
+    commitHistoryUpdate,
     historyIndex,
     historyLength,
   } = useFloorPlan(INITIAL_PLAN);
 
   const [currentFloor, setCurrentFloor] = useState(0);
+
+  // G-1: multi-user undo across collaboration boundary. Remote edits are
+  // committed to local history so they can be undone; local undo/redo can be
+  // broadcast to peers via requestUndo / requestRedo.
+  const collaboration = useCollaboration(plan, commitHistoryUpdate, {
+    onUndoRequest: undo,
+    onRedoRequest: redo,
+  });
+
   const {
     selectedRoomIds,
     select: selectRoomRaw,
@@ -150,33 +162,60 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     trackEvent(EVENTS.PLAN_CREATED);
   }, [appMode]);
 
-  // Load shared plan from URL
+  // Load shared plan from URL (plain or password-protected)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sharedPlan = params.get('plan');
     const mode = params.get('mode') as 'view' | 'comment' | null;
 
-    try {
-      if (sharedPlan) {
-        const decoded = JSON.parse(LZString.decompressFromEncodedURIComponent(sharedPlan) || '{}');
-        if (decoded.rooms) {
-          resetPlan(decoded);
-          if (decoded.analysis) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setAnalysis(decoded.analysis);
+    async function loadShared() {
+      if (!sharedPlan) return;
+      try {
+        if (isEncryptedShare(sharedPlan)) {
+          const password = window.prompt(
+            'This shared plan is password-protected. Please enter the password:'
+          );
+          if (!password) {
+            showToast('Password required to open protected plan.');
+            return;
+          }
+          const result = await decryptPlan(sharedPlan, password);
+          if (!result) {
+            showToast('Failed to open protected plan. Password may be incorrect.');
+            return;
+          }
+          replacePlanPreservingHistory(result.plan);
+          if (result.analysis) {
+            setAnalysis(result.analysis);
           }
           if (mode === 'view' || mode === 'comment') {
             setAppMode(mode);
           }
+          showToast(`Shared plan loaded in ${mode} mode.`);
+          return;
+        }
+        const result = decompressPlan(sharedPlan);
+        if (result) {
+          replacePlanPreservingHistory(result.plan);
+          if (result.analysis) {
+            setAnalysis(result.analysis);
+          }
+          if (mode === 'view' || mode === 'comment') {
+            setAppMode(mode);
+          }
+          showToast(`Shared plan loaded in ${mode} mode.`);
+        }
+      } catch (e) {
+        console.error('Failed to load shared plan', e);
+        showToast('Failed to load shared plan. The link may be corrupted.');
+      } finally {
+        if (window.location.search) {
+          window.history.replaceState(null, '', window.location.pathname);
         }
       }
-    } catch (e) {
-      console.error('Failed to load shared plan', e);
-    } finally {
-      if (window.location.search) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
     }
+
+    loadShared();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -517,10 +556,12 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
   }, [canvasContainerRef, runExport, selectedRoomIds, clearSelection, selectRoom, plan.rooms]);
 
   const handleShare = useCallback(
-    async (mode: 'view' | 'comment') => {
+    async (mode: 'view' | 'comment', password?: string) => {
       let url: string;
       try {
-        url = generateShareLink(plan, analysis, mode);
+        url = password
+          ? await generateProtectedShareLink(plan, analysis, mode, password)
+          : generateShareLink(plan, analysis, mode);
       } catch (error) {
         console.error('Failed to generate share link', error);
         alert(getErrorMessage(error) || 'Failed to generate share link. Plan might be too large.');
@@ -529,9 +570,13 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
       const result = await copyToClipboardWithFallback(url);
       if (result.ok) {
         trackEvent(mode === 'view' ? EVENTS.SHARE_VIEW_MODE : EVENTS.SHARE_COMMENT_MODE, {
-          props: { floor: currentFloor, mode },
+          props: { floor: currentFloor, mode, protected: !!password },
         });
-        alert(`Share link (${mode} mode) copied to clipboard!`);
+        alert(
+          password
+            ? `Password-protected share link (${mode} mode) copied to clipboard!`
+            : `Share link (${mode} mode) copied to clipboard!`
+        );
       } else {
         alert(`Couldn't copy the link. Here's the URL: ${url}`);
       }
@@ -949,5 +994,8 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     setRoomSearch,
     roomCategoryFilter,
     setRoomCategoryFilter,
+
+    // G-1: collaboration state + undo/redo request helpers
+    ...collaboration,
   };
 }
