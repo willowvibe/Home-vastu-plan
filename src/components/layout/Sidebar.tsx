@@ -31,6 +31,7 @@ export interface SidebarProps {
   handleExportJSON: () => void;
   updateLayers: (layers: FloorPlan['layers']) => void;
   addRoom: (type: RoomType, w: number, h: number) => void;
+  onDuplicateFloor?: (sourceFloor: number, targetFloor: number) => void;
   roomSearch: string;
   setRoomSearch: (value: string) => void;
   roomCategoryFilter: string | null;
@@ -67,6 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   handleExportJSON,
   updateLayers,
   addRoom,
+  onDuplicateFloor,
   roomSearch,
   setRoomSearch,
   roomCategoryFilter,
@@ -350,12 +352,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           )}
         </div>
-        <button
-          onClick={handleClearFloor}
-          className="w-full mt-2 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 border border-red-200 dark:border-red-800 rounded-lg transition-colors flex items-center justify-center gap-1"
-        >
-          <Trash2 className="w-3 h-3" /> Clear Floor
-        </button>
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={() =>
+              onDuplicateFloor?.(currentFloor, lastFloor < maxFloor ? lastFloor + 1 : currentFloor)
+            }
+            disabled={
+              !onDuplicateFloor || plan.rooms.filter((r) => r.floor === currentFloor).length === 0
+            }
+            title="Duplicate current floor to the next unused floor"
+            className="flex-1 py-2 text-xs font-medium rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            Duplicate {formatFloor(currentFloor)}
+          </button>
+          <button
+            onClick={handleClearFloor}
+            title="Clear all rooms on the current floor"
+            className="flex-1 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 border border-red-200 dark:border-red-800 rounded-lg transition-colors flex items-center justify-center gap-1"
+          >
+            <Trash2 className="w-3 h-3" /> Clear Floor
+          </button>
+        </div>
       </div>
 
       <LayerManager

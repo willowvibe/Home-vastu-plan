@@ -55,6 +55,7 @@ export default function App() {
               handleExportJSON={editor.handleExportJSON}
               updateLayers={editor.updateLayers}
               addRoom={editor.addRoom}
+              onDuplicateFloor={editor.duplicateFloor}
               roomSearch={editor.roomSearch}
               setRoomSearch={editor.setRoomSearch}
               roomCategoryFilter={editor.roomCategoryFilter}

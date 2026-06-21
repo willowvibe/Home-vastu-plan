@@ -86,6 +86,21 @@ const _ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => 
   );
 };
 
+let _showToast: ((message: string, type?: ToastType) => void) | null = null;
+
+/**
+ * Event-based toast API for callers outside the React tree (legacy
+ * `(window as any).showToast` replacement). Emits a CustomEvent that
+ * `ToastProvider` listens to, so non-React modules can still surface toasts.
+ */
+export const showToastEvent = (message: string, type: ToastType = 'info') => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('vastuplan:show-toast', { detail: { message, type } }));
+  }
+  // Fallback if provider isn't mounted yet
+  _showToast?.(message, type);
+};
+
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
   const toastIdRef = React.useRef(0);
@@ -108,6 +123,19 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     },
     [removeToast]
   );
+
+  React.useEffect(() => {
+    _showToast = showToast;
+    const onShowToast = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { message: string; type?: ToastType } | undefined;
+      if (detail?.message) showToast(detail.message, detail.type ?? 'info');
+    };
+    window.addEventListener('vastuplan:show-toast', onShowToast);
+    return () => {
+      _showToast = null;
+      window.removeEventListener('vastuplan:show-toast', onShowToast);
+    };
+  }, [showToast]);
 
   return (
     <ToastContext.Provider value={{ showToast, removeToast }}>

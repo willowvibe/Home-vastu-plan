@@ -21,6 +21,7 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
 - **Dynamic Setbacks**: Configure top, bottom, left, and right setbacks. Link them for uniform spacing or unlink for custom margins.
 - **Buildable Area Calculation**: The app automatically calculates and visually highlights the remaining buildable area after setbacks.
 - **Road Facing & North Angle**: Set the road direction and the exact angle of North to ensure accurate Vastu calculations.
+- **Multi-Floor Duplication**: Duplicate an entire floor's rooms onto another floor with one click.
 
 ### 3. Room Elements & Furniture
 
@@ -77,6 +78,7 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
     - `Delete` to remove rooms
     - `Ctrl+D` to duplicate rooms
     - `R` to rotate selected rooms
+    - `↑` `↓` `←` `→` to nudge selected rooms 1 ft
     - `G` to toggle Vastu Grid
     - `Ctrl+Plus` / `Ctrl+Minus` to zoom in/out
     - `Ctrl+S` to save as PNG

@@ -583,6 +583,90 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     }
   }, [selectedRoomIds, duplicateRoom, duplicateSelectedRooms]);
 
+  const duplicateFloor = useCallback(
+    (sourceFloor: number, targetFloor: number) => {
+      if (appMode !== 'edit') return;
+      if (sourceFloor === targetFloor) return;
+
+      const roomsToCopy = plan.rooms.filter((r) => r.floor === sourceFloor);
+      if (roomsToCopy.length === 0) {
+        showToast(`No rooms on ${formatFloor(sourceFloor)} to duplicate`, 'warning');
+        return;
+      }
+
+      const targetOffset = { x: 2, y: 2 }; // offset clones so they don't overlap originals if on same view
+      const newRooms: Room[] = roomsToCopy.map((room) => ({
+        ...room,
+        id: uuidv4(),
+        floor: targetFloor,
+        x: room.x + targetOffset.x,
+        y: room.y + targetOffset.y,
+        elements: (room.elements || []).map((el) => ({
+          ...el,
+          id: uuidv4(),
+        })),
+      }));
+
+      updatePlan((prev) => ({ ...prev, rooms: [...prev.rooms, ...newRooms] }));
+      commitHistory();
+      setCurrentFloor(targetFloor);
+      replaceSelection(newRooms.map((r) => r.id));
+      showToast(
+        `Duplicated ${roomsToCopy.length} room(s) to ${formatFloor(targetFloor)}`,
+        'success'
+      );
+      trackEvent(EVENTS.ROOM_ADDED, {
+        props: { source: 'duplicate_floor', count: roomsToCopy.length, targetFloor },
+      });
+    },
+    [appMode, plan.rooms, updatePlan, commitHistory, setCurrentFloor, replaceSelection, showToast]
+  );
+
+  const nudgeSelectedRooms = useCallback(
+    (direction: 'up' | 'down' | 'left' | 'right') => {
+      if (appMode !== 'edit' || selectedRoomIds.length === 0) return;
+
+      const step = 1; // 1 ft per arrow key press
+      const dx = direction === 'left' ? -step : direction === 'right' ? step : 0;
+      const dy = direction === 'up' ? -step : direction === 'down' ? step : 0;
+
+      const buildableWidth = Math.max(0, plan.plotWidth - plan.setbacks.left - plan.setbacks.right);
+      const buildableHeight = Math.max(
+        0,
+        plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom
+      );
+
+      updatePlan((prev) => {
+        const updatedRooms = prev.rooms.map((r) => {
+          if (!selectedRoomIds.includes(r.id)) return r;
+          let nextX = r.x + dx;
+          let nextY = r.y + dy;
+          // Clamp to buildable area
+          nextX = Math.max(
+            plan.setbacks.left,
+            Math.min(nextX, plan.setbacks.left + buildableWidth - r.w)
+          );
+          nextY = Math.max(
+            plan.setbacks.top,
+            Math.min(nextY, plan.setbacks.top + buildableHeight - r.h)
+          );
+          return { ...r, x: nextX, y: nextY };
+        });
+        return { ...prev, rooms: updatedRooms };
+      });
+      commitHistory();
+    },
+    [
+      appMode,
+      selectedRoomIds,
+      plan.plotWidth,
+      plan.plotHeight,
+      plan.setbacks,
+      updatePlan,
+      commitHistory,
+    ]
+  );
+
   const handleToggleGrid = useCallback(() => {
     setShowVastuGrid((prev) => {
       const next = !prev;
@@ -610,6 +694,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     onZoomIn: handleZoomIn,
     onZoomOut: handleZoomOut,
     onShowShortcuts: handleShowShortcuts,
+    onNudge: nudgeSelectedRooms,
     hasSelection: selectedRoomIds.length > 0,
     appMode,
   });
@@ -726,6 +811,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     deleteSelectedRooms,
     duplicateRoom,
     duplicateSelectedRooms,
+    duplicateFloor,
     rotateRoom,
     rotateSelectedRooms,
     addRoomElement,
@@ -749,6 +835,9 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     // Selection action wrappers
     handleDelete,
     handleDuplicate,
+
+    // Nudge
+    nudgeSelectedRooms,
 
     // Toggles
     handleToggleGrid,

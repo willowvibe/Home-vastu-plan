@@ -52,4 +52,43 @@ describe('useKeyboardShortcuts (B-5: no shortcuts in non-edit mode)', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }));
     expect(undo).toHaveBeenCalled();
   });
+
+  it('fires onNudge for arrow keys when a room is selected', () => {
+    const onNudge = vi.fn();
+    renderHook(() =>
+      useKeyboardShortcuts({
+        appMode: 'edit',
+        undo: noop,
+        redo: noop,
+        onDelete: noop,
+        onDuplicate: noop,
+        onNudge,
+        hasSelection: true,
+      })
+    );
+
+    const arrow = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
+    const preventDefault = vi.spyOn(arrow, 'preventDefault');
+    window.dispatchEvent(arrow);
+    expect(onNudge).toHaveBeenCalledWith('right');
+    expect(preventDefault).toHaveBeenCalled();
+  });
+
+  it('ignores arrow keys without selection', () => {
+    const onNudge = vi.fn();
+    renderHook(() =>
+      useKeyboardShortcuts({
+        appMode: 'edit',
+        undo: noop,
+        redo: noop,
+        onDelete: noop,
+        onDuplicate: noop,
+        onNudge,
+        hasSelection: false,
+      })
+    );
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(onNudge).not.toHaveBeenCalled();
+  });
 });

@@ -49,7 +49,7 @@ test('has floor selector controls (dynamic — U-13)', async ({ page }) => {
   // button render. Higher floors appear only after rooms are added there
   // or the user clicks "+ Add floor".
   await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
-  await expect(page.getByRole('button', { name: '0th' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '0th', exact: true })).toBeVisible();
 
   // Higher floors should NOT render in the default state.
   await expect(page.getByRole('button', { name: '1st' })).toHaveCount(0);
@@ -60,8 +60,8 @@ test('has floor selector controls (dynamic — U-13)', async ({ page }) => {
   // becomes just [1], so 1st appears and 0th disappears until a room is added
   // back to floor 0.
   await page.getByTitle('Add floor').click();
-  await expect(page.getByRole('button', { name: '1st' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '0th' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '1st', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '0th', exact: true })).toHaveCount(0);
 });
 
 test('can add a room via sidebar', async ({ page }) => {
