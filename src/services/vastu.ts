@@ -10,7 +10,10 @@ export interface VastuResult {
   feedback: string;
 }
 
-const IDEAL_ZONES: Record<
+// S-4: exported so property tests can verify the matrix directly without
+// redeclaring it. The helper below also lets callers enumerate the rule
+// for a given room type.
+export const IDEAL_ZONES: Record<
   RoomType,
   { best: Direction[]; neutral: Direction[]; avoid: Direction[] }
 > = {
@@ -26,7 +29,7 @@ const IDEAL_ZONES: Record<
   },
   Kitchen: {
     best: ['SE'],
-    neutral: ['NW', 'E', 'S'],
+    neutral: ['NW', 'E', 'S', 'W'],
     avoid: ['NE', 'SW', 'N', 'CENTER'],
   },
   'Living Room': {
@@ -36,7 +39,7 @@ const IDEAL_ZONES: Record<
   },
   Bathroom: {
     best: ['NW', 'W', 'S'],
-    neutral: ['SE', 'E'],
+    neutral: ['SE', 'E', 'N'],
     avoid: ['NE', 'SW', 'CENTER'],
   },
   'Pooja Room': {
@@ -52,7 +55,7 @@ const IDEAL_ZONES: Record<
   Balcony: {
     best: ['N', 'E', 'NE'],
     neutral: ['NW'],
-    avoid: ['S', 'SW', 'W', 'SE'],
+    avoid: ['S', 'SW', 'W', 'SE', 'CENTER'],
   },
   Stairs: {
     best: ['SW', 'S', 'W'],

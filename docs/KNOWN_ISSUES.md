@@ -132,6 +132,18 @@
 
 ---
 
+## ✅ Recently Resolved (Vastu matrix property tests — S-4)
+
+> 2026-06-21 — `fix/s4-b9-q18-batch`. Property-style tests for the Vastu ideal-direction matrix shipped alongside a matrix completeness fix. `IDEAL_ZONES` is now exported from `src/services/vastu.ts` so the test suite can verify the canonical rule set directly.
+
+| ID  | Title                                               | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --- | --------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-4 | Add property tests for Vastu ideal-direction matrix | ✅ Resolved | New `describe('Vastu matrix (S-4)')` block in `src/services/vastu.test.ts` enumerates every `ROOM_TYPES` entry, verifies each rule covers all 9 directions without duplicates, and tests every `RoomType × bucket (best/neutral/avoid) × direction` combination for the expected score/status. A `northAngle` rotation test confirms the evaluated direction shifts with plot rotation. The new tests found three missing directions: Kitchen `W` (neutral), Bathroom `N` (neutral), Balcony `CENTER` (avoid). 49/49 Vastu tests pass. |
+
+**No regressions** in `npm run lint` (0 errors), `npm test` (231/231, +8 from the previous count), or `npm run build`.
+
+---
+
 ## ✅ Recently Resolved
 
 > The P0 sweep shipped in PR #28 ([merge commit `22224ac`](https://github.com/willowvibe/Home-vastu-plan/pull/28)) on 2026-06-08. All 9 P0 bugs from the 2026-06-07 review are now fixed. The full per-bug change log is in [`CHANGELOG.md`](../CHANGELOG.md) under `[Unreleased]`. Per-bug commit refs:
@@ -172,12 +184,11 @@ _All P1 items from the 2026-06-07 sweep and the 2026-06-14 walkthrough are now r
 
 ## 🟡 P2 — Refactor (health)
 
-| ID  | Title                                                                            | File(s)                 | Effort |
-| --- | -------------------------------------------------------------------------------- | ----------------------- | ------ |
-| S-1 | Split `App.tsx` (1,839 lines) into Sidebar / Properties / Toolbar / hook modules | `src/App.tsx`           | 8-12 h |
-| S-4 | Add property tests for Vastu ideal-direction matrix                              | `src/services/vastu.ts` | 4 h    |
+| ID  | Title                                                                            | File(s)       | Effort |
+| --- | -------------------------------------------------------------------------------- | ------------- | ------ |
+| S-1 | Split `App.tsx` (1,839 lines) into Sidebar / Properties / Toolbar / hook modules | `src/App.tsx` | 8-12 h |
 
-**Subtotal:** ~12-16 h
+**Subtotal:** ~8-12 h
 
 ---
 
@@ -187,7 +198,6 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 - G-1, G-2, G-7 (multi-user undo, duplicate floor, arrow-key nudge)
 - G-12 (replace `(window as any).showToast` with real API)
-- Q-18 (sync `CHANGELOG.md` to actual `VERSION` = `0.1.0`)
 
 ---
 
@@ -285,18 +295,18 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-> **State as of 2026-06-21 (post B-8 marquee-select batch on `fix/b-8-marquee-select`).** All 9 P0s and all P1s resolved. P2: 2 items / ~12-16 h. P3/Q: 17 resolved, 1 remaining (Q-18 — CHANGELOG/VERSION sync).
+> **State as of 2026-06-21 (post S-4 + Q-18 batch on `fix/s4-b9-q18-batch`).** All 9 P0s, all P1s, and all P3/Q items resolved. P2: 1 item remaining (S-1).
 
-| Bucket | Items | Effort   | Status                                                                     |
-| ------ | ----- | -------- | -------------------------------------------------------------------------- |
-| P0     | 0     | —        | ✅ All resolved (PR #28)                                                   |
-| P1     | 0     | —        | ✅ All resolved (B-8 shipped)                                              |
-| P2     | 2     | ~12-16 h | 🟡 14 resolved (#43 + #44 + #45 + Q-2 + Q-3 + Q-1), 2 remaining (S-1, S-4) |
-| P3 / Q | many  | ongoing  | 🟡 17 resolved, 1 remaining (Q-18 — CHANGELOG/VERSION sync)                |
+| Bucket | Items | Effort  | Status                                                                      |
+| ------ | ----- | ------- | --------------------------------------------------------------------------- |
+| P0     | 0     | —       | ✅ All resolved (PR #28)                                                    |
+| P1     | 0     | —       | ✅ All resolved (B-8 shipped)                                               |
+| P2     | 1     | ~8-12 h | 🟡 15 resolved (#43 + #44 + #45 + Q-2 + Q-3 + Q-1 + S-4), 1 remaining (S-1) |
+| P3 / Q | 0     | —       | ✅ All resolved (Q-18 CHANGELOG/VERSION sync done in this batch)            |
 
-See [✅ Recently Resolved (U-3 click-to-select + B-8 multi-select)](#-recently-resolved-u-3-click-to-select--b-8-multi-select) for the latest resolution, plus the other `✅ Recently Resolved` sections above for earlier batches.
+See [✅ Recently Resolved (Vastu matrix property tests — S-4)](#-recently-resolved-vastu-matrix-property-tests--s-4) for the latest resolution, plus the other `✅ Recently Resolved` sections above for earlier batches.
 
-**Suggested next batch:** All P1 work is done. The next structural win is **S-1** (split `App.tsx`, 8-12 h). Coordinate with the user before starting since a 1,000+-line diff benefits from its own branch. Alternative low-risk small wins: **S-4** (4 h, property tests for Vastu matrix) or **Q-18** (CHANGELOG/VERSION sync, small).
+**Suggested next batch:** All P1 work is done. The next structural win is **S-1** (split `App.tsx`, 8-12 h). Coordinate with the user before starting since a 1,000+-line diff benefits from its own branch.
 
 ## How to use this document
 
