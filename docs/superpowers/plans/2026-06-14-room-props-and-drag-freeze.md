@@ -16,23 +16,23 @@
 
 ## File structure
 
-| File | Action | Responsibility |
-|---|---|---|
-| `src/hooks/useCanvasDrag.ts` | modify | Add `endDrag()` helper + `pointercancel`/`blur`/`visibilitychange` listeners + 2-tick null-ref defensive end. Export `endDrag` for tests. |
-| `src/hooks/useCanvasDrag.test.ts` | modify | Add ~10 tests for the new cleanup paths and the ref-null mid-drag defensive end. |
-| `src/components/Room.tsx` | modify | Outer `onPointerDown` bails on `e.target !== e.currentTarget`. |
-| `src/components/Room.test.tsx` | modify | Add 2 tests: room-body click fires drag; resize-handle click does NOT fire drag. |
-| `src/hooks/useSelection.ts` | **create** | Owns `selectedRoomIds` state. Exposes `{ selectedRoomIds, select(id, isShiftKey), clear() }`. |
-| `src/hooks/useSelection.test.ts` | **create** | 6 reducer tests. |
-| `src/hooks/useExportWithClearSelection.ts` | **create** | Wraps the "clear selection → await export → restore via rAF" pattern. |
-| `src/hooks/useExportWithClearSelection.test.ts` | **create** | 4 tests covering rAF restore, missing room, unmount during export. |
-| `src/components/Properties/RoomPropertiesPanel.tsx` | **create** | Renders the right-sidebar "Room Properties" block. Calls `onStaleSelection` when the id no longer resolves. Renders a lockout banner when `appMode !== 'edit'`. |
-| `src/components/Properties/RoomPropertiesPanel.test.tsx` | **create** | 10 tests. |
-| `src/App.tsx` | modify | Replace inline properties-panel JSX (lines ~1278-1620) with `<RoomPropertiesPanel>`. Replace inline `handleSelectRoom` + `selectedRoomIds` state with `useSelection()`. Replace the `setTimeout(50)` in `handleExport` with `useExportWithClearSelection`. Add the mobile-tab auto-switch `useEffect`. |
-| `docs/manual-tests/room-props-and-drag.md` | **create** | 5-minute manual checklist. |
-| `docs/CODE_REVIEW.md` | modify (post-merge) | Mark B-20, A1, A2 as resolved; add new entries if any of the audit hypotheses are confirmed. |
-| `docs/KNOWN_ISSUES.md` | modify (post-merge) | Add a row to the resolved list. |
-| `CHANGELOG.md` | modify (post-merge) | Unreleased entry. |
+| File                                                     | Action              | Responsibility                                                                                                                                                                                                                                                                                         |
+| -------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/hooks/useCanvasDrag.ts`                             | modify              | Add `endDrag()` helper + `pointercancel`/`blur`/`visibilitychange` listeners + 2-tick null-ref defensive end. Export `endDrag` for tests.                                                                                                                                                              |
+| `src/hooks/useCanvasDrag.test.ts`                        | modify              | Add ~10 tests for the new cleanup paths and the ref-null mid-drag defensive end.                                                                                                                                                                                                                       |
+| `src/components/Room.tsx`                                | modify              | Outer `onPointerDown` bails on `e.target !== e.currentTarget`.                                                                                                                                                                                                                                         |
+| `src/components/Room.test.tsx`                           | modify              | Add 2 tests: room-body click fires drag; resize-handle click does NOT fire drag.                                                                                                                                                                                                                       |
+| `src/hooks/useSelection.ts`                              | **create**          | Owns `selectedRoomIds` state. Exposes `{ selectedRoomIds, select(id, isShiftKey), clear() }`.                                                                                                                                                                                                          |
+| `src/hooks/useSelection.test.ts`                         | **create**          | 6 reducer tests.                                                                                                                                                                                                                                                                                       |
+| `src/hooks/useExportWithClearSelection.ts`               | **create**          | Wraps the "clear selection → await export → restore via rAF" pattern.                                                                                                                                                                                                                                  |
+| `src/hooks/useExportWithClearSelection.test.ts`          | **create**          | 4 tests covering rAF restore, missing room, unmount during export.                                                                                                                                                                                                                                     |
+| `src/components/Properties/RoomPropertiesPanel.tsx`      | **create**          | Renders the right-sidebar "Room Properties" block. Calls `onStaleSelection` when the id no longer resolves. Renders a lockout banner when `appMode !== 'edit'`.                                                                                                                                        |
+| `src/components/Properties/RoomPropertiesPanel.test.tsx` | **create**          | 10 tests.                                                                                                                                                                                                                                                                                              |
+| `src/App.tsx`                                            | modify              | Replace inline properties-panel JSX (lines ~1278-1620) with `<RoomPropertiesPanel>`. Replace inline `handleSelectRoom` + `selectedRoomIds` state with `useSelection()`. Replace the `setTimeout(50)` in `handleExport` with `useExportWithClearSelection`. Add the mobile-tab auto-switch `useEffect`. |
+| `docs/manual-tests/room-props-and-drag.md`               | **create**          | 5-minute manual checklist.                                                                                                                                                                                                                                                                             |
+| `docs/CODE_REVIEW.md`                                    | modify (post-merge) | Mark B-20, A1, A2 as resolved; add new entries if any of the audit hypotheses are confirmed.                                                                                                                                                                                                           |
+| `docs/KNOWN_ISSUES.md`                                   | modify (post-merge) | Add a row to the resolved list.                                                                                                                                                                                                                                                                        |
+| `CHANGELOG.md`                                           | modify (post-merge) | Unreleased entry.                                                                                                                                                                                                                                                                                      |
 
 ---
 
@@ -48,6 +48,7 @@
 ## Task 1: Add `pointercancel` / `blur` / `visibilitychange` cleanup to `useCanvasDrag`
 
 **Files:**
+
 - Modify: `src/hooks/useCanvasDrag.ts` (lines 167-390, the main `useEffect` that attaches `pointermove`/`pointerup`)
 - Test: `src/hooks/useCanvasDrag.test.ts`
 
@@ -165,265 +166,263 @@ Open `src/hooks/useCanvasDrag.ts`. Replace the existing `handlePointerUp` (lines
 **Replace lines 167-390** (the entire `useEffect` block that defines `handlePointerMove` and `handlePointerUp`) with:
 
 ```typescript
-  // D1/D2/D3: pointer lifecycle cleanup. Drag state must be cleared on
-  // pointerup, pointercancel, blur, AND visibilitychange. The 50ms export
-  // race and missed-release freeze paths both surface when this is missing.
-  // The cleanup logic lives in `endDrag()` (exported) so all four paths
-  // and the defensive ref-null end share one implementation.
+// D1/D2/D3: pointer lifecycle cleanup. Drag state must be cleared on
+// pointerup, pointercancel, blur, AND visibilitychange. The 50ms export
+// race and missed-release freeze paths both surface when this is missing.
+// The cleanup logic lives in `endDrag()` (exported) so all four paths
+// and the defensive ref-null end share one implementation.
 
-  // nullRefStreak: count consecutive pointermove calls where
-  // canvasRef.current was null. D2 says end the drag after 2 consecutive
-  // misses. Reset to 0 on the first move that finds the ref.
-  const nullRefStreakRef = useRef(0);
+// nullRefStreak: count consecutive pointermove calls where
+// canvasRef.current was null. D2 says end the drag after 2 consecutive
+// misses. Reset to 0 on the first move that finds the ref.
+const nullRefStreakRef = useRef(0);
 
-  function endDrag() {
+function endDrag() {
+  const currentState = stateRef.current;
+  const { onUpdateRoomEnd } = callbacksRef.current;
+  if (currentState.draggingRoom || currentState.resizingRoom || currentState.draggingElement) {
+    onUpdateRoomEnd?.();
+  }
+  setDraggingRoom(null);
+  setResizingRoom(null);
+  setResizeHandle(null);
+  setDraggingElement(null);
+  nullRefStreakRef.current = 0;
+}
+
+useEffect(() => {
+  const handlePointerMove = (e: PointerEvent) => {
     const currentState = stateRef.current;
-    const { onUpdateRoomEnd } = callbacksRef.current;
-    if (currentState.draggingRoom || currentState.resizingRoom || currentState.draggingElement) {
-      onUpdateRoomEnd?.();
+    const currentPlan = planRef.current;
+    const { onUpdateRoom: updateRoom } = callbacksRef.current;
+
+    // D2: if the canvas ref became null (layout reflow, modal mount,
+    // mobile tab switch), bail. After 2 consecutive misses, defensively
+    // end the drag — the alternative is a silent freeze.
+    if (!canvasRef.current) {
+      nullRefStreakRef.current += 1;
+      if (nullRefStreakRef.current >= 2) {
+        endDrag();
+      }
+      return;
     }
-    setDraggingRoom(null);
-    setResizingRoom(null);
-    setResizeHandle(null);
-    setDraggingElement(null);
     nullRefStreakRef.current = 0;
+    const rect = canvasRef.current.getBoundingClientRect();
+
+    if (currentState.draggingRoom) {
+      const room = currentPlan.rooms.find((r) => r.id === currentState.draggingRoom);
+      if (!room) return;
+
+      const snapValue = snapToGrid ? SNAP_GRID_FT : SNAP_GRID_SUB_FT;
+      let newX =
+        Math.round((e.clientX - currentState.dragOffset.x) / pixelsPerFoot / snapValue) * snapValue;
+      let newY =
+        Math.round((e.clientY - currentState.dragOffset.y) / pixelsPerFoot / snapValue) * snapValue;
+
+      const roomW = room.w;
+      const roomH = room.h;
+      const minX = currentPlan.setbacks.left;
+      const minY = currentPlan.setbacks.top;
+      const maxX = currentPlan.plotWidth - currentPlan.setbacks.right;
+      const maxY = currentPlan.plotHeight - currentPlan.setbacks.bottom;
+
+      newX = Math.max(minX, Math.min(newX, maxX - roomW));
+      newY = Math.max(minY, Math.min(newY, maxY - roomH));
+
+      const otherRooms = currentPlan.rooms.filter(
+        (r) => r.id !== currentState.draggingRoom && r.floor === currentFloor
+      );
+
+      // X-axis clamping
+      if (newX > room.x) {
+        for (const other of otherRooms) {
+          if (room.y < other.y + other.h && room.y + roomH > other.y) {
+            if (other.x >= room.x + roomW) {
+              newX = Math.min(newX, other.x - roomW);
+            }
+          }
+        }
+      } else if (newX < room.x) {
+        for (const other of otherRooms) {
+          if (room.y < other.y + other.h && room.y + roomH > other.y) {
+            if (other.x + other.w <= room.x) {
+              newX = Math.max(newX, other.x + other.w);
+            }
+          }
+        }
+      }
+
+      // Y-axis clamping
+      if (newY > room.y) {
+        for (const other of otherRooms) {
+          if (newX < other.x + other.w && newX + roomW > other.x) {
+            if (other.y >= room.y + roomH) {
+              newY = Math.min(newY, other.y - roomH);
+            }
+          }
+        }
+      } else if (newY < room.y) {
+        for (const other of otherRooms) {
+          if (newX < other.x + other.w && newX + roomW > other.x) {
+            if (other.y + other.h <= room.y) {
+              newY = Math.max(newY, other.y + other.h);
+            }
+          }
+        }
+      }
+
+      updateRoom(currentState.draggingRoom, { x: newX, y: newY });
+    } else if (currentState.resizingRoom && currentState.resizeHandle) {
+      const room = currentPlan.rooms.find((r) => r.id === currentState.resizingRoom);
+      if (!room) return;
+
+      const mouseX = Math.round((e.clientX - rect.left) / pixelsPerFoot);
+      const mouseY = Math.round((e.clientY - rect.top) / pixelsPerFoot);
+
+      let newW = room.w;
+      let newH = room.h;
+      let newX = room.x;
+      let newY = room.y;
+
+      const maxX = currentPlan.plotWidth - currentPlan.setbacks.right;
+      const maxY = currentPlan.plotHeight - currentPlan.setbacks.bottom;
+
+      const otherRooms = currentPlan.rooms.filter(
+        (r) => r.id !== currentState.resizingRoom && r.floor === currentFloor
+      );
+
+      if (currentState.resizeHandle.includes('e')) {
+        newW = Math.max(2, mouseX - room.x);
+        newW = Math.min(newW, maxX - room.x);
+        for (const other of otherRooms) {
+          if (room.y < other.y + other.h && room.y + room.h > other.y) {
+            if (other.x >= room.x + room.w) {
+              newW = Math.min(newW, other.x - room.x);
+            }
+          }
+        }
+      }
+      if (currentState.resizeHandle.includes('s')) {
+        newH = Math.max(2, mouseY - room.y);
+        newH = Math.min(newH, maxY - room.y);
+        for (const other of otherRooms) {
+          if (room.x < other.x + other.w && room.x + newW > other.x) {
+            if (other.y >= room.y + room.h) {
+              newH = Math.min(newH, other.y - room.y);
+            }
+          }
+        }
+      }
+      if (currentState.resizeHandle.includes('w')) {
+        newW = Math.max(2, room.x + room.w - mouseX);
+        newW = Math.min(newW, room.x + room.w - currentPlan.setbacks.left);
+        newX = room.x + room.w - newW;
+        for (const other of otherRooms) {
+          if (room.y < other.y + other.h && room.y + room.h > other.y) {
+            if (other.x + other.w <= room.x) {
+              newX = Math.max(newX, other.x + other.w);
+              newW = room.x + room.w - newX;
+            }
+          }
+        }
+      }
+      if (currentState.resizeHandle.includes('n')) {
+        newH = Math.max(2, room.y + room.h - mouseY);
+        newH = Math.min(newH, room.y + room.h - currentPlan.setbacks.top);
+        newY = room.y + room.h - newH;
+        for (const other of otherRooms) {
+          if (room.x < other.x + other.w && room.x + newW > other.x) {
+            if (other.y + other.h <= room.y) {
+              newY = Math.max(newY, other.y + other.h);
+              newH = room.y + room.h - newY;
+            }
+          }
+        }
+      }
+
+      updateRoom(currentState.resizingRoom, { w: newW, h: newH, x: newX, y: newY });
+    } else if (currentState.draggingElement) {
+      const room = currentPlan.rooms.find((r) => r.id === currentState.draggingElement!.roomId);
+      if (!room) return;
+      const element = room.elements?.find(
+        (el) => el.id === currentState.draggingElement!.elementId
+      );
+      if (!element) return;
+
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const elementAbsX = mouseX - currentState.elementDragOffset.x;
+      const elementAbsY = mouseY - currentState.elementDragOffset.y;
+
+      const otherFloorRooms = currentPlan.rooms.filter(
+        (r) => r.id !== room.id && r.floor === currentFloor
+      );
+      const walls = getEffectiveWalls(room, otherFloorRooms);
+
+      let newRelX = elementAbsX / pixelsPerFoot - room.x - walls.left;
+      let newRelY = elementAbsY / pixelsPerFoot - room.y - walls.top;
+
+      newRelX = Math.round(newRelX * 2) / 2;
+      newRelY = Math.round(newRelY * 2) / 2;
+
+      const innerW = room.w - walls.left - walls.right;
+      const innerH = room.h - walls.top - walls.bottom;
+
+      const isOpening = element.type === 'Door' || element.type === 'Window';
+      const allowanceX = isOpening ? Math.min(walls.left, walls.right) : 0;
+      const allowanceY = isOpening ? Math.min(walls.top, walls.bottom) : 0;
+
+      let minX = -allowanceX;
+      let minY = -allowanceY;
+      let maxX = innerW - element.w + allowanceX;
+      let maxY = innerH - element.h + allowanceY;
+
+      if (element.rotation % 180 !== 0) {
+        minX = -allowanceX + (element.h - element.w) / 2;
+        maxX = innerW - (element.w + element.h) / 2 + allowanceX;
+        minY = -allowanceY + (element.w - element.h) / 2;
+        maxY = innerH - (element.h + element.w) / 2 + allowanceY;
+      }
+
+      newRelX = Math.max(minX, Math.min(newRelX, maxX));
+      newRelY = Math.max(minY, Math.min(newRelY, maxY));
+
+      const updatedElements = room.elements?.map((el) =>
+        el.id === element.id ? { ...el, x: newRelX, y: newRelY } : el
+      );
+
+      updateRoom(room.id, { elements: updatedElements });
+    }
+  };
+
+  if (draggingRoom || resizingRoom || draggingElement) {
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+    window.addEventListener('blur', endDrag);
+    document.addEventListener('visibilitychange', endDrag);
   }
 
-  useEffect(() => {
-    const handlePointerMove = (e: PointerEvent) => {
-      const currentState = stateRef.current;
-      const currentPlan = planRef.current;
-      const { onUpdateRoom: updateRoom } = callbacksRef.current;
-
-      // D2: if the canvas ref became null (layout reflow, modal mount,
-      // mobile tab switch), bail. After 2 consecutive misses, defensively
-      // end the drag — the alternative is a silent freeze.
-      if (!canvasRef.current) {
-        nullRefStreakRef.current += 1;
-        if (nullRefStreakRef.current >= 2) {
-          endDrag();
-        }
-        return;
-      }
-      nullRefStreakRef.current = 0;
-      const rect = canvasRef.current.getBoundingClientRect();
-
-      if (currentState.draggingRoom) {
-        const room = currentPlan.rooms.find((r) => r.id === currentState.draggingRoom);
-        if (!room) return;
-
-        const snapValue = snapToGrid ? SNAP_GRID_FT : SNAP_GRID_SUB_FT;
-        let newX =
-          Math.round((e.clientX - currentState.dragOffset.x) / pixelsPerFoot / snapValue) *
-          snapValue;
-        let newY =
-          Math.round((e.clientY - currentState.dragOffset.y) / pixelsPerFoot / snapValue) *
-          snapValue;
-
-        const roomW = room.w;
-        const roomH = room.h;
-        const minX = currentPlan.setbacks.left;
-        const minY = currentPlan.setbacks.top;
-        const maxX = currentPlan.plotWidth - currentPlan.setbacks.right;
-        const maxY = currentPlan.plotHeight - currentPlan.setbacks.bottom;
-
-        newX = Math.max(minX, Math.min(newX, maxX - roomW));
-        newY = Math.max(minY, Math.min(newY, maxY - roomH));
-
-        const otherRooms = currentPlan.rooms.filter(
-          (r) => r.id !== currentState.draggingRoom && r.floor === currentFloor
-        );
-
-        // X-axis clamping
-        if (newX > room.x) {
-          for (const other of otherRooms) {
-            if (room.y < other.y + other.h && room.y + roomH > other.y) {
-              if (other.x >= room.x + roomW) {
-                newX = Math.min(newX, other.x - roomW);
-              }
-            }
-          }
-        } else if (newX < room.x) {
-          for (const other of otherRooms) {
-            if (room.y < other.y + other.h && room.y + roomH > other.y) {
-              if (other.x + other.w <= room.x) {
-                newX = Math.max(newX, other.x + other.w);
-              }
-            }
-          }
-        }
-
-        // Y-axis clamping
-        if (newY > room.y) {
-          for (const other of otherRooms) {
-            if (newX < other.x + other.w && newX + roomW > other.x) {
-              if (other.y >= room.y + roomH) {
-                newY = Math.min(newY, other.y - roomH);
-              }
-            }
-          }
-        } else if (newY < room.y) {
-          for (const other of otherRooms) {
-            if (newX < other.x + other.w && newX + roomW > other.x) {
-              if (other.y + other.h <= room.y) {
-                newY = Math.max(newY, other.y + other.h);
-              }
-            }
-          }
-        }
-
-        updateRoom(currentState.draggingRoom, { x: newX, y: newY });
-      } else if (currentState.resizingRoom && currentState.resizeHandle) {
-        const room = currentPlan.rooms.find((r) => r.id === currentState.resizingRoom);
-        if (!room) return;
-
-        const mouseX = Math.round((e.clientX - rect.left) / pixelsPerFoot);
-        const mouseY = Math.round((e.clientY - rect.top) / pixelsPerFoot);
-
-        let newW = room.w;
-        let newH = room.h;
-        let newX = room.x;
-        let newY = room.y;
-
-        const maxX = currentPlan.plotWidth - currentPlan.setbacks.right;
-        const maxY = currentPlan.plotHeight - currentPlan.setbacks.bottom;
-
-        const otherRooms = currentPlan.rooms.filter(
-          (r) => r.id !== currentState.resizingRoom && r.floor === currentFloor
-        );
-
-        if (currentState.resizeHandle.includes('e')) {
-          newW = Math.max(2, mouseX - room.x);
-          newW = Math.min(newW, maxX - room.x);
-          for (const other of otherRooms) {
-            if (room.y < other.y + other.h && room.y + room.h > other.y) {
-              if (other.x >= room.x + room.w) {
-                newW = Math.min(newW, other.x - room.x);
-              }
-            }
-          }
-        }
-        if (currentState.resizeHandle.includes('s')) {
-          newH = Math.max(2, mouseY - room.y);
-          newH = Math.min(newH, maxY - room.y);
-          for (const other of otherRooms) {
-            if (room.x < other.x + other.w && room.x + newW > other.x) {
-              if (other.y >= room.y + room.h) {
-                newH = Math.min(newH, other.y - room.y);
-              }
-            }
-          }
-        }
-        if (currentState.resizeHandle.includes('w')) {
-          newW = Math.max(2, room.x + room.w - mouseX);
-          newW = Math.min(newW, room.x + room.w - currentPlan.setbacks.left);
-          newX = room.x + room.w - newW;
-          for (const other of otherRooms) {
-            if (room.y < other.y + other.h && room.y + room.h > other.y) {
-              if (other.x + other.w <= room.x) {
-                newX = Math.max(newX, other.x + other.w);
-                newW = room.x + room.w - newX;
-              }
-            }
-          }
-        }
-        if (currentState.resizeHandle.includes('n')) {
-          newH = Math.max(2, room.y + room.h - mouseY);
-          newH = Math.min(newH, room.y + room.h - currentPlan.setbacks.top);
-          newY = room.y + room.h - newH;
-          for (const other of otherRooms) {
-            if (room.x < other.x + other.w && room.x + newW > other.x) {
-              if (other.y + other.h <= room.y) {
-                newY = Math.max(newY, other.y + other.h);
-                newH = room.y + room.h - newY;
-              }
-            }
-          }
-        }
-
-        updateRoom(currentState.resizingRoom, { w: newW, h: newH, x: newX, y: newY });
-      } else if (currentState.draggingElement) {
-        const room = currentPlan.rooms.find((r) => r.id === currentState.draggingElement!.roomId);
-        if (!room) return;
-        const element = room.elements?.find(
-          (el) => el.id === currentState.draggingElement!.elementId
-        );
-        if (!element) return;
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        const elementAbsX = mouseX - currentState.elementDragOffset.x;
-        const elementAbsY = mouseY - currentState.elementDragOffset.y;
-
-        const otherFloorRooms = currentPlan.rooms.filter(
-          (r) => r.id !== room.id && r.floor === currentFloor
-        );
-        const walls = getEffectiveWalls(room, otherFloorRooms);
-
-        let newRelX = elementAbsX / pixelsPerFoot - room.x - walls.left;
-        let newRelY = elementAbsY / pixelsPerFoot - room.y - walls.top;
-
-        newRelX = Math.round(newRelX * 2) / 2;
-        newRelY = Math.round(newRelY * 2) / 2;
-
-        const innerW = room.w - walls.left - walls.right;
-        const innerH = room.h - walls.top - walls.bottom;
-
-        const isOpening = element.type === 'Door' || element.type === 'Window';
-        const allowanceX = isOpening ? Math.min(walls.left, walls.right) : 0;
-        const allowanceY = isOpening ? Math.min(walls.top, walls.bottom) : 0;
-
-        let minX = -allowanceX;
-        let minY = -allowanceY;
-        let maxX = innerW - element.w + allowanceX;
-        let maxY = innerH - element.h + allowanceY;
-
-        if (element.rotation % 180 !== 0) {
-          minX = -allowanceX + (element.h - element.w) / 2;
-          maxX = innerW - (element.w + element.h) / 2 + allowanceX;
-          minY = -allowanceY + (element.w - element.h) / 2;
-          maxY = innerH - (element.h + element.w) / 2 + allowanceY;
-        }
-
-        newRelX = Math.max(minX, Math.min(newRelX, maxX));
-        newRelY = Math.max(minY, Math.min(newRelY, maxY));
-
-        const updatedElements = room.elements?.map((el) =>
-          el.id === element.id ? { ...el, x: newRelX, y: newRelY } : el
-        );
-
-        updateRoom(room.id, { elements: updatedElements });
-      }
-    };
-
-    if (draggingRoom || resizingRoom || draggingElement) {
-      window.addEventListener('pointermove', handlePointerMove);
-      window.addEventListener('pointerup', endDrag);
-      window.addEventListener('pointercancel', endDrag);
-      window.addEventListener('blur', endDrag);
-      document.addEventListener('visibilitychange', endDrag);
-    }
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', endDrag);
-      window.removeEventListener('pointercancel', endDrag);
-      window.removeEventListener('blur', endDrag);
-      document.removeEventListener('visibilitychange', endDrag);
-    };
-  }, [
-    draggingRoom,
-    resizingRoom,
-    draggingElement,
-    pixelsPerFoot,
-    snapToGrid,
-    currentFloor,
-    canvasRef,
-  ]);
+  return () => {
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerup', endDrag);
+    window.removeEventListener('pointercancel', endDrag);
+    window.removeEventListener('blur', endDrag);
+    document.removeEventListener('visibilitychange', endDrag);
+  };
+}, [
+  draggingRoom,
+  resizingRoom,
+  draggingElement,
+  pixelsPerFoot,
+  snapToGrid,
+  currentFloor,
+  canvasRef,
+]);
 ```
 
-The function `endDrag` is defined inside the hook body so it captures `setDraggingRoom`, `setResizingRoom`, `setResizeHandle`, `setDraggingElement`, and `callbacksRef`. It is *also* exported as a **standalone, no-op-shape** function for the unit test that asserts it is safe to call with an empty object (the test in Step 1 will be removed in a later task; the export is kept for the test that calls it via a real hook instance). See Step 4 for the export shape.
+The function `endDrag` is defined inside the hook body so it captures `setDraggingRoom`, `setResizingRoom`, `setResizeHandle`, `setDraggingElement`, and `callbacksRef`. It is _also_ exported as a **standalone, no-op-shape** function for the unit test that asserts it is safe to call with an empty object (the test in Step 1 will be removed in a later task; the export is kept for the test that calls it via a real hook instance). See Step 4 for the export shape.
 
 Add a top-level export at the very end of the file (after the `useCanvasDrag` function definition, after line 409):
 
@@ -452,9 +451,53 @@ Expected: PASS — all 78 pre-existing tests + 4 new tests pass.
 Add to the same `describe('useCanvasDrag (pointer lifecycle cleanup)')` block:
 
 ```typescript
-  it('canvasRef.current becoming null for 2 pointermove calls ends the drag', () => {
-    const { result, onUpdateRoomEnd } = setup();
-    // Start a drag.
+it('canvasRef.current becoming null for 2 pointermove calls ends the drag', () => {
+  const { result, onUpdateRoomEnd } = setup();
+  // Start a drag.
+  act(() => {
+    result.current.handlePointerDown(
+      { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+      PLAN.rooms[0],
+      'drag'
+    );
+  });
+  expect(result.current.draggingRoom).toBe('r1');
+
+  // First move with a null ref: bails, no end yet.
+  // The simplest way to "make the ref null" is to swap the canvas
+  // ref via re-rendering. The renderHook's `rerender` lets us do
+  // that, but our setup factory builds the ref inline — so we use
+  // a custom setup that exposes the ref.
+  // For brevity, we test this with a custom setup below.
+});
+```
+
+The cleaner approach is to expose the ref through the `setup` factory. Replace the test above with this combined setup + test pattern at the bottom of the same describe block:
+
+```typescript
+describe('canvasRef becomes null mid-drag (D2)', () => {
+  it('ends the drag after 2 consecutive pointermove calls with a null ref', () => {
+    let ref: { current: HTMLDivElement | null } = canvasRef({
+      left: 0,
+      top: 0,
+      width: 1000,
+      height: 1000,
+    });
+    const onUpdateRoomEnd = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ refVal }) =>
+        useCanvasDrag({
+          plan: PLAN,
+          currentFloor: 0,
+          pixelsPerFoot: 20,
+          snapToGrid: true,
+          canvasRef: refVal,
+          onUpdateRoom: vi.fn(),
+          onUpdateRoomEnd,
+          appMode: 'edit',
+        }),
+      { initialProps: { refVal: ref } }
+    );
     act(() => {
       result.current.handlePointerDown(
         { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
@@ -464,65 +507,30 @@ Add to the same `describe('useCanvasDrag (pointer lifecycle cleanup)')` block:
     });
     expect(result.current.draggingRoom).toBe('r1');
 
-    // First move with a null ref: bails, no end yet.
-    // The simplest way to "make the ref null" is to swap the canvas
-    // ref via re-rendering. The renderHook's `rerender` lets us do
-    // that, but our setup factory builds the ref inline — so we use
-    // a custom setup that exposes the ref.
-    // For brevity, we test this with a custom setup below.
-  });
-```
+    // Make the ref null and re-render. The effect re-binds the
+    // window listener (it sees draggingRoom still set), but the
+    // listener's first move now sees a null ref.
+    ref = { current: null };
+    rerender({ refVal: ref });
 
-The cleaner approach is to expose the ref through the `setup` factory. Replace the test above with this combined setup + test pattern at the bottom of the same describe block:
-
-```typescript
-  describe('canvasRef becomes null mid-drag (D2)', () => {
-    it('ends the drag after 2 consecutive pointermove calls with a null ref', () => {
-      let ref: { current: HTMLDivElement | null } = canvasRef({ left: 0, top: 0, width: 1000, height: 1000 });
-      const onUpdateRoomEnd = vi.fn();
-      const { result, rerender } = renderHook(
-        ({ refVal }) =>
-          useCanvasDrag({
-            plan: PLAN,
-            currentFloor: 0,
-            pixelsPerFoot: 20,
-            snapToGrid: true,
-            canvasRef: refVal,
-            onUpdateRoom: vi.fn(),
-            onUpdateRoomEnd,
-            appMode: 'edit',
-          }),
-        { initialProps: { refVal: ref } }
+    // Move #1 with null ref: streak=1, no end.
+    act(() => {
+      window.dispatchEvent(
+        new MouseEvent('pointermove', { clientX: 0, clientY: 0, bubbles: true })
       );
-      act(() => {
-        result.current.handlePointerDown(
-          { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
-          PLAN.rooms[0],
-          'drag'
-        );
-      });
-      expect(result.current.draggingRoom).toBe('r1');
-
-      // Make the ref null and re-render. The effect re-binds the
-      // window listener (it sees draggingRoom still set), but the
-      // listener's first move now sees a null ref.
-      ref = { current: null };
-      rerender({ refVal: ref });
-
-      // Move #1 with null ref: streak=1, no end.
-      act(() => {
-        window.dispatchEvent(new MouseEvent('pointermove', { clientX: 0, clientY: 0, bubbles: true }));
-      });
-      expect(result.current.draggingRoom).toBe('r1');
-
-      // Move #2 with null ref: streak=2, end.
-      act(() => {
-        window.dispatchEvent(new MouseEvent('pointermove', { clientX: 0, clientY: 0, bubbles: true }));
-      });
-      expect(result.current.draggingRoom).toBeNull();
-      expect(onUpdateRoomEnd).toHaveBeenCalledTimes(1);
     });
+    expect(result.current.draggingRoom).toBe('r1');
+
+    // Move #2 with null ref: streak=2, end.
+    act(() => {
+      window.dispatchEvent(
+        new MouseEvent('pointermove', { clientX: 0, clientY: 0, bubbles: true })
+      );
+    });
+    expect(result.current.draggingRoom).toBeNull();
+    expect(onUpdateRoomEnd).toHaveBeenCalledTimes(1);
   });
+});
 ```
 
 - [ ] **Step 6: Run all `useCanvasDrag` tests**
@@ -547,10 +555,11 @@ git -c user.email=claude@anthropic.com -c user.name=Claude commit -m "fix(hooks)
 ## Task 2: Add `Room` outer-onPointerDown `target === currentTarget` guard (B-20)
 
 **Files:**
+
 - Modify: `src/components/Room.tsx:125`
 - Test: `src/components/Room.test.tsx`
 
-The current `Room.tsx:125` has `onPointerDown={(e) => onPointerDown(e, room, 'drag')}` on the outer div. When the user clicks a resize handle (lines 156, 160, 164, 168), the outer div's onPointerDown fires *first* with `e.target` set to the handle element. We bail if `e.target !== e.currentTarget` so only room-body clicks fire the drag branch.
+The current `Room.tsx:125` has `onPointerDown={(e) => onPointerDown(e, room, 'drag')}` on the outer div. When the user clicks a resize handle (lines 156, 160, 164, 168), the outer div's onPointerDown fires _first_ with `e.target` set to the handle element. We bail if `e.target !== e.currentTarget` so only room-body clicks fire the drag branch.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -675,6 +684,7 @@ git -c user.email=claude@anthropic.com -c user.name=Claude commit -m "fix(room):
 ## Task 3: Create `useSelection` hook
 
 **Files:**
+
 - Create: `src/hooks/useSelection.ts`
 - Test: `src/hooks/useSelection.test.ts`
 
@@ -808,6 +818,7 @@ git -c user.email=claude@anthropic.com -c user.name=Claude commit -m "feat(hooks
 ## Task 4: Create `useExportWithClearSelection` hook
 
 **Files:**
+
 - Create: `src/hooks/useExportWithClearSelection.ts`
 - Test: `src/hooks/useExportWithClearSelection.test.ts`
 
@@ -827,13 +838,10 @@ describe('useExportWithClearSelection (replaces App.tsx setTimeout(50) export da
   let rafCallbacks: FrameRequestCallback[] = [];
   beforeEach(() => {
     rafCallbacks = [];
-    vi.stubGlobal(
-      'requestAnimationFrame',
-      (cb: FrameRequestCallback) => {
-        rafCallbacks.push(cb);
-        return rafCallbacks.length;
-      }
-    );
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      rafCallbacks.push(cb);
+      return rafCallbacks.length;
+    });
     vi.stubGlobal('cancelAnimationFrame', (_id: number) => {});
   });
   afterEach(() => {
@@ -893,13 +901,10 @@ describe('useExportWithClearSelection', () => {
     rafCallbacks = [];
     cafIds = [];
     nextRafId = 1;
-    vi.stubGlobal(
-      'requestAnimationFrame',
-      (cb: FrameRequestCallback) => {
-        rafCallbacks.push(cb);
-        return nextRafId++;
-      }
-    );
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      rafCallbacks.push(cb);
+      return nextRafId++;
+    });
     vi.stubGlobal('cancelAnimationFrame', (id: number) => {
       cafIds.push(id);
       // Remove the matching callback if it hasn't fired yet.
@@ -972,9 +977,9 @@ describe('useExportWithClearSelection', () => {
   });
 
   it('unmount during export is safe (no setState-after-unmount warning)', async () => {
-    const exportFn = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 50))
-    );
+    const exportFn = vi
+      .fn()
+      .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 50)));
     const onStaleSelection = vi.fn();
     const setSelectedRoomIds = vi.fn();
     const { result, unmount } = renderHook(() =>
@@ -1117,10 +1122,12 @@ git -c user.email=claude@anthropic.com -c user.name=Claude commit -m "feat(hooks
 ## Task 5: Create `<RoomPropertiesPanel>` component
 
 **Files:**
+
 - Create: `src/components/Properties/RoomPropertiesPanel.tsx`
 - Test: `src/components/Properties/RoomPropertiesPanel.test.tsx`
 
 This is the largest unit. The component owns the right sidebar's properties block, takes the selection and plan as props, and emits callbacks. It renders:
+
 - A header ("Room Properties" / "N Rooms Selected") with action buttons (Clear, Duplicate, Rotate, Delete).
 - For single-selection: the room's type, width, length, wall thickness, and elements (per the existing JSX in App.tsx:1278-1620).
 - An empty state when `selectedRoomIds[0]` no longer resolves (calls `onStaleSelection`).
@@ -1726,6 +1733,7 @@ git -c user.email=claude@anthropic.com -c user.name=Claude commit -m "feat(prope
 ## Task 6: Wire `App.tsx` to use the new hook and component
 
 **Files:**
+
 - Modify: `src/App.tsx`
 
 This task replaces the inline selection state with `useSelection`, the inline properties-panel JSX with `<RoomPropertiesPanel>`, and the inline export dance with `useExportWithClearSelection`. It also adds the mobile-tab auto-switch `useEffect`.
@@ -1747,7 +1755,7 @@ In `src/App.tsx`, **remove** lines 73 (`const [selectedRoomIds, setSelectedRoomI
 **Add** immediately after the `useFloorPlan` block (around line 70):
 
 ```typescript
-  const { selectedRoomIds, select: handleSelectRoom, clear: clearSelection } = useSelection();
+const { selectedRoomIds, select: handleSelectRoom, clear: clearSelection } = useSelection();
 ```
 
 - [ ] **Step 3: Replace the inline right-sidebar JSX with `<RoomPropertiesPanel>`**
@@ -1755,34 +1763,26 @@ In `src/App.tsx`, **remove** lines 73 (`const [selectedRoomIds, setSelectedRoomI
 In `src/App.tsx`, find the block that begins with `{selectedRoomIds.length > 0 ? (` (around line 1278) and ends with the matching `)}` (around line 1620 — the closing of the right sidebar's properties block). Replace it with:
 
 ```tsx
-              <RoomPropertiesPanel
-                selectedRoomIds={selectedRoomIds}
-                plan={plan}
-                appMode={appMode}
-                onUpdateRoom={updateRoom}
-                onCommitHistory={commitHistory}
-                onDuplicate={() =>
-                  selectedRoomIds.length === 1
-                    ? duplicateRoom(selectedRoomIds[0])
-                    : duplicateSelectedRooms()
-                }
-                onRotate={() =>
-                  selectedRoomIds.length === 1
-                    ? rotateRoom(selectedRoomIds[0])
-                    : rotateSelectedRooms()
-                }
-                onDelete={() =>
-                  selectedRoomIds.length === 1
-                    ? deleteRoom(selectedRoomIds[0])
-                    : deleteSelectedRooms()
-                }
-                onStaleSelection={clearSelection}
-                onClearSelection={clearSelection}
-                addRoomElement={addRoomElement}
-                updateRoomCategory={(roomId, category) =>
-                  updateRoom(roomId, { category })
-                }
-              />
+<RoomPropertiesPanel
+  selectedRoomIds={selectedRoomIds}
+  plan={plan}
+  appMode={appMode}
+  onUpdateRoom={updateRoom}
+  onCommitHistory={commitHistory}
+  onDuplicate={() =>
+    selectedRoomIds.length === 1 ? duplicateRoom(selectedRoomIds[0]) : duplicateSelectedRooms()
+  }
+  onRotate={() =>
+    selectedRoomIds.length === 1 ? rotateRoom(selectedRoomIds[0]) : rotateSelectedRooms()
+  }
+  onDelete={() =>
+    selectedRoomIds.length === 1 ? deleteRoom(selectedRoomIds[0]) : deleteSelectedRooms()
+  }
+  onStaleSelection={clearSelection}
+  onClearSelection={clearSelection}
+  addRoomElement={addRoomElement}
+  updateRoomCategory={(roomId, category) => updateRoom(roomId, { category })}
+/>
 ```
 
 (Keep the surrounding right-sidebar wrapper — the analysis panel above, the lockout overlay class on the parent div, etc. — as-is. The component replaces only the inner properties block.)
@@ -1792,51 +1792,51 @@ In `src/App.tsx`, find the block that begins with `{selectedRoomIds.length > 0 ?
 **Add** to the body of `App` (near the other hooks, around line 70):
 
 ```typescript
-  // P3: replaces the 50ms setTimeout in handleExport. The new hook uses
-  // requestAnimationFrame to synchronize the restore with the next
-  // paint, and detects deleted-mid-export rooms via isRoomStillPresent.
-  const { runExport } = useExportWithClearSelection({
-    exportFn: async () => {
-      if (!canvasContainerRef.current) return;
-      await exportToPNG(canvasContainerRef.current, `VastuPlan_Floor_${currentFloor}.png`);
-      addBreadcrumb('PNG Exported', 'export', { floor: currentFloor });
-    },
-    onStaleSelection: clearSelection,
-  });
+// P3: replaces the 50ms setTimeout in handleExport. The new hook uses
+// requestAnimationFrame to synchronize the restore with the next
+// paint, and detects deleted-mid-export rooms via isRoomStillPresent.
+const { runExport } = useExportWithClearSelection({
+  exportFn: async () => {
+    if (!canvasContainerRef.current) return;
+    await exportToPNG(canvasContainerRef.current, `VastuPlan_Floor_${currentFloor}.png`);
+    addBreadcrumb('PNG Exported', 'export', { floor: currentFloor });
+  },
+  onStaleSelection: clearSelection,
+});
 ```
 
 **Replace** `handleExport` (lines 426-445) with:
 
 ```typescript
-  const handleExport = async () => {
-    setIsExporting(true);
-    const prevSelected = selectedRoomIds.length > 0 ? selectedRoomIds[0] : null;
-    try {
-      await runExport({
-        prevSelectedId: prevSelected,
-        setSelectedRoomIds: (ids) => {
-          // The hook calls setSelectedRoomIds directly; the new
-          // useSelection exposes a clear() but no setter. The
-          // simplest bridge is to mirror the new array through
-          // select/clear.
-          if (ids.length === 0) {
-            clearSelection();
-          } else {
-            // Restore: select the first id (this replaces any
-            // current selection, which is fine — runExport cleared
-            // it first).
-            handleSelectRoom(ids[0], false);
-          }
-        },
-        isRoomStillPresent: (id) => plan.rooms.some((r) => r.id === id),
-      });
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Failed to export floor plan.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
+const handleExport = async () => {
+  setIsExporting(true);
+  const prevSelected = selectedRoomIds.length > 0 ? selectedRoomIds[0] : null;
+  try {
+    await runExport({
+      prevSelectedId: prevSelected,
+      setSelectedRoomIds: (ids) => {
+        // The hook calls setSelectedRoomIds directly; the new
+        // useSelection exposes a clear() but no setter. The
+        // simplest bridge is to mirror the new array through
+        // select/clear.
+        if (ids.length === 0) {
+          clearSelection();
+        } else {
+          // Restore: select the first id (this replaces any
+          // current selection, which is fine — runExport cleared
+          // it first).
+          handleSelectRoom(ids[0], false);
+        }
+      },
+      isRoomStillPresent: (id) => plan.rooms.some((r) => r.id === id),
+    });
+  } catch (error) {
+    console.error('Export failed:', error);
+    alert('Failed to export floor plan.');
+  } finally {
+    setIsExporting(false);
+  }
+};
 ```
 
 - [ ] **Step 5: Add the mobile-tab auto-switch `useEffect`**
@@ -1844,27 +1844,27 @@ In `src/App.tsx`, find the block that begins with `{selectedRoomIds.length > 0 ?
 **Add** to the body of `App` (right after the `useEffect`s at the top):
 
 ```typescript
-  // P4: on a mobile viewport, auto-switch to the properties tab when
-  // a room becomes selected. We read matchMedia once on mount and on
-  // media-query change, not on every resize event, so the effect
-  // doesn't re-fire as the user resizes their window.
-  const isMobileRef = useRef(false);
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mql = window.matchMedia('(max-width: 768px)');
-    isMobileRef.current = mql.matches;
-    const handler = (e: MediaQueryListEvent) => {
-      isMobileRef.current = e.matches;
-    };
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, []);
+// P4: on a mobile viewport, auto-switch to the properties tab when
+// a room becomes selected. We read matchMedia once on mount and on
+// media-query change, not on every resize event, so the effect
+// doesn't re-fire as the user resizes their window.
+const isMobileRef = useRef(false);
+useEffect(() => {
+  if (typeof window === 'undefined' || !window.matchMedia) return;
+  const mql = window.matchMedia('(max-width: 768px)');
+  isMobileRef.current = mql.matches;
+  const handler = (e: MediaQueryListEvent) => {
+    isMobileRef.current = e.matches;
+  };
+  mql.addEventListener('change', handler);
+  return () => mql.removeEventListener('change', handler);
+}, []);
 
-  useEffect(() => {
-    if (isMobileRef.current && selectedRoomIds.length > 0 && mobileTab !== 'properties') {
-      setMobileTab('properties');
-    }
-  }, [selectedRoomIds, mobileTab]);
+useEffect(() => {
+  if (isMobileRef.current && selectedRoomIds.length > 0 && mobileTab !== 'properties') {
+    setMobileTab('properties');
+  }
+}, [selectedRoomIds, mobileTab]);
 ```
 
 - [ ] **Step 6: Run the full test suite**
@@ -1889,6 +1889,7 @@ git -c user.email=claude@anthropic.com -c user.name=Claude commit -m "refactor(a
 ## Task 7: Add the manual test script
 
 **Files:**
+
 - Create: `docs/manual-tests/room-props-and-drag.md`
 
 The jsdom test suite covers the deterministic paths. The "missed `pointerup`" / "blur during drag" / "tab hide during drag" paths are browser-OS-specific. The manual script walks the user through each.
@@ -1983,6 +1984,7 @@ npm run lint && npm test -- --run && npm run build
 ```
 
 Expected:
+
 - `npm run lint` → 0 new errors, warning count ≤ 36 (the pre-PR-#47 baseline).
 - `npm test -- --run` → all tests pass. New count ~191.
 - `npm run build` → exits 0.
@@ -1996,6 +1998,7 @@ git push -u origin fix/room-props-and-drag-freeze
 - [ ] **Step 3: Open a PR**
 
 Use `gh pr create` (or the GitHub web UI) with a body that includes:
+
 - A short summary of the four commits.
 - "Resolves: room properties not showing, room movement freezing" (per the user's report).
 - "Refs: B-20, D1, D2, D3, D4, P1, P2, P3, P4 (audit findings from `docs/superpowers/specs/2026-06-14-room-props-and-drag-freeze-design.md` §1b)."
@@ -2060,26 +2063,27 @@ git push
 
 **Spec coverage:**
 
-| Spec requirement | Task |
-|---|---|
-| Add `pointercancel` / `blur` / `visibilitychange` listeners (D1, D3) | Task 1 |
-| Defensive 2-tick ref-null end (D2) | Task 1 |
-| `Room` outer onPointerDown bails on `target !== currentTarget` (B-20, D4) | Task 2 |
-| Stale-id empty state in properties panel (P2) | Task 5 (component) + Task 6 (wiring) |
-| `appMode !== 'edit'` lockout banner (P1) | Task 5 |
-| Mobile tab auto-switch (P4) | Task 6 |
-| Export race fix with rAF + stale check (P3) | Task 4 (hook) + Task 6 (wiring) |
-| `useSelection` extraction (testability for handleSelectRoom) | Task 3 + Task 6 |
-| ~32 new tests (10 + 2 + 7 + 4 + 11 + manual) | Tasks 1-6 |
-| Manual test script | Task 7 |
-| 4 commits on a single branch | Tasks 1, 2, 5, 7 (3+4 are intermediate preludes to commit 3) |
-| Post-merge doc updates | Task 8 |
+| Spec requirement                                                          | Task                                                         |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Add `pointercancel` / `blur` / `visibilitychange` listeners (D1, D3)      | Task 1                                                       |
+| Defensive 2-tick ref-null end (D2)                                        | Task 1                                                       |
+| `Room` outer onPointerDown bails on `target !== currentTarget` (B-20, D4) | Task 2                                                       |
+| Stale-id empty state in properties panel (P2)                             | Task 5 (component) + Task 6 (wiring)                         |
+| `appMode !== 'edit'` lockout banner (P1)                                  | Task 5                                                       |
+| Mobile tab auto-switch (P4)                                               | Task 6                                                       |
+| Export race fix with rAF + stale check (P3)                               | Task 4 (hook) + Task 6 (wiring)                              |
+| `useSelection` extraction (testability for handleSelectRoom)              | Task 3 + Task 6                                              |
+| ~32 new tests (10 + 2 + 7 + 4 + 11 + manual)                              | Tasks 1-6                                                    |
+| Manual test script                                                        | Task 7                                                       |
+| 4 commits on a single branch                                              | Tasks 1, 2, 5, 7 (3+4 are intermediate preludes to commit 3) |
+| Post-merge doc updates                                                    | Task 8                                                       |
 
 All spec requirements are covered.
 
 **Placeholder scan:** the plan contains no `TBD`, `TODO`, "fill in later", "add appropriate error handling", or "similar to Task N". Every step shows the actual code.
 
 **Type consistency:**
+
 - `endDrag` is exported as a no-op standalone function in Task 1 (the comment in the file explains why; the actual cleanup lives in the closure).
 - `useSelection` exposes `{ selectedRoomIds, select, clear }` (Task 3). The test asserts those exact names. `App.tsx` (Task 6) destructures `select: handleSelectRoom, clear: clearSelection` — same names.
 - `useExportWithClearSelection` exposes `{ runExport }` (Task 4). `App.tsx` (Task 6) uses `runExport` directly.

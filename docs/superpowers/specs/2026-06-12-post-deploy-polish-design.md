@@ -3,6 +3,7 @@
 **Date:** 2026-06-12
 **Status:** Approved (pending user review of this spec)
 **Scope:** Three logically independent changes bundled into a single batch on one branch (`fix/post-deploy-polish`, off `origin/main @ 99b8bf1`):
+
 1. **Floor labels:** rename `Ground / First / Second` → `0th / 1st / 2nd`, with a single `formatFloor()` helper to kill the ternary smell.
 2. **Theme system:** migrate the prop-drilled `darkMode` React state + 83 ternary class strings to Tailwind v4's `dark:` variant, with a `useDarkMode()` hook + `<ThemeProvider>` context. **Also** add section-specific light/dark shades so the UI doesn't read as "all white" or "all dark" — each major region (header, sidebar, canvas frame, properties panel) gets its own shade within the existing `slate` palette.
 3. **Doc sweep:** add a new `CLAUDE.md` at the repo root, sync `CHANGELOG.md` / `docs/CODE_REVIEW.md` / `docs/KNOWN_ISSUES.md` to post-PR-#47 + post-Vercel + post-theme-fix state, and refresh the persistent memory index.
@@ -35,6 +36,7 @@ The current state is broken in three independent ways:
 ### 1c. Doc sweep (the bookkeeping)
 
 The repo's last big docs sync was on 2026-06-11 (the `docs-sync-2026-06-11.md` memory). Since then:
+
 - PR #45 (P2 refactor) merged — S-3, S-8, S-12, Q-9, Q-12 done
 - PR #46 (Q-2 + Q-3 test coverage) merged — 97 → 128 tests
 - PR #47 (Q-1 test coverage) merged — 128 → 151 tests
@@ -54,26 +56,26 @@ The repo's last big docs sync was on 2026-06-11 (the `docs-sync-2026-06-11.md` m
 
 ## 2. What changes
 
-| File | Action | Why |
-|---|---|---|
-| `src/constants/floorPlanConstants.ts` | **edit** | Add `formatFloor()` helper. |
-| `src/App.tsx` | **edit** (4 ternary → 4 call sites) | Floor label rename. |
-| `src/types.ts` | **edit** (1 comment) | Update stale `// 0 = Ground, 1 = First, etc.` comment. |
-| `src/constants/floorPlanConstants.test.ts` | **create** | Unit test for `formatFloor()`. |
-| `src/index.css` | **edit** (1 line) | Add `@custom-variant dark (...)` to enable Tailwind v4's `dark:` variant. |
-| `src/hooks/useDarkMode.ts` | **create** | Hook that toggles `<html class="dark">` + persists to localStorage. |
-| `src/hooks/useDarkMode.test.ts` | **create** | Tests for the hook. |
-| `src/contexts/ThemeContext.tsx` | **create** | `<ThemeProvider>` + `useTheme()` consumer hook. |
-| `src/main.tsx` (or root) | **edit** (1 wrap) | Wrap app in `<ThemeProvider>`. |
-| `src/App.tsx` | **edit** (delete state + effect) | Remove the local `darkMode` state and the localStorage `useEffect`; consume `useTheme()` instead. |
-| `src/components/layout/Header.tsx` | **edit** (props + ternaries) | Drop `darkMode` / `setDarkMode` props; migrate all ternaries to `dark:` + section-specific shades. |
-| `src/components/LayerManager.tsx` | **edit** (props + ternaries) | Same. |
-| 13 other component files | **edit** (ternaries only) | Migrate 76 remaining ternaries + add section-specific shades where applicable. |
-| `CLAUDE.md` | **create** | New repo-root file (≤200 lines) for future Claude sessions. |
-| `CHANGELOG.md` | **edit** | Add Vercel deploy entry + post-deploy-polish entry. |
-| `docs/CODE_REVIEW.md` | **edit** | Bump header, mark theme-system item Resolved. |
-| `docs/KNOWN_ISSUES.md` | **edit** | Bump header, add to "Recently Resolved" list. |
-| `docs/superpowers/specs/2026-06-12-post-deploy-polish-design.md` | **create** (this file) | The design spec. |
+| File                                                             | Action                              | Why                                                                                                |
+| ---------------------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/constants/floorPlanConstants.ts`                            | **edit**                            | Add `formatFloor()` helper.                                                                        |
+| `src/App.tsx`                                                    | **edit** (4 ternary → 4 call sites) | Floor label rename.                                                                                |
+| `src/types.ts`                                                   | **edit** (1 comment)                | Update stale `// 0 = Ground, 1 = First, etc.` comment.                                             |
+| `src/constants/floorPlanConstants.test.ts`                       | **create**                          | Unit test for `formatFloor()`.                                                                     |
+| `src/index.css`                                                  | **edit** (1 line)                   | Add `@custom-variant dark (...)` to enable Tailwind v4's `dark:` variant.                          |
+| `src/hooks/useDarkMode.ts`                                       | **create**                          | Hook that toggles `<html class="dark">` + persists to localStorage.                                |
+| `src/hooks/useDarkMode.test.ts`                                  | **create**                          | Tests for the hook.                                                                                |
+| `src/contexts/ThemeContext.tsx`                                  | **create**                          | `<ThemeProvider>` + `useTheme()` consumer hook.                                                    |
+| `src/main.tsx` (or root)                                         | **edit** (1 wrap)                   | Wrap app in `<ThemeProvider>`.                                                                     |
+| `src/App.tsx`                                                    | **edit** (delete state + effect)    | Remove the local `darkMode` state and the localStorage `useEffect`; consume `useTheme()` instead.  |
+| `src/components/layout/Header.tsx`                               | **edit** (props + ternaries)        | Drop `darkMode` / `setDarkMode` props; migrate all ternaries to `dark:` + section-specific shades. |
+| `src/components/LayerManager.tsx`                                | **edit** (props + ternaries)        | Same.                                                                                              |
+| 13 other component files                                         | **edit** (ternaries only)           | Migrate 76 remaining ternaries + add section-specific shades where applicable.                     |
+| `CLAUDE.md`                                                      | **create**                          | New repo-root file (≤200 lines) for future Claude sessions.                                        |
+| `CHANGELOG.md`                                                   | **edit**                            | Add Vercel deploy entry + post-deploy-polish entry.                                                |
+| `docs/CODE_REVIEW.md`                                            | **edit**                            | Bump header, mark theme-system item Resolved.                                                      |
+| `docs/KNOWN_ISSUES.md`                                           | **edit**                            | Bump header, add to "Recently Resolved" list.                                                      |
+| `docs/superpowers/specs/2026-06-12-post-deploy-polish-design.md` | **create** (this file)              | The design spec.                                                                                   |
 
 **Net diff vs. `main @ 99b8bf1`:** 2 new files for the floor rename (test file + helper addition), 1 new file for `useDarkMode.ts` + its test, 1 new file for `ThemeContext.tsx`, 1 new file for `CLAUDE.md`, 1 new file for the spec, plus edits to 16 source files and 4 doc files. **No new dependencies. No new top-level packages.**
 
@@ -103,10 +105,14 @@ export function formatFloor(n: number): string {
   const v = n % 100;
   if (v >= 11 && v <= 13) return `${n}th`;
   switch (n % 10) {
-    case 1: return `${n}st`;
-    case 2: return `${n}nd`;
-    case 3: return `${n}rd`;
-    default: return `${n}th`;
+    case 1:
+      return `${n}st`;
+    case 2:
+      return `${n}nd`;
+    case 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
   }
 }
 ```
@@ -118,16 +124,21 @@ This is **not** just a rename — it removes the duplicated ternary smell, so fu
 In `src/App.tsx`, four sites currently look like:
 
 ```tsx
-{floor === 0 ? 'Ground' : floor === 1 ? 'First' : 'Second'}
+{
+  floor === 0 ? 'Ground' : floor === 1 ? 'First' : 'Second';
+}
 ```
 
 All four become:
 
 ```tsx
-{formatFloor(floor)}
+{
+  formatFloor(floor);
+}
 ```
 
 The 4 lines and their purpose:
+
 - `App.tsx:1002` — `<option>` label in the floor selector dropdown
 - `App.tsx:1010` — Confirmation dialog text ("Clear all rooms on X floor?")
 - `App.tsx:1277` — Vastu score area header
@@ -160,11 +171,11 @@ expect(formatFloor(2)).toBe('2nd');
 expect(formatFloor(3)).toBe('3rd');
 expect(formatFloor(4)).toBe('4th');
 expect(formatFloor(10)).toBe('10th');
-expect(formatFloor(11)).toBe('11th');  // special case
-expect(formatFloor(12)).toBe('12th');  // special case
-expect(formatFloor(13)).toBe('13th');  // special case
+expect(formatFloor(11)).toBe('11th'); // special case
+expect(formatFloor(12)).toBe('12th'); // special case
+expect(formatFloor(13)).toBe('13th'); // special case
 expect(formatFloor(14)).toBe('14th');
-expect(formatFloor(21)).toBe('21st');  // special case doesn't apply
+expect(formatFloor(21)).toBe('21st'); // special case doesn't apply
 expect(formatFloor(22)).toBe('22nd');
 expect(formatFloor(100)).toBe('100th');
 expect(formatFloor(111)).toBe('111th'); // 11 special case applies (111 % 100 = 11)
@@ -253,11 +264,7 @@ const ThemeContext = createContext<ThemeContextValue>({
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [darkMode, toggle] = useDarkMode();
-  return (
-    <ThemeContext.Provider value={{ darkMode, toggle }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ darkMode, toggle }}>{children}</ThemeContext.Provider>;
 };
 
 /** Read the current dark-mode state and the toggle function. */
@@ -300,25 +307,25 @@ The `darkMode` and `setDarkMode` props that `<App>` passes to `<Header>` and `<L
 
 This is the mechanical bulk. Pattern translations:
 
-| Old (ternary) | New (Tailwind `dark:` variant) |
-|---|---|
-| `darkMode ? 'bg-slate-800' : 'bg-white'` | `bg-white dark:bg-slate-800` |
-| `darkMode ? 'text-slate-100' : 'text-slate-900'` | `text-slate-900 dark:text-slate-100` |
-| `darkMode ? 'border-slate-700' : 'border-slate-200'` | `border-slate-200 dark:border-slate-700` |
+| Old (ternary)                                                                    | New (Tailwind `dark:` variant)                                            |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `darkMode ? 'bg-slate-800' : 'bg-white'`                                         | `bg-white dark:bg-slate-800`                                              |
+| `darkMode ? 'text-slate-100' : 'text-slate-900'`                                 | `text-slate-900 dark:text-slate-100`                                      |
+| `darkMode ? 'border-slate-700' : 'border-slate-200'`                             | `border-slate-200 dark:border-slate-700`                                  |
 | `darkMode ? 'bg-amber-900/30 border-amber-700' : 'bg-amber-50 border-amber-200'` | `bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-700` |
 
 **Section-specific shades.** Beyond just making the ternaries work, the spec gives each major region a consistent shade so the UI has visual sectioning:
 
-| Region | Light shade | Dark shade | Tailwind |
-|---|---|---|---|
-| **Page background** | `slate-50` | `slate-900` | `bg-slate-50 dark:bg-slate-900` |
-| **Top header bar** | `slate-100` | `slate-800` | `bg-slate-100 dark:bg-slate-800` |
-| **Sidebar (left rail)** | `white` | `slate-900` | `bg-white dark:bg-slate-900` |
-| **Properties panel (right rail)** | `slate-50` | `slate-900` | `bg-slate-50 dark:bg-slate-900` |
-| **Canvas frame / canvas wrapper** | `white` | `slate-800` | `bg-white dark:bg-slate-800` |
-| **Modal / dialog** | `white` | `slate-800` | `bg-white dark:bg-slate-800` |
-| **Input / form control** | `white` | `slate-800` | `bg-white dark:bg-slate-800` |
-| **Tooltip / popover** | `white` | `slate-700` | `bg-white dark:bg-slate-700` |
+| Region                            | Light shade | Dark shade  | Tailwind                         |
+| --------------------------------- | ----------- | ----------- | -------------------------------- |
+| **Page background**               | `slate-50`  | `slate-900` | `bg-slate-50 dark:bg-slate-900`  |
+| **Top header bar**                | `slate-100` | `slate-800` | `bg-slate-100 dark:bg-slate-800` |
+| **Sidebar (left rail)**           | `white`     | `slate-900` | `bg-white dark:bg-slate-900`     |
+| **Properties panel (right rail)** | `slate-50`  | `slate-900` | `bg-slate-50 dark:bg-slate-900`  |
+| **Canvas frame / canvas wrapper** | `white`     | `slate-800` | `bg-white dark:bg-slate-800`     |
+| **Modal / dialog**                | `white`     | `slate-800` | `bg-white dark:bg-slate-800`     |
+| **Input / form control**          | `white`     | `slate-800` | `bg-white dark:bg-slate-800`     |
+| **Tooltip / popover**             | `white`     | `slate-700` | `bg-white dark:bg-slate-700`     |
 
 **How this is enforced:** the migration is component-by-component. When migrating `<Header>`, the dev looks at the current `darkMode` ternary, picks the matching row from the table above, and writes the new className. There's no automatic enforcement — the rule is "follow the table."
 
@@ -430,17 +437,20 @@ If any component looks broken in dark mode, **revert just that component** to th
 > linked, not inlined.
 
 ## What this is
+
 - VastuPlan 2D: React 19 + Vite 6 + Tailwind v4 SPA for Indian home
   design with Vastu compliance scoring. TypeScript strict. Optional
   Socket.io collab server in `server/`. See README.md.
 - Version 0.1.0 (alpha). Production: Vercel (auto-deploys on push to main).
 
 ## Dev environment
+
 - `npm run dev` / `test` / `lint` / `build`. Node >=20 (.nvmrc).
 - CI: lint + tsc + prettier + vitest + build + audit on every PR
   (.github/workflows/ci.yml). Snyk step removed in PR #40.
 
 ## Git / repo
+
 - `origin` = `willowvibe/Home-vastu-plan` (active mirror).
 - `harishconti/Home-vastu-plan` is stuck at April 2026 — don't push there.
 - Branch off `main`. PR + green CI is the only path to merge. Don't
@@ -448,18 +458,21 @@ If any component looks broken in dark mode, **revert just that component** to th
 - Conventional commits: feat:, fix:, chore:, test:, docs:, refactor:.
 
 ## Conventions
+
 - TypeScript strict, no new deps without justification, tests-with-change.
 - Where things live: see memory/naming-and-paths.md.
-- Tests live next to source as *.test.ts(x). Run with `npm test -- --run`.
+- Tests live next to source as \*.test.ts(x). Run with `npm test -- --run`.
 - Tailwind v4: config is in src/index.css, not tailwind.config.js.
   `dark:` variant enabled via @custom-variant — see memory/theme-notes.md.
 
 ## Known issues
+
 - P0/P1: all resolved. P1 backlog: B-8 (multi-select rooms). P2: S-1
   (split App.tsx, 8-12h), S-4 (Vastu matrix property tests, 4h).
   See docs/KNOWN_ISSUES.md and docs/CODE_REVIEW.md.
 
 ## Things future Claude should know
+
 - App.tsx is 1,851 lines. S-1 will split it. Coordinate before starting
   a 1,000+-line diff — its own branch.
 - Wall thickness is in INCHES, not feet. Snap-to-grid is 1ft; sub-grid
@@ -482,12 +495,14 @@ Add a new dated entry above the existing `0.1.0` section:
 ## [Unreleased] — 2026-06-12
 
 ### Added
+
 - Vercel deployment via Git integration (vercel.json + README pointer).
   Every push to main → Production; every PR → Preview URL.
 - New `formatFloor()` helper in `src/constants/floorPlanConstants.ts`.
   Floor labels now use ordinals: `0th / 1st / 2nd / …`.
 
 ### Changed
+
 - **Theme system refactor:** migrated 83 ternary class strings to
   Tailwind v4's `dark:` variant. New `useDarkMode()` hook +
   `<ThemeProvider>` context. `<html class="dark">` toggles the whole
@@ -524,29 +539,29 @@ Add a new dated entry above the existing `0.1.0` section:
 
 ## 6. Validation (the post-implementation checklist)
 
-| Check | Command | Expected |
-|---|---|---|
-| Tests pass | `npm test -- --run` | 156/156 (was 151; +1 for `formatFloor`, +4 for `useDarkMode`) |
-| Lint clean | `npm run lint` | 0 errors, 58 warnings (baseline; the existing 35 `any` warnings + 21 carried over + 2 originally pre-existing) |
-| Build succeeds | `npm run build` | Exit 0; `dist/sw.js`, `dist/index.html`, `dist/assets/index-[hash].{js,css}` all emitted |
-| Dark mode toggle works | `npm run dev`, click toggle | Whole UI flips; `<html class="dark">` toggles; preference persists on reload |
-| Section-specific shades | `npm run dev`, eyeball | Header / sidebar / canvas / properties / modals each have a distinct shade in both light and dark |
-| Floor labels | `npm run dev`, open floor selector | Shows `0th / 1st / 2nd`; "Clear all rooms on X floor?" uses `0th / 1st / 2nd`; print header uses `0th / 1st / 2nd` |
-| `CLAUDE.md` readable | open the file in an editor | ≤200 lines; covers conventions, pitfalls, deploy state |
-| Vercel preview | push the branch | PR preview URL works; both light and dark modes look right in the preview |
+| Check                   | Command                            | Expected                                                                                                           |
+| ----------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Tests pass              | `npm test -- --run`                | 156/156 (was 151; +1 for `formatFloor`, +4 for `useDarkMode`)                                                      |
+| Lint clean              | `npm run lint`                     | 0 errors, 58 warnings (baseline; the existing 35 `any` warnings + 21 carried over + 2 originally pre-existing)     |
+| Build succeeds          | `npm run build`                    | Exit 0; `dist/sw.js`, `dist/index.html`, `dist/assets/index-[hash].{js,css}` all emitted                           |
+| Dark mode toggle works  | `npm run dev`, click toggle        | Whole UI flips; `<html class="dark">` toggles; preference persists on reload                                       |
+| Section-specific shades | `npm run dev`, eyeball             | Header / sidebar / canvas / properties / modals each have a distinct shade in both light and dark                  |
+| Floor labels            | `npm run dev`, open floor selector | Shows `0th / 1st / 2nd`; "Clear all rooms on X floor?" uses `0th / 1st / 2nd`; print header uses `0th / 1st / 2nd` |
+| `CLAUDE.md` readable    | open the file in an editor         | ≤200 lines; covers conventions, pitfalls, deploy state                                                             |
+| Vercel preview          | push the branch                    | PR preview URL works; both light and dark modes look right in the preview                                          |
 
 ---
 
 ## 7. Failure modes
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `npm run build` fails with "tsc: cannot find useDarkMode" | Hook not yet created or import path wrong | Check that `src/hooks/useDarkMode.ts` exists and exports the function |
-| Dark mode toggle does nothing in the browser | `<ThemeProvider>` not wrapping the app | Check `src/main.tsx` (or root) — verify the wrap |
-| Some `dark:` classes still don't paint | Component was migrated but its parent doesn't propagate the `darkMode` state (should be impossible after the context refactor, but…) | Verify the component uses `useTheme()` and not a stale prop |
-| Section-specific shades look wrong in one region | Mismatch between the table in §4f and the actual code | The migration is mechanical — re-check the source against the table |
-| Floor labels show "0th / 1st / 2nd" but the 4th ternary site is still old | Missed a call site in `App.tsx` | Re-grep for `Ground\|First\|Second`; should return nothing outside this spec's history |
-| Vercel preview is stuck in light mode | The CSS line `@custom-variant dark` didn't make it into the build | Verify `src/index.css` has the line; `npm run build`; check `dist/assets/index-*.css` contains `dark` variant rules |
+| Symptom                                                                   | Likely cause                                                                                                                         | Fix                                                                                                                 |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `npm run build` fails with "tsc: cannot find useDarkMode"                 | Hook not yet created or import path wrong                                                                                            | Check that `src/hooks/useDarkMode.ts` exists and exports the function                                               |
+| Dark mode toggle does nothing in the browser                              | `<ThemeProvider>` not wrapping the app                                                                                               | Check `src/main.tsx` (or root) — verify the wrap                                                                    |
+| Some `dark:` classes still don't paint                                    | Component was migrated but its parent doesn't propagate the `darkMode` state (should be impossible after the context refactor, but…) | Verify the component uses `useTheme()` and not a stale prop                                                         |
+| Section-specific shades look wrong in one region                          | Mismatch between the table in §4f and the actual code                                                                                | The migration is mechanical — re-check the source against the table                                                 |
+| Floor labels show "0th / 1st / 2nd" but the 4th ternary site is still old | Missed a call site in `App.tsx`                                                                                                      | Re-grep for `Ground\|First\|Second`; should return nothing outside this spec's history                              |
+| Vercel preview is stuck in light mode                                     | The CSS line `@custom-variant dark` didn't make it into the build                                                                    | Verify `src/index.css` has the line; `npm run build`; check `dist/assets/index-*.css` contains `dark` variant rules |
 
 ---
 

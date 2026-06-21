@@ -46,7 +46,12 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useSelection } from './hooks/useSelection';
 import { useExportWithClearSelection } from './hooks/useExportWithClearSelection';
 import { useTheme } from './contexts/ThemeContext';
-import { getAnalyzeButtonState, getErrorMessage, computeInitialRoomPosition, copyToClipboardWithFallback } from './utils';
+import {
+  getAnalyzeButtonState,
+  getErrorMessage,
+  computeInitialRoomPosition,
+  copyToClipboardWithFallback,
+} from './utils';
 import {
   exportToPNG,
   exportToJSON,
@@ -65,8 +70,17 @@ import {
 import { INCHES_PER_FOOT, DEFAULT_WALL_THICKNESS_IN } from './constants/geometry';
 
 export default function App() {
-  const { plan, updatePlan, commitHistory, undo, redo, resetPlan, replacePlanPreservingHistory, historyIndex, historyLength } =
-    useFloorPlan(INITIAL_PLAN);
+  const {
+    plan,
+    updatePlan,
+    commitHistory,
+    undo,
+    redo,
+    resetPlan,
+    replacePlanPreservingHistory,
+    historyIndex,
+    historyLength,
+  } = useFloorPlan(INITIAL_PLAN);
 
   const [currentFloor, setCurrentFloor] = useState(0);
   const {

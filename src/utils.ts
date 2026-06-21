@@ -182,17 +182,12 @@ export interface ClampRoomPlan {
  *
  * Returns a new object; never mutates the input.
  */
-export function clampRoomToBuildableArea<
-  T extends { x: number; y: number; w: number; h: number }
->(room: T, plan: ClampRoomPlan): T {
-  const buildableWidth = Math.max(
-    0,
-    plan.plotWidth - plan.setbacks.left - plan.setbacks.right
-  );
-  const buildableHeight = Math.max(
-    0,
-    plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom
-  );
+export function clampRoomToBuildableArea<T extends { x: number; y: number; w: number; h: number }>(
+  room: T,
+  plan: ClampRoomPlan
+): T {
+  const buildableWidth = Math.max(0, plan.plotWidth - plan.setbacks.left - plan.setbacks.right);
+  const buildableHeight = Math.max(0, plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom);
   if (buildableWidth <= 0 || buildableHeight <= 0) {
     return room;
   }

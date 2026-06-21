@@ -19,6 +19,7 @@ Live browser walk-through against the local dev server. No code audit, no Playwr
 ### Sequence (three phases, ~90-120 min)
 
 **Phase 1 — Foundational flows (~30-40 min)**
+
 - App init, first load, default state
 - Add room (5+ types: Bedroom, Kitchen, Bathroom, Living Room, Dining, etc.)
 - Drag room (canvas)
@@ -32,6 +33,7 @@ Live browser walk-through against the local dev server. No code audit, no Playwr
 - Dark mode toggle, persist across reload
 
 **Phase 2 — Sharing & exports (~20-30 min)**
+
 - Share link: generate (view, comment), paste into new tab, verify plan loads, edit-after-share
 - Export PNG
 - Export JSON: save, then re-import, verify roundtrip
@@ -40,6 +42,7 @@ Live browser walk-through against the local dev server. No code audit, no Playwr
 - Print (browser print preview)
 
 **Phase 3 — AI / collab / mobile / edges (~30-40 min)**
+
 - AI analysis: click "Analyze Floor Plan", see what happens (no API key? mocked?)
 - Collab: two browser tabs on same plan via shared link, edit in one, see in other
 - Mobile viewport: resize to 375×812, test tab switch, drag, tap, properties panel

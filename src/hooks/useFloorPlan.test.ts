@@ -299,10 +299,7 @@ describe('useFloorPlan replacePlanPreservingHistory (U-8)', () => {
     expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['r1']);
 
     // Replace with an imported plan.
-    const importedPlan = makePlanWithRooms([
-      makeRoom('r2', 3, 3),
-      makeRoom('r3', 14, 3),
-    ]);
+    const importedPlan = makePlanWithRooms([makeRoom('r2', 3, 3), makeRoom('r3', 14, 3)]);
     act(() => {
       result.current.replacePlanPreservingHistory(importedPlan);
     });

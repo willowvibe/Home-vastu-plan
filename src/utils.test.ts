@@ -181,9 +181,7 @@ describe('clampRoomToBuildableArea (U-11: no more 500ft rooms past the plot)', (
     setbacks: { top: 3, right: 3, bottom: 3, left: 3 },
   };
   // Buildable area: 24' x 34' (plot minus setbacks on each side).
-  const room = (
-    overrides: Partial<{ x: number; y: number; w: number; h: number }> = {}
-  ) => ({
+  const room = (overrides: Partial<{ x: number; y: number; w: number; h: number }> = {}) => ({
     id: 'r1',
     type: 'bedroom',
     floor: 0,

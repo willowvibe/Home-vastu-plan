@@ -31,22 +31,37 @@ test('loads canvas container', async ({ page }) => {
   await skipOnboarding(page);
 
   // Wait for sidebar elements to load (ground floor button)
-  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
 
   // Also verify canvas container is present (using canvasContainerRef data attribute)
   await page.waitForSelector('div[data-testid="canvas-container"]', { timeout: 10000 });
 });
 
-test('has floor selector controls', async ({ page }) => {
+test('has floor selector controls (dynamic — U-13)', async ({ page }) => {
   await skipOnboarding(page);
 
-  // Wait for floor buttons to load
-  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  // 0.1.1 (Q-1) renamed the floor label from "Ground" to the ordinal "0th"
+  // via formatFloor() in src/constants/floorPlanConstants.ts.
+  // 0.1.1 (U-13) made the floor set dynamic: derived from the union of
+  // currentFloor and the floors used by plan.rooms, sorted ascending, with
+  // a "+ Add floor" button capped at floor 9. With a fresh default plan
+  // (INITIAL_PLAN.rooms === []), only the current floor (0th) and the "+"
+  // button render. Higher floors appear only after rooms are added there
+  // or the user clicks "+ Add floor".
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
+  await expect(page.getByRole('button', { name: '0th' })).toBeVisible();
 
-  // Check for floor buttons
-  await expect(page.getByRole('button', { name: 'Ground' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'First' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Second' })).toBeVisible();
+  // Higher floors should NOT render in the default state.
+  await expect(page.getByRole('button', { name: '1st' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '2nd' })).toHaveCount(0);
+
+  // The "+ Add floor" button (rendered as a literal "+" with title="Add floor")
+  // bumps currentFloor to the next unused slot. With no rooms, the floor set
+  // becomes just [1], so 1st appears and 0th disappears until a room is added
+  // back to floor 0.
+  await page.getByTitle('Add floor').click();
+  await expect(page.getByRole('button', { name: '1st' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '0th' })).toHaveCount(0);
 });
 
 test('can add a room via sidebar', async ({ page }) => {
@@ -81,7 +96,7 @@ test('can export plan as PNG', async ({ page }) => {
   await skipOnboarding(page);
 
   // Wait for floor buttons to load (app is ready)
-  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
 
   // Set up download listener before clicking
   const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
@@ -98,7 +113,7 @@ test('can export plan as SVG', async ({ page }) => {
   await skipOnboarding(page);
 
   // Wait for floor buttons to load (app is ready)
-  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
 
   // Set up download listener before clicking
   const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
@@ -115,10 +130,10 @@ test('can export plan as PDF', async ({ page }) => {
   await skipOnboarding(page);
 
   // Wait for floor buttons to load (app is ready)
-  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
 
   // Click export PDF button (opens modal)
-  await page.getByRole('button', { name: 'PDF Export' }).click();
+  await page.getByRole('button', { name: 'Presentation Export' }).click();
 
   // Wait for modal to open
   await page.waitForSelector('h2:text("Presentation Export")', { timeout: 5000 });
@@ -146,7 +161,7 @@ test('can export plan as PDF', async ({ page }) => {
 test('shared link URL is stripped after first load (B-10)', async ({ page }) => {
   await skipOnboarding(page);
   // Wait for the app to be ready.
-  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
 
   // Build a minimal shared plan payload the same way the app does:
   // JSON.stringify a floor plan, then LZString-compress to a URI component.
@@ -170,21 +185,28 @@ test('shared link URL is stripped after first load (B-10)', async ({ page }) => 
   await page.waitForFunction(() => window.location.search === '', null, { timeout: 5000 });
   expect(page.url()).toMatch(/\/$|\/\?$/);
 
-  // Now navigate to a state with no shared plan and add a room.
+  // Now navigate to a state with no shared plan and add a room. The shared
+  // plan was persisted to localStorage by resetPlan(), so clear it and reload
+  // so the in-memory plan starts empty. Otherwise the previously-loaded 10'x10'
+  // room would still be present when we add the bedroom, making the built-up
+  // area non-deterministic.
   await page.goto('/');
-  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
+  await page.evaluate(() => localStorage.removeItem('vastuplan_autosave'));
+  await page.reload();
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
   await page.getByRole('button', { name: "Bedroom 12'x12'" }).click();
 
   // Refresh — the added room should still be there (autosave to localStorage).
-  // The default floor plan already includes a 10'x10' room, so the total
-  // built-up after adding our 12'x12' bedroom is 244 sq ft (144 + 100).
+  // With the autosave cleared and INITIAL_PLAN.rooms === [] (post-0.1.1), the
+  // 12'x12' bedroom is the only built-up: 12 × 12 = 144 sq ft.
   // We assert on the built-up area which is visible in the left sidebar,
   // rather than the right "Room Properties" panel which only appears for a
   // selected room (selection isn't persisted across reloads).
   await page.reload();
-  await page.waitForSelector('button:has-text("Ground")', { timeout: 10000 });
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
   await page.waitForFunction(
-    () => /Built-up[\s\S]*244\s*sq\s*ft/.test(document.body.textContent || ''),
+    () => /Built-up[\s\S]*144\s*sq\s*ft/.test(document.body.textContent || ''),
     null,
     { timeout: 5000 }
   );
