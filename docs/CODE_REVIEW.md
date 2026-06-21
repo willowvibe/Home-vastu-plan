@@ -275,20 +275,19 @@ Minor a11y — give each button a stable aria-label like "Add Bedroom, 12 by 12 
 
 ## 3. 🟠 Code smells & risks
 
-### S-1. `App.tsx` is 1,839 lines — still a god-component
+### S-1. `App.tsx` is 1,839 lines — still a god-component ✅ RESOLVED
 
-After the v0.2 alpha refactor, the canvas was split out, but App.tsx still owns: layout, sidebars, toolbars, properties panel, export modal triggers, keyboard shortcut wiring, theme, sharing, import/export, and the full room-crud surface. Recommended splits:
+After the v0.2 alpha refactor, the canvas was split out, but App.tsx still owned layout, sidebars, toolbars, properties panel, export modal triggers, keyboard shortcut wiring, theme, sharing, import/export, and the full room-crud surface.
 
-- `components/Sidebar/PlotSettings.tsx`
-- `components/Sidebar/RoomPicker.tsx`
-- `components/Sidebar/LayerSidebar.tsx`
-- `components/Properties/RoomPropertiesPanel.tsx`
-- `components/Properties/AIVastuPanel.tsx`
-- `components/Toolbar/CanvasToolbar.tsx`
-- `hooks/useRoomCrud.ts` (wraps `addRoom`, `updateRoom`, `deleteRoom`, `duplicateRoom`, `rotateRoom`, `addRoomElement`, `clearFloor`)
-- `hooks/useShareImportExport.ts` (wraps share, JSON import/export, print, PDF/SVG/PNG triggers)
+**Resolved 2026-06-21 in PR #67.** The 1,839-line `src/App.tsx` is now a ~220-line orchestrator. All editor state and handlers moved into the new `usePlanEditor` hook (`src/hooks/usePlanEditor.ts`), and the UI shell was split into focused layout modules under `src/components/layout/`:
 
-Estimated effort: 8-12 hours. High value.
+- `Sidebar.tsx` — plot settings, floor selector, layer manager, JSON import/export, add-rooms grid
+- `Toolbar.tsx` — grid toggle, undo/redo, zoom, share, presentation export, PNG/print/JSON/SVG/ruler
+- `CanvasArea.tsx` — canvas wrapper + print-only area
+- `PropertiesPanel.tsx` — `RoomPropertiesPanel` + AI analysis panel
+- `MobileTabs.tsx` — mobile tab switcher
+
+`usePlanEditor` now owns plan/history, `currentFloor`, selection, UI state, room CRUD, import/export/share/analyze, and derived metrics. 13 tests in `src/hooks/usePlanEditor.test.ts` + 8 smoke tests in `src/components/layout/layout.test.tsx`. See `memory/s1-split-app-shipped.md`.
 
 ### S-2. `useEffect` dep arrays ignored in three places
 
@@ -574,16 +573,16 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-21 (post `fix/b-8-marquee-select`):** All 9 P0s and all P1s are resolved. P2 has 2 items totaling ~12-16 h. P3 is ongoing.
+> **State as of 2026-06-21 (post `fix/s1-split-app`):** All 9 P0s, all P1s, and all P2 items are resolved. P3/G items remain as nice-to-have / future features.
 
-| Bucket                   | Items                                   | Suggested owner track | Effort   |
-| ------------------------ | --------------------------------------- | --------------------- | -------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —        |
-| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —        |
-| **P2 — Refactor**        | S-1, S-4                                | health                | ~12-16 h |
-| **P3 — Polish**          | All Q and G items                       | DX / features         | ongoing  |
+| Bucket                   | Items                                   | Suggested owner track | Effort  |
+| ------------------------ | --------------------------------------- | --------------------- | ------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —       |
+| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —       |
+| **P2 — Refactor**        | _none — S-1 and S-4 both shipped_       | health                | —       |
+| **P3 — Polish**          | Q and G items (nice-to-have / DX)       | DX / features         | ongoing |
 
-**Where to start:** **S-1** (split `App.tsx` — 8-12 h, the single biggest structural win). The P2 hooks-test trio (Q-1, Q-2, Q-3) is now complete. The remaining P2 items are both larger refactors; coordinate with the user before starting since both touch many files.
+**Where to start next:** Pick a 3-task batch from `docs/CODE_REVIEW.md` §5. Candidate themes: (1) G-1 multi-user undo + G-2 duplicate floor + G-7 arrow-key nudge, (2) G-12 replace `(window as any).showToast` + related cleanup, or (3) Dependabot security/dep refresh batch.
 
 ---
 
