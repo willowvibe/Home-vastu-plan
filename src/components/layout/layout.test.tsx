@@ -220,6 +220,7 @@ describe('Toolbar', () => {
         onExportJSON={vi.fn()}
         onExportSVG={vi.fn()}
         onPresentationExport={vi.fn()}
+        onComplianceExport={vi.fn()}
         onMeasure={vi.fn()}
       />
     );

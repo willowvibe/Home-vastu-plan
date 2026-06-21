@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, Info, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { RoomPropertiesPanel } from '../Properties/RoomPropertiesPanel';
+import { CommentPropertiesPanel } from '../Properties/CommentPropertiesPanel';
 import { FloorPlan, AppMode, Room, RoomCategory } from '../../types';
 import { AnalyzeButtonState } from '../../utils';
 
@@ -23,6 +24,9 @@ export interface PropertiesPanelProps {
   analyzeBtn: AnalyzeButtonState;
   onAnalyze: () => void;
   mobileTab: 'settings' | 'canvas' | 'properties';
+  selectedCommentId?: string | null;
+  onUpdateComment?: (id: string, updates: Partial<FloorPlan['comments'][number]>) => void;
+  onDeleteComment?: (id: string) => void;
 }
 
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
@@ -43,15 +47,25 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   analyzeBtn,
   onAnalyze,
   mobileTab,
+  selectedCommentId,
+  onUpdateComment,
+  onDeleteComment,
 }) => {
-  const isLocked = appMode !== 'edit';
-
   return (
     <div
       className={`w-full md:w-80 flex-col overflow-hidden shrink-0 ${
         mobileTab === 'properties' ? 'flex' : 'hidden md:flex'
-      } ${isLocked ? 'opacity-50 pointer-events-none' : ''} bg-white border-l border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
+      } bg-white border-l border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
     >
+      <CommentPropertiesPanel
+        selectedCommentId={selectedCommentId}
+        plan={plan}
+        appMode={appMode}
+        onUpdateComment={onUpdateComment || (() => {})}
+        onDeleteComment={onDeleteComment || (() => {})}
+        onClearSelection={onClearSelection}
+      />
+
       <RoomPropertiesPanel
         selectedRoomIds={selectedRoomIds}
         plan={plan}

@@ -4,7 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { FloorPlan, AppMode, RoomElement, RoomCategory } from '../../types';
 import { DEFAULT_WALL_THICKNESS_IN } from '../../constants/geometry';
 import { ROOM_ELEMENTS, COMMON_ELEMENTS } from '../../constants/floorPlanConstants';
-import { clampRoomToBuildableArea } from '../../utils';
+import {
+  clampRoomToBuildableArea,
+  DEFAULT_COST_PER_SQFT,
+  formatCurrency,
+  getRoomCost,
+  getTotalCost,
+} from '../../utils';
 
 interface RoomPropertiesPanelProps {
   selectedRoomIds: string[];
@@ -218,6 +224,70 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
             <option value="12">12&quot; (External)</option>
             <option value="14">14&quot; (Load Bearing)</option>
           </select>
+        </div>
+
+        {/* Cost Estimate */}
+        <div className="p-3 rounded-lg border bg-emerald-50/60 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800">
+          {selectedRoomIds.length === 1 ? (
+            <>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                  Area
+                </span>
+                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                  {Math.round(room.w * room.h)} sq ft
+                </span>
+              </div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                  Est. Cost
+                </span>
+                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                  {formatCurrency(getRoomCost(room))}
+                </span>
+              </div>
+              <div>
+                <label className="text-xs text-emerald-700 dark:text-emerald-300 block mb-1">
+                  Cost / sq.ft ({DEFAULT_COST_PER_SQFT} default)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={room.costPerSqFt ?? DEFAULT_COST_PER_SQFT}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    onUpdateRoom(room.id, {
+                      costPerSqFt: value > 0 ? value : DEFAULT_COST_PER_SQFT,
+                    });
+                  }}
+                  onBlur={onCommitHistory}
+                  disabled={isLocked}
+                  className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                  Selected Rooms
+                </span>
+                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                  {selectedRoomIds.length}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                  Combined Est. Cost
+                </span>
+                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                  {formatCurrency(
+                    getTotalCost(plan.rooms.filter((r) => selectedRoomIds.includes(r.id)))
+                  )}
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Room Elements */}

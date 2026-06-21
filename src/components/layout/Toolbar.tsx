@@ -8,6 +8,7 @@ import {
   Share2,
   MessageSquare,
   FileText,
+  FileCheck,
   Download,
   Ruler,
   Loader2,
@@ -31,6 +32,7 @@ export interface ToolbarProps {
   onExportSVG: () => void;
   onPresentationExport: () => void;
   onMeasure: () => void;
+  onComplianceExport: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -50,6 +52,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onExportJSON,
   onExportSVG,
   onPresentationExport,
+  onComplianceExport,
   onMeasure,
 }) => {
   return (
@@ -127,6 +130,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">Presentation Export</span>
+        </button>
+        <button
+          onClick={onComplianceExport}
+          className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          title="Export Vastu compliance report PDF"
+        >
+          <FileCheck className="w-4 h-4" />
+          <span className="hidden sm:inline">Compliance</span>
         </button>
         <button
           onClick={onExport}

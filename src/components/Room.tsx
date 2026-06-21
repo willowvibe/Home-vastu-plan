@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Room as RoomType } from '../types';
+import { Room as RoomType, AppMode } from '../types';
 import { cn } from '../utils';
 import { analyzeRoomVastu } from '../services/vastu';
 import { RoomElement } from './RoomElement';
@@ -34,6 +34,7 @@ interface RoomProps {
   // rooms without a selection handler. When omitted, the room-body
   // click is still a drag — the select call is silently skipped.
   onSelectRoom?: (roomId: string, isShiftKey: boolean) => void;
+  appMode?: AppMode;
 }
 
 export const Room: React.FC<RoomProps> = React.memo(
@@ -48,6 +49,7 @@ export const Room: React.FC<RoomProps> = React.memo(
     onUpdateRoom,
     onUpdateRoomEnd,
     onSelectRoom,
+    appMode = 'edit',
   }) => {
     // B-13: depend on the plan primitives that analyzeRoomVastu actually
     // reads (plotWidth, plotHeight, northAngle), not the whole `plan` ref.
@@ -113,11 +115,14 @@ export const Room: React.FC<RoomProps> = React.memo(
       [room, onUpdateRoom, onUpdateRoomEnd]
     );
 
+    const isInteractive = appMode === 'edit';
+
     return (
       <div
         className={cn(
-          'absolute flex items-center justify-center cursor-move select-none transition-colors',
-          isSelected ? 'ring-2 ring-blue-500 z-10' : 'z-0',
+          'absolute flex items-center justify-center select-none transition-colors',
+          isInteractive ? 'cursor-move' : 'cursor-default pointer-events-none',
+          isSelected && isInteractive ? 'ring-2 ring-blue-500 z-10' : 'z-0',
           vastuColor
         )}
         style={{
@@ -129,6 +134,8 @@ export const Room: React.FC<RoomProps> = React.memo(
           borderStyle: 'solid',
         }}
         onPointerDown={(e) => {
+          if (!isInteractive) return;
+
           // B-20: only fire the drag branch when the user clicks the
           // room body, not a child (resize handle, element, label).
           // The handles' own onPointerDown will still fire for the

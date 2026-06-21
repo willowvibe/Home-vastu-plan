@@ -57,6 +57,7 @@ export interface Room {
   category?: RoomCategory;
   tags?: RoomTags;
   notes?: string;
+  costPerSqFt?: number; // construction cost rate for this room in INR/sq.ft
   elements?: RoomElement[];
 }
 
@@ -94,10 +95,11 @@ export interface CollaborationState {
 export interface Comment {
   id: string;
   text: string;
-  x: number;
-  y: number;
+  x: number; // in feet, relative to plot origin
+  y: number; // in feet, relative to plot origin
   author: string;
   timestamp: number;
+  floor?: number; // floor the pin belongs to; defaults to 0 if omitted
 }
 
 export interface FloorPlan {

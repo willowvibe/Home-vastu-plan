@@ -50,11 +50,36 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
   const [currentFloor, setCurrentFloor] = useState(0);
   const {
     selectedRoomIds,
-    select: selectRoom,
-    clear: clearSelection,
+    select: selectRoomRaw,
+    clear: clearSelectionRaw,
     replace: replaceSelection,
-    selectMany,
+    selectMany: selectManyRaw,
   } = useSelection();
+
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+
+  // G-11: selecting a room should clear any active comment selection so the
+  // right panel shows the relevant properties, not a stale comment card.
+  const selectRoom = useCallback(
+    (roomId: string | null, isShiftKey: boolean = false) => {
+      selectRoomRaw(roomId, isShiftKey);
+      setSelectedCommentId(null);
+    },
+    [selectRoomRaw]
+  );
+
+  const selectMany = useCallback(
+    (ids: string[], isShiftKey: boolean = false) => {
+      selectManyRaw(ids, isShiftKey);
+      setSelectedCommentId(null);
+    },
+    [selectManyRaw]
+  );
+
+  const clearSelection = useCallback(() => {
+    clearSelectionRaw();
+    setSelectedCommentId(null);
+  }, [clearSelectionRaw]);
 
   const { runExport } = useExportWithClearSelection({
     exportFn: async () => {
@@ -86,6 +111,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
   const [appMode, setAppMode] = useState<AppMode>('edit');
   const [showProjectManager, setShowProjectManager] = useState(false);
   const [showPresentationExport, setShowPresentationExport] = useState(false);
+  const [showComplianceExport, setShowComplianceExport] = useState(false);
   const [showShortcutHelp, setShowShortcutHelp] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     try {
@@ -293,6 +319,61 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
       }
     });
   }, [plan.rooms, updatePlan, commitHistory, selectedRoomIds, appMode, clearSelection]);
+
+  const addComment = useCallback(
+    (x: number, y: number) => {
+      if (appMode !== 'comment') return;
+      const newComment = {
+        id: uuidv4(),
+        text: '',
+        x,
+        y,
+        author: 'Reviewer',
+        timestamp: Date.now(),
+        floor: currentFloor,
+      };
+      updatePlan((prev) => ({
+        ...prev,
+        comments: [...(prev.comments || []), newComment],
+      }));
+      commitHistory();
+      setSelectedCommentId(newComment.id);
+      trackEvent(EVENTS.COMMENT_ADDED, {
+        props: { floor: currentFloor },
+      });
+      showToast('Comment pin added', 'success');
+    },
+    [appMode, currentFloor, updatePlan, commitHistory, showToast]
+  );
+
+  const updateComment = useCallback(
+    (id: string, updates: Partial<FloorPlan['comments'][number]>) => {
+      if (appMode !== 'comment') return;
+      updatePlan((prev) => ({
+        ...prev,
+        comments: (prev.comments || []).map((c) => (c.id === id ? { ...c, ...updates } : c)),
+      }));
+    },
+    [appMode, updatePlan]
+  );
+
+  const deleteComment = useCallback(
+    (id: string) => {
+      if (appMode !== 'comment') return;
+      updatePlan((prev) => ({
+        ...prev,
+        comments: (prev.comments || []).filter((c) => c.id !== id),
+      }));
+      commitHistory();
+      if (selectedCommentId === id) {
+        setSelectedCommentId(null);
+      }
+      trackEvent(EVENTS.COMMENT_DELETED, {
+        props: { floor: currentFloor },
+      });
+    },
+    [appMode, currentFloor, selectedCommentId, updatePlan, commitHistory]
+  );
 
   const duplicateRoom = useCallback(
     (id: string) => {
@@ -764,6 +845,13 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     clearSelection,
     replaceSelection,
 
+    // Comments (G-11)
+    selectedCommentId,
+    setSelectedCommentId,
+    addComment,
+    updateComment,
+    deleteComment,
+
     // UI state
     activeTab,
     setActiveTab,
@@ -799,6 +887,8 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     setShowProjectManager,
     showPresentationExport,
     setShowPresentationExport,
+    showComplianceExport,
+    setShowComplianceExport,
     showShortcutHelp,
     setShowShortcutHelp,
     showOnboarding,

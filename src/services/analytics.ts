@@ -116,6 +116,11 @@ export const EVENTS = {
   SHARE_LINK_CREATED: 'share_link_created',
   SHARE_VIEW_MODE: 'share_view_mode',
   SHARE_COMMENT_MODE: 'share_comment_mode',
+
+  // Comment events
+  COMMENT_ADDED: 'comment_added',
+  COMMENT_DELETED: 'comment_deleted',
+  COMMENT_UPDATED: 'comment_updated',
 };
 
 // Default metadata for events
