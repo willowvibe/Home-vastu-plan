@@ -91,7 +91,7 @@ jobs:
         run: npm run test:e2e
         env:
           CI: 'true'
-          PORT: 3001
+          PORT: 3000
 
       - name: Upload Playwright report
         if: failure()

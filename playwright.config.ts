@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const isCI = !!process.env.CI;
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 export default defineConfig({
   testDir: './tests/e2e',
