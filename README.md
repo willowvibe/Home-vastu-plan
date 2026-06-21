@@ -64,7 +64,7 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
 - **Utilities**: `html-to-image` for PNG/SVG export, `jsPDF` for PDF export, `lz-string` for URL-compressed plan sharing, `uuid` for unique identification.
 - **Backend (optional)**: Node + Express + Socket.io collaboration server in [`server/`](./server/README.md)
 - **Tooling**: Vitest + React Testing Library for unit/integration, Playwright for E2E, ESLint + Prettier, Sentry (prod), Plausible (analytics)
-- **Runtime requirement**: Node.js >= 20 (see [`.nvmrc`](./.nvmrc))
+- **Runtime requirement**: Node.js >= 22 (see [`.nvmrc`](./.nvmrc))
 
 ## 🚀 How to Use
 

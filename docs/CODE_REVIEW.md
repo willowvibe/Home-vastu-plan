@@ -525,13 +525,13 @@ Add a `docker-build.yml` workflow.
 
 Tie tasks to versions. Added a "Version context" note at the top of `tasks.md` tying the original 30 tasks to the **0.1.0 alpha** scope and pointing to `docs/KNOWN_ISSUES.md` / `docs/CODE_REVIEW.md` for the active backlog.
 
-### Q-20. `package.json` doesn't declare Node engine version
+### Q-20. `package.json` doesn't declare Node engine version ✅ Resolved 2026-06-21
 
-Add `"engines": { "node": ">=22" }` (matches CI).
+`package.json` and `server/package.json` now declare `"engines": { "node": ">=22.0.0" }`, `.nvmrc` is `22`, and the README runtime requirement is updated to Node.js >= 22. This matches the CI Node version.
 
-### Q-21. `.env.example` lists `GEMINI_API_KEY` and `APP_URL` but the README and vite.config.ts only reference `GEMINI_API_KEY` (or `VITE_GEMINI_API_KEY`)
+### Q-21. `.env.example` lists `GEMINI_API_KEY` and `APP_URL` but the README and vite.config.ts only reference `GEMINI_API_KEY` (or `VITE_GEMINI_API_KEY`) ✅ Resolved 2026-06-21
 
-`APP_URL` is unused. `VITE_*` prefix required for Vite exposure. Document or remove.
+Removed the unused `APP_URL` variable and the redundant `GEMINI_API_KEY` alias from `.env.example`. Only env vars actually read by the client or server remain.
 
 ### Q-22. No README section on accessibility (ARIA, focus trap, reduced motion) ✅ Resolved 2026-06-21
 
@@ -545,9 +545,9 @@ Added a README "Internationalization" section: states the app is English-only, r
 
 Documented in README: `metadata.json` is a host-discovery file consumed by the hosting environment (e.g., Google AI Studio / project listings). It contains `name`, `description`, and `requestFramePermissions`.
 
-### Q-25. `vite.config.ts` has a `define` for `GEMINI_API_KEY` but `gemini.ts` reads `process.env.GEMINI_API_KEY`
+### Q-25. `vite.config.ts` has a `define` for `GEMINI_API_KEY` but `gemini.ts` reads `process.env.GEMINI_API_KEY` ✅ Resolved 2026-06-21
 
-The define block works in client code at build time. But `gemini.ts` has a fallback to `import.meta.env.VITE_GEMINI_API_KEY`. Only the `VITE_*` form will work if `define` is removed. Today, both work, but it's confusing. Standardize.
+Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the `process.env.GEMINI_API_KEY` build-time `define` from `vite.config.ts`, removed the `process.env.*` fallbacks in `src/services/gemini.ts`, and dropped the `GEMINI_API_KEY` alias from `.env.example`. `src/vite-env.d.ts` already typed `VITE_GEMINI_API_KEY`.
 
 ---
 
@@ -570,16 +570,30 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-21 (post `fix/q-19-q22-q23-q24-batch`):** All 9 P0s, all P1s, and all P2 items are resolved. G-2/G-7/G-12, G-6/G-8/G-11, and G-1/G-13/G-14 are resolved. Q-19, Q-22, Q-23, and Q-24 are resolved. Remaining work is P3 / nice-to-have: Q-20, Q-21, Q-25, and the outstanding G items.
+> **State as of 2026-06-21 (post `fix/q-20-q21-q25-batch`):** All 9 P0s, all P1s, all P2 items, and all P3/Q items are resolved. G-1/G-13/G-14, G-2/G-7/G-12, and G-6/G-8/G-11 are resolved. Q-19, Q-20, Q-21, Q-22, Q-23, Q-24, and Q-25 are resolved. Remaining work is the outstanding G nice-to-haves: G-3, G-4, G-5, G-9, G-10, G-15.
 
 | Bucket                   | Items                                   | Suggested owner track | Effort  |
 | ------------------------ | --------------------------------------- | --------------------- | ------- |
 | **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —       |
 | **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —       |
 | **P2 — Refactor**        | _none — S-1 and S-4 both shipped_       | health                | —       |
-| **P3 — Polish**          | Q-20, Q-21, Q-25, and remaining G items | DX / features         | ongoing |
+| **P3 — Polish**          | Remaining G items                       | features              | ongoing |
 
-**Where to start next:** Pick a small batch from the remaining P3 items. Candidate themes: (1) **env/docs tidy** — Q-20 (Node engine), Q-21 (`.env.example` cleanup), Q-25 (Gemini env standardization); or (2) a **feature batch** from the remaining G items (G-3 staircase, G-4 plumbing overlay, G-5 sun path, etc.).
+**Where to start next:** Pick a feature batch from the remaining G items. Candidates: **G-3 staircase + G-4 plumbing overlay + G-5 sun path** (multi-floor / construction visualization theme), or **G-9 configurable grid + G-10 Vastu zone tour + G-15 auto-named floors** (Vastu UX theme).
+
+---
+
+## ✅ Resolved in Q-20/Q-21/Q-25 env/docs batch
+
+> The 2026-06-21 env/docs tidy batch (`fix/q-20-q21-q25-batch`) closed the last three P3/Q items from `docs/CODE_REVIEW.md` §4. Low-risk config and doc changes only.
+
+| ID   | Title                              | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                |
+| ---- | ---------------------------------- | ------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-20 | `package.json` Node engine version | §4 Q-20       | —     | `package.json` and `server/package.json` now declare `"engines": { "node": ">=22.0.0" }`; `.nvmrc` updated to `22`; README runtime requirement updated to Node.js >= 22. Matches CI.                                                                                 |
+| Q-21 | `.env.example` cleanup             | §4 Q-21       | —     | Removed unused `APP_URL` and redundant `GEMINI_API_KEY` alias from `.env.example`. Only env vars actually consumed by the client/server remain.                                                                                                                      |
+| Q-25 | Gemini env standardization         | §4 Q-25       | —     | `VITE_GEMINI_API_KEY` is now the only supported source. Removed `process.env.GEMINI_API_KEY` build-time `define` from `vite.config.ts`, removed `process.env.*` fallbacks from `src/services/gemini.ts`, and dropped the `GEMINI_API_KEY` alias from `.env.example`. |
+
+**Validation:** `npm run lint` ✅ (0 errors; 72 pre-existing warnings unchanged), `npm test` ✅, `npm run build` ✅.
 
 ---
 

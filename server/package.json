@@ -4,6 +4,9 @@
   "description": "Real-time collaboration server for VastuPlan 2D",
   "type": "module",
   "main": "dist/index.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
