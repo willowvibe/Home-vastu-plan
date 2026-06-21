@@ -8,6 +8,7 @@ import { PropertiesPanel } from './components/layout/PropertiesPanel';
 import { ImageEditor } from './components/ImageEditor';
 import { ProjectManager } from './components/ProjectManager';
 import { PresentationExport } from './components/PresentationExport';
+import { ComplianceReportExport } from './components/ComplianceReportExport';
 import { ShortcutHelp } from './components/ShortcutHelp';
 import { Onboarding } from './components/Onboarding';
 import { OfflineIndicator } from './components/OfflineIndicator';
@@ -89,6 +90,7 @@ export default function App() {
                 onExportJSON={editor.handleExportJSON}
                 onExportSVG={editor.handleExportSVG}
                 onPresentationExport={() => editor.setShowPresentationExport(true)}
+                onComplianceExport={() => editor.setShowComplianceExport(true)}
                 onMeasure={() => editor.setMeasuring(true)}
               />
               <CanvasArea
@@ -107,6 +109,9 @@ export default function App() {
                 selectedRoomIds={editor.selectedRoomIds}
                 layers={editor.plan.layers}
                 appMode={editor.appMode}
+                selectedCommentId={editor.selectedCommentId}
+                onSelectComment={editor.setSelectedCommentId}
+                onAddComment={editor.addComment}
               />
             </div>
 
@@ -128,6 +133,9 @@ export default function App() {
               analyzeBtn={editor.analyzeBtn}
               onAnalyze={editor.handleAnalyze}
               mobileTab={editor.mobileTab}
+              selectedCommentId={editor.selectedCommentId}
+              onUpdateComment={editor.updateComment}
+              onDeleteComment={editor.deleteComment}
             />
           </>
         ) : (
@@ -153,6 +161,16 @@ export default function App() {
           plan={editor.plan}
           currentFloor={editor.currentFloor}
           onClose={() => editor.setShowPresentationExport(false)}
+        />
+      )}
+
+      {editor.showComplianceExport && (
+        <ComplianceReportExport
+          canvasRef={canvasContainerRef}
+          plan={editor.plan}
+          currentFloor={editor.currentFloor}
+          analysis={editor.analysis}
+          onClose={() => editor.setShowComplianceExport(false)}
         />
       )}
 

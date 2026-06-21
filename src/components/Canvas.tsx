@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Room as RoomType, FloorPlan, RoomLayer, AppMode } from '../types';
+import { Room as RoomType, FloorPlan, RoomLayer, AppMode, Comment } from '../types';
 import { useCanvasDrag } from '../hooks/useCanvasDrag';
 import { Room } from './Room';
 import { VastuGrid } from './VastuGrid';
@@ -7,6 +7,7 @@ import { Compass } from './Compass';
 import { RulerOverlay } from './RulerOverlay';
 import { RoadIndicator } from './RoadIndicator';
 import { formatFloor } from '../constants/floorPlanConstants';
+import { MessageSquare } from 'lucide-react';
 
 interface CanvasProps {
   plan: FloorPlan;
@@ -23,6 +24,9 @@ interface CanvasProps {
   selectedRoomIds: string[];
   layers?: RoomLayer[];
   appMode?: AppMode;
+  selectedCommentId?: string | null;
+  onSelectComment?: (id: string | null) => void;
+  onAddComment?: (x: number, y: number) => void;
 }
 
 export const Canvas: React.FC<CanvasProps> = ({
@@ -40,6 +44,9 @@ export const Canvas: React.FC<CanvasProps> = ({
   selectedRoomIds,
   layers,
   appMode = 'edit',
+  selectedCommentId,
+  onSelectComment,
+  onAddComment,
 }) => {
   const PIXELS_PER_FOOT = 20 * zoom;
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -165,17 +172,29 @@ export const Canvas: React.FC<CanvasProps> = ({
       ref={canvasRef}
       onPointerDown={(e) => {
         // B-5: only the edit surface may manipulate selection.
-        if (appMode !== 'edit') return;
+        if (appMode === 'view') return;
+
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const x = (e.clientX - rect.left) / PIXELS_PER_FOOT;
+        const y = (e.clientY - rect.top) / PIXELS_PER_FOOT;
+
+        // G-11: comment mode lets reviewers drop pins on the canvas
+        // background. Room clicks are disabled in comment mode via the
+        // appMode guard in Room.tsx, so a background click always lands
+        // here.
+        if (appMode === 'comment') {
+          onSelectRoom?.(null);
+          onAddComment?.(x, y);
+          return;
+        }
 
         // B-8: start a marquee drag-select from the canvas background.
         // Room pointerdowns stop propagation, so this only fires on the
         // background. Measuring mode consumes the pointer instead.
         if (!measuring) {
           if (!e.shiftKey) onSelectRoom(null);
-          const rect = canvasRef.current?.getBoundingClientRect();
-          if (rect && canvasRef.current) {
-            const x = (e.clientX - rect.left) / PIXELS_PER_FOOT;
-            const y = (e.clientY - rect.top) / PIXELS_PER_FOOT;
+          if (canvasRef.current) {
             setMarquee({ start: { x, y }, current: { x, y }, shiftKey: e.shiftKey });
             try {
               canvasRef.current.setPointerCapture(e.pointerId);
@@ -187,16 +206,11 @@ export const Canvas: React.FC<CanvasProps> = ({
         }
 
         if (measuring && setMeasuring) {
-          const rect = canvasRef.current?.getBoundingClientRect();
-          if (rect) {
-            const x = (e.clientX - rect.left) / PIXELS_PER_FOOT;
-            const y = (e.clientY - rect.top) / PIXELS_PER_FOOT;
-            if (!measureStart) {
-              setMeasureStart({ x, y });
-            } else {
-              setMeasureEnd({ x, y });
-              setMeasuring(false);
-            }
+          if (!measureStart) {
+            setMeasureStart({ x, y });
+          } else {
+            setMeasureEnd({ x, y });
+            setMeasuring(false);
           }
         }
       }}
@@ -263,10 +277,41 @@ export const Canvas: React.FC<CanvasProps> = ({
           // elements, resize handles) still bail. The shift path
           // toggles selection (B-8 multi-select P1 hook contract).
           onSelectRoom={onSelectRoom}
+          appMode={appMode}
         />
       ))}
 
+      {/* G-11: comment pins (visible in view and comment modes). */}
+      {(appMode === 'comment' || appMode === 'view') &&
+        (plan.comments || [])
+          .filter((c) => (c.floor ?? 0) === currentFloor)
+          .map((comment) => (
+            <button
+              key={comment.id}
+              data-testid={`comment-pin-${comment.id}`}
+              onClick={() => onSelectComment?.(comment.id)}
+              className={`absolute flex items-center justify-center w-6 h-6 -ml-3 -mt-6 rounded-full shadow-sm border transition-colors z-20 ${
+                selectedCommentId === comment.id
+                  ? 'bg-amber-400 border-amber-600 text-amber-900 scale-110'
+                  : 'bg-amber-100 border-amber-400 text-amber-700 hover:bg-amber-200'
+              }`}
+              style={{
+                left: comment.x * PIXELS_PER_FOOT,
+                top: comment.y * PIXELS_PER_FOOT,
+              }}
+              title={comment.text || 'Click to view comment'}
+            >
+              <MessageSquare className="w-3 h-3" />
+            </button>
+          ))}
+
       <Compass northAngle={plan.northAngle} />
+
+      {appMode === 'comment' && (
+        <div className="absolute top-4 left-4 bg-amber-100 border border-amber-300 text-amber-800 text-[10px] px-2 py-1 rounded z-20 pointer-events-none">
+          Click anywhere on the canvas to add a comment.
+        </div>
+      )}
 
       {snapToGrid && (
         <div className="absolute top-4 right-4 bg-slate-900/70 text-white text-[9px] px-2 py-1 rounded z-20 pointer-events-none">

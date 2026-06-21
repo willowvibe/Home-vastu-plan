@@ -13,8 +13,12 @@ import {
   cn,
   computeInitialRoomPosition,
   copyToClipboardWithFallback,
+  DEFAULT_COST_PER_SQFT,
+  formatCurrency,
   getAnalyzeButtonState,
   getErrorMessage,
+  getRoomCost,
+  getTotalCost,
 } from './utils';
 
 describe('cn', () => {
@@ -244,6 +248,28 @@ describe('clampRoomToBuildableArea (U-11: no more 500ft rooms past the plot)', (
     };
     const r = room();
     expect(clampRoomToBuildableArea(r, tinyPlan)).toEqual(r);
+  });
+});
+
+describe('cost helpers (G-8: per-room cost estimation)', () => {
+  it('uses the default rate when costPerSqFt is missing', () => {
+    expect(getRoomCost({ w: 10, h: 12 })).toBe(Math.round(120 * DEFAULT_COST_PER_SQFT));
+  });
+
+  it('uses the room-specific rate when provided', () => {
+    expect(getRoomCost({ w: 10, h: 12, costPerSqFt: 2500 })).toBe(300_000);
+  });
+
+  it('sums multiple rooms for the total cost', () => {
+    const rooms = [
+      { w: 10, h: 12 }, // default → 120 × 2000 = 240_000
+      { w: 8, h: 10, costPerSqFt: 3000 }, // 80 × 3000 = 240_000
+    ];
+    expect(getTotalCost(rooms)).toBe(480_000);
+  });
+
+  it('formatCurrency renders INR without decimals', () => {
+    expect(formatCurrency(240000)).toMatch(/₹\s?2,40,000/);
   });
 });
 

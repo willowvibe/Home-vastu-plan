@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-21 to add the G-2/G-7/G-12 batch (`fix/g2-g7-g12-batch`, merged via PR #68).
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-21 to add the G-2/G-7/G-12 batch (`fix/g2-g7-g12-batch`, merged via PR #68) and the G-6/G-8/G-11 batch (`fix/g6-g8-g11-batch`, PR pending).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -557,11 +557,11 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 - **G-3.** A "staircase" element with proper cut-out rendering for multi-floor plans.
 - **G-4.** A "plumbing" overlay for kitchens and bathrooms (showing water connections).
 - **G-5.** Sun-path / shadow calculation for each room based on orientation and date.
-- **G-6.** A "compliance" report PDF that combines Vastu score, AI analysis, and the floor plan in one document.
-- **G-8.** Per-room cost estimation (not just total).
+- **G-6.** A "compliance" report PDF that combines Vastu score, AI analysis, and the floor plan in one document. — ✅ resolved in G-6/G-8/G-11 batch
+- **G-8.** Per-room cost estimation (not just total). — ✅ resolved in G-6/G-8/G-11 batch
 - **G-9.** Snap-to-grid configurable to imperial or metric base.
 - **G-10.** A "tour" of all Vastu zones with hover cards on the grid (currently only the cell label appears).
-- **G-11.** A "share with annotation" mode that allows collaborators to drop comments on the canvas.
+- **G-11.** A "share with annotation" mode that allows collaborators to drop comments on the canvas. — ✅ resolved in G-6/G-8/G-11 batch
 - **G-13.** Add `@testing-library/user-event` keyboard tests for `useKeyboardShortcuts`.
 - **G-14.** Generate a "share" link with optional password protection (encrypts the plan blob).
 - **G-15.** Auto-name floors (Ground, First, Second) based on Indian conventions.
@@ -570,7 +570,7 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-21 (post `fix/g2-g7-g12-batch`):** All 9 P0s, all P1s, and all P2 items are resolved. G-2, G-7, and G-12 are resolved. Remaining P3/G items are nice-to-have / future features.
+> **State as of 2026-06-21 (post `fix/g6-g8-g11-batch`):** All 9 P0s, all P1s, and all P2 items are resolved. G-2, G-7, G-12, G-6, G-8, and G-11 are resolved. Remaining P3/G items are nice-to-have / future features.
 
 | Bucket                   | Items                                       | Suggested owner track | Effort  |
 | ------------------------ | ------------------------------------------- | --------------------- | ------- |
@@ -594,6 +594,20 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 | G-12 | Replace `(window as any).showToast` with a real event-based toast API  | §5 G-12 / S-10 | +3    | `Toast.tsx` now dispatches and listens for `vastuplan:show-toast` CustomEvents; exports `showToastEvent(message, type?)` and a `_showToast` fallback. Used by `duplicateFloor` and `nudgeSelectedRooms`. 3 new tests in `Toast.test.tsx`.                                                                                  |
 
 **Validation:** `npm run lint` ✅ (0 errors; pre-existing warnings unchanged), `npm test` (299/299, +14 new) ✅, `npm run test:e2e` (9/9) ✅, `npm run build` ✅.
+
+---
+
+## ✅ Resolved in G-6/G-8/G-11 batch
+
+> The 2026-06-21 feature batch (`fix/g6-g8-g11-batch`) shipped 3 high-impact nice-to-haves from `docs/CODE_REVIEW.md` §5: G-6 (compliance report PDF), G-8 (per-room cost estimation), and G-11 (share-with-annotation mode). PR pending manual creation. All three are user-facing, tested, and documented. The original §5 entries are kept above for traceability and marked resolved in-place.
+
+| ID   | Title                      | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                  |
+| ---- | -------------------------- | ------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G-6  | Compliance report PDF      | §5 G-6        | +6    | `ComplianceReportExport.tsx` modal triggered from `Toolbar`. Captures live canvas via `toPng`, builds a portrait letter PDF with metadata, Vastu score, AI summary, per-room table, total area, and floor-plan image. Pure builder in `src/lib/complianceReport.ts`.                                                                   |
+| G-8  | Per-room cost estimation   | §5 G-8        | +6    | `Room.costPerSqFt?: number` defaulting to `2000`. `RoomPropertiesPanel` shows area + cost for single selection and combined cost for multi-selection. `Sidebar` total uses `getTotalCost()` + `formatCurrency()`. Helpers in `src/utils.ts`.                                                                                           |
+| G-11 | Share-with-annotation mode | §5 G-11       | +4    | `AppMode` widened to include `'comment'`. Comment-enabled share links load in `comment` mode. `Canvas` renders/drops/selects comment pins; `CommentPropertiesPanel` edits/deletes them (read-only in `view` mode). Comment CRUD lives in `usePlanEditor`; `analytics.ts` tracks `COMMENT_ADDED`, `COMMENT_UPDATED`, `COMMENT_DELETED`. |
+
+**Validation:** `npm run lint` ✅ (0 errors; pre-existing warnings unchanged), `npm test` (315/315, +16 new) ✅, `npm run test:e2e` (9/9) ✅, `npm run build` ✅.
 
 ---
 

@@ -267,3 +267,27 @@ export async function copyToClipboardWithFallback(text: string): Promise<CopyToC
   }
   return { ok: false };
 }
+
+// --- G-8 per-room cost helpers -------------------------------------------
+
+/** Default construction cost rate used when a room has no custom rate. */
+export const DEFAULT_COST_PER_SQFT = 2000;
+
+/** Format a number as Indian Rupees without fractional digits. */
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+/** Estimated cost for a single room (area × rate). */
+export function getRoomCost(room: { w: number; h: number; costPerSqFt?: number }): number {
+  return Math.round(room.w * room.h * (room.costPerSqFt ?? DEFAULT_COST_PER_SQFT));
+}
+
+/** Estimated cost for a collection of rooms. */
+export function getTotalCost(rooms: { w: number; h: number; costPerSqFt?: number }[]): number {
+  return rooms.reduce((sum, room) => sum + getRoomCost(room), 0);
+}

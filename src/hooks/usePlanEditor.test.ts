@@ -105,6 +105,7 @@ describe('usePlanEditor public API', () => {
     expect(Object.keys(result.current).sort()).toEqual(
       [
         'activeTab',
+        'addComment',
         'addRoom',
         'addRoomElement',
         'analysis',
@@ -118,6 +119,7 @@ describe('usePlanEditor public API', () => {
         'clearSelection',
         'commitHistory',
         'currentFloor',
+        'deleteComment',
         'deleteRoom',
         'deleteSelectedRooms',
         'duplicateFloor',
@@ -156,6 +158,7 @@ describe('usePlanEditor public API', () => {
         'roomSearch',
         'rotateRoom',
         'rotateSelectedRooms',
+        'selectedCommentId',
         'selectedRoomIds',
         'selectMany',
         'selectRoom',
@@ -171,6 +174,8 @@ describe('usePlanEditor public API', () => {
         'setMobileTab',
         'setRoomCategoryFilter',
         'setRoomSearch',
+        'setSelectedCommentId',
+        'setShowComplianceExport',
         'setShowOnboarding',
         'setShowPresentationExport',
         'setShowProjectManager',
@@ -178,6 +183,7 @@ describe('usePlanEditor public API', () => {
         'setShowVastuGrid',
         'setSnapToGrid',
         'setZoom',
+        'showComplianceExport',
         'showOnboarding',
         'showPresentationExport',
         'showProjectManager',
@@ -186,6 +192,7 @@ describe('usePlanEditor public API', () => {
         'snapToGrid',
         'totalArea',
         'undo',
+        'updateComment',
         'updateLayers',
         'updatePlan',
         'updateRoom',
@@ -311,6 +318,76 @@ describe('usePlanEditor room editing', () => {
     const startX = result.current.plan.rooms[0].x;
     act(() => result.current.nudgeSelectedRooms('right'));
     expect(result.current.plan.rooms[0].x).toBe(startX);
+  });
+});
+
+describe('usePlanEditor comments (G-11)', () => {
+  it('does not add comments in edit mode', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.addComment(5, 5));
+
+    expect(result.current.plan.comments || []).toHaveLength(0);
+    expect(result.current.selectedCommentId).toBeNull();
+  });
+
+  it('adds a comment pin in comment mode and selects it', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.setAppMode('comment'));
+    act(() => result.current.setCurrentFloor(1));
+    act(() => result.current.addComment(4.5, 6));
+
+    const comments = result.current.plan.comments || [];
+    expect(comments).toHaveLength(1);
+    expect(comments[0].x).toBe(4.5);
+    expect(comments[0].y).toBe(6);
+    expect(comments[0].floor).toBe(1);
+    expect(result.current.selectedCommentId).toBe(comments[0].id);
+    expect(showToast).toHaveBeenCalledWith('Comment pin added', 'success');
+  });
+
+  it('updates a comment in comment mode', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.setAppMode('comment'));
+    act(() => result.current.addComment(1, 1));
+    const id = result.current.plan.comments![0].id;
+
+    act(() => result.current.updateComment(id, { text: 'Needs a window here' }));
+
+    expect(result.current.plan.comments![0].text).toBe('Needs a window here');
+  });
+
+  it('deletes a comment and clears its selection', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.setAppMode('comment'));
+    act(() => result.current.addComment(1, 1));
+    const id = result.current.plan.comments![0].id;
+
+    act(() => result.current.deleteComment(id));
+
+    expect(result.current.plan.comments || []).toHaveLength(0);
+    expect(result.current.selectedCommentId).toBeNull();
+  });
+
+  it('selecting a room clears the active comment selection', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.addRoom('Bedroom', 12, 12));
+    act(() => result.current.setAppMode('comment'));
+    act(() => result.current.addComment(1, 1));
+    expect(result.current.selectedCommentId).not.toBeNull();
+
+    act(() => result.current.selectRoom(result.current.plan.rooms[0].id));
+
+    expect(result.current.selectedCommentId).toBeNull();
   });
 });
 

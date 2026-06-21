@@ -13,6 +13,7 @@ import {
 import { FloorPlan, AppMode, RoomType } from '../../types';
 import { LayerManager } from '../LayerManager';
 import { ROOM_TYPES, ROOM_CATEGORIES, formatFloor } from '../../constants/floorPlanConstants';
+import { DEFAULT_COST_PER_SQFT, formatCurrency, getTotalCost } from '../../utils';
 
 export interface SidebarProps {
   plan: FloorPlan;
@@ -281,7 +282,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           {(() => {
             const totalBuiltUpArea = Math.round(plan.rooms.reduce((sum, r) => sum + r.w * r.h, 0));
-            const estCost = (totalBuiltUpArea * 2000).toLocaleString('en-IN');
+            const estCost = getTotalCost(plan.rooms);
             return (
               <>
                 <div className="w-full h-px bg-slate-200 my-1 dark:bg-slate-700" />
@@ -293,10 +294,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="text-indigo-700 font-medium tracking-tight">
                     Est. Core Cost:
                   </span>
-                  <strong className="text-indigo-700">₹ {estCost}</strong>
+                  <strong className="text-indigo-700">{formatCurrency(estCost)}</strong>
                 </div>
                 <div className="text-[9px] text-slate-400 text-right -mt-1">
-                  *Assumes avg structure cost of ₹2000/sq.ft
+                  *Assumes avg structure cost of ₹{DEFAULT_COST_PER_SQFT}/sq.ft; override per room
+                  in properties
                 </div>
               </>
             );

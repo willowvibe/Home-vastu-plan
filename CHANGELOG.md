@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Duplicate floor** (G-2, PR #68). A new "Duplicate {floor}" button in `Sidebar.tsx` clones every room on the current floor onto a target floor (creating it if necessary), assigns new IDs, switches to the target floor, selects the clones, and toasts the result. Handler lives in `usePlanEditor.ts` as `duplicateFloor(sourceFloor, targetFloor)`. Disabled when the current floor has no rooms.
 - **Keyboard nudge** (G-7, PR #68). Arrow keys nudge the selected room(s) by 1 ft in `edit` mode when focus is not in an input. `useKeyboardShortcuts.ts` exposes `onNudge` and `usePlanEditor.ts` implements `nudgeSelectedRooms(direction)` with buildable-area clamping. New analytics event `ROOM_NUDGED`.
 - **Event-based toast API** (G-12, PR #68). `Toast.tsx` now dispatches a `vastuplan:show-toast` CustomEvent and exports `showToastEvent(message, type?)`, so code outside React trees (e.g., pure helpers or hook-level handlers) can show toasts without the `(window as any).showToast` hack.
+- **Compliance report PDF** (G-6). New `ComplianceReportExport` modal reachable from the toolbar "Compliance" button. Captures the live canvas via `html-to-image` `toPng`, then builds a portrait letter PDF (`jsPDF`) with project/client/consultant metadata, overall Vastu score, AI analysis summary, a per-room compliance table, total built-up area, and the floor-plan image. Pure report builder lives in `src/lib/complianceReport.ts`.
+- **Per-room cost estimation** (G-8). Rooms now carry an optional `costPerSqFt?: number` (default `2000`). `RoomPropertiesPanel` shows each selected room's area and estimated cost in an editable card; multi-selection shows the combined cost. `Sidebar` total cost now uses `getTotalCost(plan.rooms)` and `formatCurrency()`. New cost helpers in `src/utils.ts` with unit tests.
+- **Share-with-annotation mode** (G-11). `appMode` union widened to `'edit' | 'view' | 'comment'`. A comment-enabled share link opens the plan in `comment` mode, where reviewers can drop comment pins on the canvas. `Canvas` renders pins for the current floor, supports selecting a pin, and `PropertiesPanel` shows a `CommentPropertiesPanel` card to view/edit/delete the comment (read-only in `view` mode). Comment CRUD lives in `usePlanEditor`; `analytics.ts` tracks `COMMENT_ADDED`, `COMMENT_UPDATED`, and `COMMENT_DELETED`.
 
 ### Changed
 
@@ -32,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Vastu matrix completeness** (S-4). The new property tests found three directions missing from `IDEAL_ZONES`: Kitchen was missing `W` (now neutral), Bathroom was missing `N` (now neutral), and Balcony was missing `CENTER` (now avoid). All 9 directions are now covered for every room type without overlap.
 - **Shortcut help** (`ShortcutHelp.tsx`) and **README** now document the arrow-key nudge (`↑ ↓ ← → / Nudge selected room 1 ft`) and duplicate-floor affordance.
 
-_Nothing else in flight. Last release: **0.1.1** (2026-06-15)._
+_In flight: **G-6/G-8/G-11 batch** on branch `fix/g6-g8-g11-batch` (+16 tests, 315/315 unit tests passing). Last release: **0.1.1** (2026-06-15)._
 
 ## [0.1.1] - 2026-06-15 — Polish & UX sweep
 

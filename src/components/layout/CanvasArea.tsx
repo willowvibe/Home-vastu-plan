@@ -19,6 +19,9 @@ export interface CanvasAreaProps {
   selectedRoomIds: string[];
   layers?: FloorPlan['layers'];
   appMode: AppMode;
+  selectedCommentId?: string | null;
+  onSelectComment?: (id: string | null) => void;
+  onAddComment?: (x: number, y: number) => void;
 }
 
 export const CanvasArea: React.FC<CanvasAreaProps> = ({
@@ -37,6 +40,9 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   selectedRoomIds,
   layers,
   appMode,
+  selectedCommentId,
+  onSelectComment,
+  onAddComment,
 }) => {
   const isViewOnly = appMode === 'view';
 
@@ -63,6 +69,10 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
           onSelectMany={onSelectMany}
           selectedRoomIds={selectedRoomIds}
           layers={layers}
+          appMode={appMode}
+          selectedCommentId={selectedCommentId}
+          onSelectComment={onSelectComment}
+          onAddComment={onAddComment}
         />
       </div>
 
@@ -88,6 +98,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               onSelectMany={() => {}}
               selectedRoomIds={[]}
               layers={layers}
+              appMode={appMode}
             />
           </div>
         </div>
