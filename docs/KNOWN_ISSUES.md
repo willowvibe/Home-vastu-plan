@@ -2,7 +2,7 @@
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
 > **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
-> **Last updated:** 2026-06-21 (Q-19/Q-22/Q-23/Q-24 docs batch in progress on `fix/q-19-q22-q23-q24-batch`; G-1/G-13/G-14 batch resolved via PR #72; G-6/G-8/G-11 batch resolved via PR #70; G-2/G-7/G-12 batch resolved via PR #68; S-1 `App.tsx` split resolved via PR #67; B-8 marquee drag-select resolved on `fix/b-8-marquee-select`.)
+> **Last updated:** 2026-06-21 (Q-20/Q-21/Q-25 env/docs batch in progress on `fix/q-20-q21-q25-batch`; Q-19/Q-22/Q-23/Q-24 docs batch merged via PR #73; G-1/G-13/G-14 batch resolved via PR #72; G-6/G-8/G-11 batch resolved via PR #70; G-2/G-7/G-12 batch resolved via PR #68; S-1 `App.tsx` split resolved via PR #67; B-8 marquee drag-select resolved on `fix/b-8-marquee-select`.)
 
 ## Quick links
 
@@ -238,7 +238,6 @@ _All P2 refactor backlog items are now resolved._
 
 Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
-- Q-20, Q-21, Q-25 (Node engine, `.env.example` cleanup, Gemini env standardization)
 - G-3, G-4, G-5, G-9, G-10, G-15 (staircase, plumbing overlay, sun path, configurable grid, Vastu zone tour, auto-named floors)
 
 ---
@@ -337,18 +336,30 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-> **State as of 2026-06-21 (post `fix/q-19-q22-q23-q24-batch`).** All 9 P0s, all P1s, and all P2 items are resolved. Remaining work is P3 / nice-to-have: Q-20, Q-21, Q-25, and the outstanding G items.
+> **State as of 2026-06-21 (post `fix/q-20-q21-q25-batch`).** All 9 P0s, all P1s, all P2 items, and all P3/Q items are resolved. Remaining work is the outstanding G nice-to-haves: G-3, G-4, G-5, G-9, G-10, G-15.
 
-| Bucket | Items | Effort | Status                                                         |
-| ------ | ----- | ------ | -------------------------------------------------------------- |
-| P0     | 0     | —      | ✅ All resolved (PR #28)                                       |
-| P1     | 0     | —      | ✅ All resolved (B-8 shipped)                                  |
-| P2     | 0     | —      | ✅ All resolved (S-1 shipped in PR #67, S-4 in PR #66)         |
-| P3 / Q | 9     | —      | 🟢 Remaining: Q-20, Q-21, Q-25, G-3, G-4, G-5, G-9, G-10, G-15 |
+| Bucket | Items | Effort | Status                                                 |
+| ------ | ----- | ------ | ------------------------------------------------------ |
+| P0     | 0     | —      | ✅ All resolved (PR #28)                               |
+| P1     | 0     | —      | ✅ All resolved (B-8 shipped)                          |
+| P2     | 0     | —      | ✅ All resolved (S-1 shipped in PR #67, S-4 in PR #66) |
+| P3 / Q | 0     | —      | ✅ All resolved                                        |
 
 See the `✅ Recently Resolved` sections above for earlier batches.
 
-**Suggested next batch:** Pick from the remaining P3 items. Candidate themes: (1) **env/docs tidy** — Q-20 + Q-21 + Q-25; or (2) a **feature batch** from the remaining G items.
+**Suggested next batch:** Pick a feature batch from the remaining G items. Candidates: **G-3 + G-4 + G-5** (multi-floor construction visualization theme) or **G-9 + G-10 + G-15** (Vastu UX / floor-label theme).
+
+## ✅ Recently Resolved (Q-20/Q-21/Q-25 env/docs batch)
+
+> 2026-06-21 — `fix/q-20-q21-q25-batch`. Closed the last three P3/Q items from `docs/CODE_REVIEW.md` §4. Config/docs changes only.
+
+| ID   | Title                              | Status      | Notes                                                                                                                                                                                                                                           |
+| ---- | ---------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-20 | `package.json` Node engine version | ✅ Resolved | `package.json` and `server/package.json` now declare `"engines": { "node": ">=22.0.0" }`; `.nvmrc` updated to `22`; README runtime requirement updated to Node.js >= 22. Matches CI.                                                            |
+| Q-21 | `.env.example` cleanup             | ✅ Resolved | Removed unused `APP_URL` and redundant `GEMINI_API_KEY` alias. Only env vars actually consumed by client/server remain.                                                                                                                         |
+| Q-25 | Gemini env standardization         | ✅ Resolved | `VITE_GEMINI_API_KEY` is the only supported source. Removed the `process.env.GEMINI_API_KEY` `define` from `vite.config.ts`, removed `process.env.*` fallbacks from `src/services/gemini.ts`, and dropped `GEMINI_API_KEY` from `.env.example`. |
+
+**No regressions** in `npm run lint` (0 errors; 72 pre-existing warnings unchanged), `npm test`, or `npm run build`.
 
 ## How to use this document
 

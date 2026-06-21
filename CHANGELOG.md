@@ -46,6 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **README internationalization section** (Q-23). Added an "Internationalization" section stating the app is English-only and outlining the future i18n path (`messages.ts` or `react-i18next`) plus locale-aware formatting, unit conversion, and RTL considerations.
 - **Document `metadata.json`** (Q-24). Added a README section explaining the repo-root `metadata.json` host-discovery file and its fields (`name`, `description`, `requestFramePermissions`).
 
+### Changed
+
+- **Node engine alignment** (Q-20). `package.json` and `server/package.json` now declare `"node": ">=22.0.0"`, `.nvmrc` is now `22`, and the README runtime requirement is updated to Node.js >= 22. This matches the CI Node version.
+- **Gemini env standardization** (Q-25). `VITE_GEMINI_API_KEY` is now the single supported env var for the Gemini API key. Removed the `process.env.GEMINI_API_KEY` build-time `define` from `vite.config.ts`, removed the `process.env.*` fallbacks in `src/services/gemini.ts`, and dropped the unused `GEMINI_API_KEY` alias from `.env.example`.
+- **`.env.example` cleanup** (Q-21). Removed the unused `APP_URL` variable and the now-redundant `GEMINI_API_KEY` alias, leaving only env vars that are actually read by the client or server.
+
 _Last release: **0.1.1** (2026-06-15)._
 
 ## [0.1.1] - 2026-06-15 — Polish & UX sweep
