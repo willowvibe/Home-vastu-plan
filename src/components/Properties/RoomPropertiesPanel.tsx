@@ -80,14 +80,8 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
   // U-11: cap width/height inputs at the buildable area so the user
   // can't blow a room past the setbacks via the number input. The
   // drag handles get the same cap inside useCanvasDrag.
-  const buildableWidth = Math.max(
-    2,
-    plan.plotWidth - plan.setbacks.left - plan.setbacks.right
-  );
-  const buildableHeight = Math.max(
-    2,
-    plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom
-  );
+  const buildableWidth = Math.max(2, plan.plotWidth - plan.setbacks.left - plan.setbacks.right);
+  const buildableHeight = Math.max(2, plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom);
 
   return (
     <div

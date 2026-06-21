@@ -454,9 +454,7 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
       plotHeight: 40,
       // Place the room at the buildable origin so the helper is a
       // no-op on x/y and we can pin just the w/h cap.
-      rooms: [
-        { ...PLAN.rooms[0], x: 3, y: 3 },
-      ],
+      rooms: [{ ...PLAN.rooms[0], x: 3, y: 3 }],
     };
     const { result, onUpdateRoom } = setup({ plan: planWithFullSetback });
     act(() => {
