@@ -56,6 +56,9 @@ export default defineConfig(({ mode }) => {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
+      // Respect PORT env var (used by CI / E2E) while keeping the historical
+      // local-dev default of 3000. The collab server lives on 3001.
+      port: Number(process.env.PORT) || 3000,
     },
   };
 });
