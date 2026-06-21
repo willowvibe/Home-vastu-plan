@@ -2,7 +2,7 @@
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
 > **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
-> **Last updated:** 2026-06-21 (G-1/G-13/G-14 batch in progress on `fix/g1-g13-g14-batch`; G-6/G-8/G-11 batch resolved on `fix/g6-g8-g11-batch`; G-2/G-7/G-12 batch resolved on `fix/g2-g7-g12-batch`; S-1 `App.tsx` split resolved on `fix/s1-split-app`; B-8 marquee drag-select resolved on `fix/b-8-marquee-select`.)
+> **Last updated:** 2026-06-21 (Q-19/Q-22/Q-23/Q-24 docs batch in progress on `fix/q-19-q22-q23-q24-batch`; G-1/G-13/G-14 batch resolved via PR #72; G-6/G-8/G-11 batch resolved via PR #70; G-2/G-7/G-12 batch resolved via PR #68; S-1 `App.tsx` split resolved via PR #67; B-8 marquee drag-select resolved on `fix/b-8-marquee-select`.)
 
 ## Quick links
 
@@ -238,9 +238,8 @@ _All P2 refactor backlog items are now resolved._
 
 Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
-- G-13, G-14 (`@testing-library/user-event` keyboard tests, password-protected share links)
-- G-2, G-7 (duplicate floor, arrow-key nudge)
-- G-12 (replace `(window as any).showToast` with real API)
+- Q-20, Q-21, Q-25 (Node engine, `.env.example` cleanup, Gemini env standardization)
+- G-3, G-4, G-5, G-9, G-10, G-15 (staircase, plumbing overlay, sun path, configurable grid, Vastu zone tour, auto-named floors)
 
 ---
 
@@ -338,18 +337,18 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-> **State as of 2026-06-21 (post S-4 + Q-18 batch on `fix/s4-b9-q18-batch`).** All 9 P0s, all P1s, and all P3/Q items resolved. P2: 1 item remaining (S-1).
+> **State as of 2026-06-21 (post `fix/q-19-q22-q23-q24-batch`).** All 9 P0s, all P1s, and all P2 items are resolved. Remaining work is P3 / nice-to-have: Q-20, Q-21, Q-25, and the outstanding G items.
 
-| Bucket | Items | Effort  | Status                                                                      |
-| ------ | ----- | ------- | --------------------------------------------------------------------------- |
-| P0     | 0     | —       | ✅ All resolved (PR #28)                                                    |
-| P1     | 0     | —       | ✅ All resolved (B-8 shipped)                                               |
-| P2     | 1     | ~8-12 h | 🟡 15 resolved (#43 + #44 + #45 + Q-2 + Q-3 + Q-1 + S-4), 1 remaining (S-1) |
-| P3 / Q | 0     | —       | ✅ All resolved (Q-18 CHANGELOG/VERSION sync done in this batch)            |
+| Bucket | Items | Effort | Status                                                         |
+| ------ | ----- | ------ | -------------------------------------------------------------- |
+| P0     | 0     | —      | ✅ All resolved (PR #28)                                       |
+| P1     | 0     | —      | ✅ All resolved (B-8 shipped)                                  |
+| P2     | 0     | —      | ✅ All resolved (S-1 shipped in PR #67, S-4 in PR #66)         |
+| P3 / Q | 9     | —      | 🟢 Remaining: Q-20, Q-21, Q-25, G-3, G-4, G-5, G-9, G-10, G-15 |
 
-See [✅ Recently Resolved (Vastu matrix property tests — S-4)](#-recently-resolved-vastu-matrix-property-tests--s-4) for the latest resolution, plus the other `✅ Recently Resolved` sections above for earlier batches.
+See the `✅ Recently Resolved` sections above for earlier batches.
 
-**Suggested next batch:** All P1 work is done. The next structural win is **S-1** (split `App.tsx`, 8-12 h). Coordinate with the user before starting since a 1,000+-line diff benefits from its own branch.
+**Suggested next batch:** Pick from the remaining P3 items. Candidate themes: (1) **env/docs tidy** — Q-20 + Q-21 + Q-25; or (2) a **feature batch** from the remaining G items.
 
 ## How to use this document
 

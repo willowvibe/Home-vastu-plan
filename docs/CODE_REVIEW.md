@@ -521,9 +521,9 @@ Add a `docker-build.yml` workflow.
 
 `CHANGELOG.md` was collapsed onto the actual `0.1.x` alpha line in the 0.1.1 release sweep (`8b6ae08`). `VERSION`, `package.json`, `CHANGELOG.md`, and `README.md` now all agree at `0.1.1`. This batch (`fix/s4-b9-q18-batch`) updated `CHANGELOG.md` under `[Unreleased]` for S-4 and kept the release note accurate; `VERSION` remains `0.1.1` until the next release.
 
-### Q-19. `tasks.md` says "30/30 completed" but doesn't reference the current `feature/v0.2-alpha` branch or v0.1.0 version
+### Q-19. `tasks.md` says "30/30 completed" but doesn't reference the current `feature/v0.2-alpha` branch or v0.1.0 version ✅ Resolved 2026-06-21
 
-Tie tasks to versions.
+Tie tasks to versions. Added a "Version context" note at the top of `tasks.md` tying the original 30 tasks to the **0.1.0 alpha** scope and pointing to `docs/KNOWN_ISSUES.md` / `docs/CODE_REVIEW.md` for the active backlog.
 
 ### Q-20. `package.json` doesn't declare Node engine version
 
@@ -533,17 +533,17 @@ Add `"engines": { "node": ">=22" }` (matches CI).
 
 `APP_URL` is unused. `VITE_*` prefix required for Vite exposure. Document or remove.
 
-### Q-22. No README section on accessibility (ARIA, focus trap, reduced motion)
+### Q-22. No README section on accessibility (ARIA, focus trap, reduced motion) ✅ Resolved 2026-06-21
 
-Add a brief section.
+Added a dedicated README "Accessibility" section: skip link, ARIA labels, focus trap + `Esc` + focus restore, keyboard-shortcut table, read-only mode locking, and `prefers-reduced-motion`. Also documents known gaps.
 
-### Q-23. No README section on internationalization (currently English-only)
+### Q-23. No README section on internationalization (currently English-only) ✅ Resolved 2026-06-21
 
-Future-proofing: structure text into a `messages.ts` or use a library.
+Added a README "Internationalization" section: states the app is English-only, recommends a future `messages.ts` / `react-i18next` catalog, and notes locale formatting, unit conversion, and RTL concerns.
 
-### Q-24. `metadata.json` is at the repo root — used by the host (AI Studio)?
+### Q-24. `metadata.json` is at the repo root — used by the host (AI Studio)? ✅ Resolved 2026-06-21
 
-It's `{"name": "...", "description": "..."}` — likely consumed by Google's AI Studio. Leave it but document.
+Documented in README: `metadata.json` is a host-discovery file consumed by the hosting environment (e.g., Google AI Studio / project listings). It contains `name`, `description`, and `requestFramePermissions`.
 
 ### Q-25. `vite.config.ts` has a `define` for `GEMINI_API_KEY` but `gemini.ts` reads `process.env.GEMINI_API_KEY`
 
@@ -553,7 +553,7 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 5. 🟢 Nice-to-have
 
-- **G-1.** Undo/redo across the collaboration boundary (multi-user undo).
+- **G-1.** Undo/redo across the collaboration boundary (multi-user undo). — ✅ resolved in G-1/G-13/G-14 batch
 - **G-3.** A "staircase" element with proper cut-out rendering for multi-floor plans.
 - **G-4.** A "plumbing" overlay for kitchens and bathrooms (showing water connections).
 - **G-5.** Sun-path / shadow calculation for each room based on orientation and date.
@@ -562,24 +562,24 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 - **G-9.** Snap-to-grid configurable to imperial or metric base.
 - **G-10.** A "tour" of all Vastu zones with hover cards on the grid (currently only the cell label appears).
 - **G-11.** A "share with annotation" mode that allows collaborators to drop comments on the canvas. — ✅ resolved in G-6/G-8/G-11 batch
-- **G-13.** Add `@testing-library/user-event` keyboard tests for `useKeyboardShortcuts`.
-- **G-14.** Generate a "share" link with optional password protection (encrypts the plan blob).
+- **G-13.** Add `@testing-library/user-event` keyboard tests for `useKeyboardShortcuts`. — ✅ resolved in G-1/G-13/G-14 batch
+- **G-14.** Generate a "share" link with optional password protection (encrypts the plan blob). — ✅ resolved in G-1/G-13/G-14 batch
 - **G-15.** Auto-name floors (Ground, First, Second) based on Indian conventions.
 
 ---
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-21 (post `fix/g6-g8-g11-batch`):** All 9 P0s, all P1s, and all P2 items are resolved. G-2, G-7, G-12, G-6, G-8, and G-11 are resolved. Remaining P3/G items are nice-to-have / future features.
+> **State as of 2026-06-21 (post `fix/q-19-q22-q23-q24-batch`):** All 9 P0s, all P1s, and all P2 items are resolved. G-2/G-7/G-12, G-6/G-8/G-11, and G-1/G-13/G-14 are resolved. Q-19, Q-22, Q-23, and Q-24 are resolved. Remaining work is P3 / nice-to-have: Q-20, Q-21, Q-25, and the outstanding G items.
 
-| Bucket                   | Items                                       | Suggested owner track | Effort  |
-| ------------------------ | ------------------------------------------- | --------------------- | ------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_       | —                     | —       |
-| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_     | —                     | —       |
-| **P2 — Refactor**        | _none — S-1 and S-4 both shipped_           | health                | —       |
-| **P3 — Polish**          | Q and remaining G items (nice-to-have / DX) | DX / features         | ongoing |
+| Bucket                   | Items                                   | Suggested owner track | Effort  |
+| ------------------------ | --------------------------------------- | --------------------- | ------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —       |
+| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —       |
+| **P2 — Refactor**        | _none — S-1 and S-4 both shipped_       | health                | —       |
+| **P3 — Polish**          | Q-20, Q-21, Q-25, and remaining G items | DX / features         | ongoing |
 
-**Where to start next:** Pick a 3-task batch from `docs/CODE_REVIEW.md` §5. Candidate themes: (1) G-1 multi-user undo + G-13 user-event keyboard tests + G-14 password-protected shares, (2) Dependabot security/dep refresh batch.
+**Where to start next:** Pick a small batch from the remaining P3 items. Candidate themes: (1) **env/docs tidy** — Q-20 (Node engine), Q-21 (`.env.example` cleanup), Q-25 (Gemini env standardization); or (2) a **feature batch** from the remaining G items (G-3 staircase, G-4 plumbing overlay, G-5 sun path, etc.).
 
 ---
 
@@ -747,6 +747,21 @@ Test count: 151 → 159 (+8 total: +4 from `formatFloor()` in Commit 1, +4 from 
 | Q-2 | Dark mode "implemented twice" (ternaries + dead dark: classes) | §6 Q-2        | +4    | The 7 already-`dark:`-using sites start working with `@custom-variant dark` in `src/index.css`. The 53 ternary class strings across `App.tsx`, `Header.tsx`, `LayerManager.tsx` migrate to the `dark:` variant with section-specific shades (page=`slate-50/900`, header=`slate-100/800`, sidebar=`white/900`, properties=`slate-50/900`, canvas=`white/800`, modal=`white/800`, input=`white/800`). `App.tsx`'s local `darkMode` state and the prop-passing to `Header` / `LayerManager` are gone; components consume `useTheme()`. New `useDarkMode()` hook handles `localStorage` + `<html class="dark">` with a per-file real-store shim in its test (the global `vi.fn()` mock in `src/test/setup.ts` would have made persistence untestable). |
 
 **Validation:** `npm test` (159/159, +8 new) ✅, `npm run lint` ✅ (0 new errors), `npm run build` ✅ (41 `dark:` variant rules now in `dist/assets/index-*.css`; 0 before). No new dependencies. The 3-commit split keeps `git log` clean and makes the theme refactor easy to revert without losing the floor rename.
+
+---
+
+## ✅ Resolved in Q-19/Q-22/Q-23/Q-24 docs batch
+
+> The 2026-06-21 documentation batch (`fix/q-19-q22-q23-q24-batch`) closed four low-risk quality items from `docs/CODE_REVIEW.md` §4. Docs-only changes; no source code or tests were touched.
+
+| ID   | Title                               | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                  |
+| ---- | ----------------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Q-19 | Tie `tasks.md` to versions          | §4 Q-19       | —     | Added a "Version context" block at the top of `tasks.md` stating the original 30 tasks were the **0.1.0 alpha** scope and that the active backlog is now in `docs/KNOWN_ISSUES.md` / `docs/CODE_REVIEW.md`. Updated the completed-tasks note to 0.1.1. |
+| Q-22 | README accessibility section        | §4 Q-22       | —     | Expanded README "Accessibility" section with skip link, ARIA labels, focus trap + `Esc` + focus restore, keyboard shortcuts, view/comment read-only locking, and `prefers-reduced-motion`. Also documents known gaps.                                  |
+| Q-23 | README internationalization section | §4 Q-23       | —     | Added README "Internationalization" section: English-only today, future path via `messages.ts` or `react-i18next`, plus locale formatting, unit conversion, and RTL considerations.                                                                    |
+| Q-24 | Document `metadata.json`            | §4 Q-24       | —     | Added README "`metadata.json`" section explaining the repo-root host-discovery file and its fields (`name`, `description`, `requestFramePermissions`).                                                                                                 |
+
+**Validation:** `npm run lint` ✅, `npm run build` ✅. No test changes (docs-only).
 
 ---
 
