@@ -4,7 +4,7 @@
 
 ## ✅ Shipped: fix/e2e-in-ci (Q-4 E2E in CI)
 
-Branch: `fix/e2e-in-ci` off `main @ 5145214`. Local E2E is now **8/8 green**. Work completed:
+Branch: `fix/e2e-in-ci` off `main @ 5145214`; pushed to `origin`. Local E2E is now **8/8 green**. Work completed:
 
 1. Fixed two post-0.1.1 E2E regressions in `tests/e2e/basic.spec.ts`:
    - U-13 dynamic floor selector: the "+ Add floor" button moves `currentFloor` to the next unused slot, so the previous floor button disappears; test now asserts `0th` count is `0` after adding floor 1.
@@ -21,32 +21,16 @@ Branch: `fix/e2e-in-ci` off `main @ 5145214`. Local E2E is now **8/8 green**. Wo
 - [x] Add e2e job to `.github/workflows/ci.yml`
 - [x] Verify `.gitignore` covers `playwright-report` + `test-results`
 - [x] Update docs (KNOWN_ISSUES, CHANGELOG, RELEASE_BLOCKERS, memory)
-- [ ] Commit and open PR — pending final local checks
-- **Untracked (not part of this branch):**
-  - `docs/RELEASE_BLOCKERS.md` (this file)
-  - `docs/superpowers/plans/2026-06-12-post-deploy-polish.md` (pre-existing)
-  - `docs/superpowers/plans/2026-06-12-vercel-deployment.md` (pre-existing)
-  - `playwright-report/`, `test-results/` (Playwright artefacts, will get a `.gitignore` entry in Task #32)
-- **Skipped previously:** had to `git stash drop` a pre-existing dirty `package-lock.json` from an earlier session. Working tree was clean after that.
+- [x] Commit and push branch `fix/e2e-in-ci`
+- [ ] Open PR — blocked by GitHub token permissions (see "PR status" below)
 
-### Resume commands (copy-pasteable)
+### PR status
 
-```bash
-# 1. Make sure you're on the right branch
-cd /mnt/data2/git_repos/Home-vastu-plan
-git branch --show-current  # should print: fix/e2e-in-ci
-git log --oneline -2       # 89f9e95 ... 5145214
-
-# 2. Fix the 2 E2E failures
-#    - test line 62: drop the redundant 0th assertion OR change to toHaveCount
-#    - test line 202: range-match 144|244 in the regex
-
-# 3. Re-run E2E
-PORT=3001 npm run test:e2e
-# Expected: 8 passed (chromium)
-
-# 4. Then proceed with Task #31, #32, #33, #27.
-```
+- Branch `fix/e2e-in-ci` is pushed to `origin`.
+- Both `gh pr create` and the GitHub MCP API returned **403 "Resource not accessible by personal access token"** for `willowvibe/Home-vastu-plan`.
+- Open the PR manually at: https://github.com/willowvibe/Home-vastu-plan/pull/new/fix/e2e-in-ci
+- Suggested title: `chore(ci): run Playwright E2E suite in CI (Q-4)`
+- Suggested body is in the final assistant summary.
 
 ## What's shipped (the 0.1.1 release)
 
