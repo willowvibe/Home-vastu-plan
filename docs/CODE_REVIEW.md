@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-21 to add the G-2/G-7/G-12 batch (`fix/g2-g7-g12-batch`).
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-21 to add the G-2/G-7/G-12 batch (`fix/g2-g7-g12-batch`, merged via PR #68).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -585,7 +585,7 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## ✅ Resolved in G-2/G-7/G-12 batch
 
-> The 2026-06-21 nice-to-have batch (`fix/g2-g7-g12-batch`) shipped 3 small high-impact features from `docs/CODE_REVIEW.md` §5. All three are user-facing, tested, and documented. The original §5 entries are kept above for traceability (marked resolved in-place by removal from the active list).
+> The 2026-06-21 nice-to-have batch (`fix/g2-g7-g12-batch`) shipped 3 small high-impact features from `docs/CODE_REVIEW.md` §5. Merged via **PR #68** (merge commit `0999aa2`). All three are user-facing, tested, and documented. The original §5 entries are kept above for traceability (marked resolved in-place by removal from the active list).
 
 | ID   | Title                                                                  | Per-bug entry  | Tests | Notes                                                                                                                                                                                                                                                                                                                      |
 | ---- | ---------------------------------------------------------------------- | -------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
