@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-12 to add the post-deploy polish batch (`fix/post-deploy-polish`, 3 commits, pending PR).
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-21 to add the G-2/G-7/G-12 batch (`fix/g2-g7-g12-batch`).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -554,17 +554,14 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 ## 5. 🟢 Nice-to-have
 
 - **G-1.** Undo/redo across the collaboration boundary (multi-user undo).
-- **G-2.** A "duplicate floor" button to clone an entire floor's rooms onto another.
 - **G-3.** A "staircase" element with proper cut-out rendering for multi-floor plans.
 - **G-4.** A "plumbing" overlay for kitchens and bathrooms (showing water connections).
 - **G-5.** Sun-path / shadow calculation for each room based on orientation and date.
 - **G-6.** A "compliance" report PDF that combines Vastu score, AI analysis, and the floor plan in one document.
-- **G-7.** A keyboard shortcut to nudge a room by 1 ft in any direction.
 - **G-8.** Per-room cost estimation (not just total).
 - **G-9.** Snap-to-grid configurable to imperial or metric base.
 - **G-10.** A "tour" of all Vastu zones with hover cards on the grid (currently only the cell label appears).
 - **G-11.** A "share with annotation" mode that allows collaborators to drop comments on the canvas.
-- **G-12.** Replace `(window as any).showToast` (S-10) with a real event-based toast API.
 - **G-13.** Add `@testing-library/user-event` keyboard tests for `useKeyboardShortcuts`.
 - **G-14.** Generate a "share" link with optional password protection (encrypts the plan blob).
 - **G-15.** Auto-name floors (Ground, First, Second) based on Indian conventions.
@@ -573,16 +570,30 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-21 (post `fix/s1-split-app`):** All 9 P0s, all P1s, and all P2 items are resolved. P3/G items remain as nice-to-have / future features.
+> **State as of 2026-06-21 (post `fix/g2-g7-g12-batch`):** All 9 P0s, all P1s, and all P2 items are resolved. G-2, G-7, and G-12 are resolved. Remaining P3/G items are nice-to-have / future features.
 
-| Bucket                   | Items                                   | Suggested owner track | Effort  |
-| ------------------------ | --------------------------------------- | --------------------- | ------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —       |
-| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —       |
-| **P2 — Refactor**        | _none — S-1 and S-4 both shipped_       | health                | —       |
-| **P3 — Polish**          | Q and G items (nice-to-have / DX)       | DX / features         | ongoing |
+| Bucket                   | Items                                       | Suggested owner track | Effort  |
+| ------------------------ | ------------------------------------------- | --------------------- | ------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_       | —                     | —       |
+| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_     | —                     | —       |
+| **P2 — Refactor**        | _none — S-1 and S-4 both shipped_           | health                | —       |
+| **P3 — Polish**          | Q and remaining G items (nice-to-have / DX) | DX / features         | ongoing |
 
-**Where to start next:** Pick a 3-task batch from `docs/CODE_REVIEW.md` §5. Candidate themes: (1) G-1 multi-user undo + G-2 duplicate floor + G-7 arrow-key nudge, (2) G-12 replace `(window as any).showToast` + related cleanup, or (3) Dependabot security/dep refresh batch.
+**Where to start next:** Pick a 3-task batch from `docs/CODE_REVIEW.md` §5. Candidate themes: (1) G-1 multi-user undo + G-13 user-event keyboard tests + G-14 password-protected shares, (2) Dependabot security/dep refresh batch.
+
+---
+
+## ✅ Resolved in G-2/G-7/G-12 batch
+
+> The 2026-06-21 nice-to-have batch (`fix/g2-g7-g12-batch`) shipped 3 small high-impact features from `docs/CODE_REVIEW.md` §5. All three are user-facing, tested, and documented. The original §5 entries are kept above for traceability (marked resolved in-place by removal from the active list).
+
+| ID   | Title                                                                  | Per-bug entry  | Tests | Notes                                                                                                                                                                                                                                                                                                                      |
+| ---- | ---------------------------------------------------------------------- | -------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G-7  | Keyboard shortcut to nudge a room by 1 ft in any direction             | §5 G-7         | +7    | `useKeyboardShortcuts.ts` `onNudge` option + arrow-key handler; `usePlanEditor.ts` `nudgeSelectedRooms(direction)` with buildable-area clamping and history commit. New `analytics.ts` `ROOM_NUDGED` event. `ShortcutHelp.tsx` updated.                                                                                    |
+| G-2  | "Duplicate floor" button to clone an entire floor's rooms onto another | §5 G-2         | +4    | `usePlanEditor.ts` `duplicateFloor(sourceFloor, targetFloor)` clones rooms with new IDs, switches to target floor, selects clones, and toasts via `showToastEvent`. `Sidebar.tsx` adds "Duplicate {formatFloor(currentFloor)}" button next to "Clear Floor"; disabled when current floor has no rooms. Wired in `App.tsx`. |
+| G-12 | Replace `(window as any).showToast` with a real event-based toast API  | §5 G-12 / S-10 | +3    | `Toast.tsx` now dispatches and listens for `vastuplan:show-toast` CustomEvents; exports `showToastEvent(message, type?)` and a `_showToast` fallback. Used by `duplicateFloor` and `nudgeSelectedRooms`. 3 new tests in `Toast.test.tsx`.                                                                                  |
+
+**Validation:** `npm run lint` ✅ (0 errors; pre-existing warnings unchanged), `npm test` (299/299, +14 new) ✅, `npm run test:e2e` (9/9) ✅, `npm run build` ✅.
 
 ---
 

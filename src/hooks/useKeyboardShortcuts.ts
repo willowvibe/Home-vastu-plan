@@ -2,6 +2,8 @@ import { useEffect, useCallback } from 'react';
 import { trackEvent, EVENTS } from '../services/analytics';
 import { AppMode } from '../types';
 
+export type NudgeDirection = 'up' | 'down' | 'left' | 'right';
+
 interface UseKeyboardShortcutsOptions {
   undo: () => void;
   redo: () => void;
@@ -12,6 +14,7 @@ interface UseKeyboardShortcutsOptions {
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onShowShortcuts?: () => void;
+  onNudge?: (direction: NudgeDirection) => void;
   hasSelection: boolean;
   appMode: AppMode;
 }
@@ -26,6 +29,7 @@ export function useKeyboardShortcuts({
   onZoomIn,
   onZoomOut,
   onShowShortcuts,
+  onNudge,
   hasSelection,
   appMode,
 }: UseKeyboardShortcutsOptions) {
@@ -81,6 +85,25 @@ export function useKeyboardShortcuts({
       } else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
         e.preventDefault();
         onZoomOut?.();
+      } else if (
+        e.key === 'ArrowUp' ||
+        e.key === 'ArrowDown' ||
+        e.key === 'ArrowLeft' ||
+        e.key === 'ArrowRight'
+      ) {
+        if (hasSelection && onNudge) {
+          e.preventDefault();
+          const direction: NudgeDirection =
+            e.key === 'ArrowUp'
+              ? 'up'
+              : e.key === 'ArrowDown'
+                ? 'down'
+                : e.key === 'ArrowLeft'
+                  ? 'left'
+                  : 'right';
+          onNudge(direction);
+          trackEvent(EVENTS.ROOM_NUDGED, { props: { source: 'keyboard', direction } });
+        }
       } else if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         onShowShortcuts?.();
@@ -97,6 +120,7 @@ export function useKeyboardShortcuts({
       onZoomIn,
       onZoomOut,
       onShowShortcuts,
+      onNudge,
       hasSelection,
       appMode,
     ]

@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Marquee drag-select** (B-8). `Canvas.tsx` now supports click-and-drag selection boxes on the canvas background. Plain drag replaces the selection with intersected rooms; shift+drag merges them. Measuring mode and non-`edit` app modes skip marquee. `useSelection.ts` gained `selectMany(ids, shiftKey)` for batch replace/merge. `App.tsx` wires `selectMany` into `<Canvas>`. Includes 6 new unit tests in `Canvas.test.tsx`, 2 new `useSelection.test.ts` tests, 1 new Playwright E2E test, and a `data-testid="canvas"` marker on the canvas root.
 - **E2E tests in CI** (Q-4). New `e2e` job in `.github/workflows/ci.yml` installs Playwright Chromium deps and runs `npm run test:e2e` on every PR. Playwright report is uploaded as an artifact on failure. `playwright-report/` and `test-results/` are now ignored by git; previously tracked generated files were removed from the index.
 - **Vastu matrix property tests** (S-4). New property-style tests in `src/services/vastu.test.ts` enumerate every `RoomType × direction` combination against the exported `IDEAL_ZONES` matrix, pinning scores (100/good, 60/average, 20/poor) and verifying `northAngle` rotation shifts the evaluated direction. `IDEAL_ZONES` is now exported from `src/services/vastu.ts` so tests verify the canonical rule set.
+- **Duplicate floor** (G-2). A new "Duplicate {floor}" button in `Sidebar.tsx` clones every room on the current floor onto a target floor (creating it if necessary), assigns new IDs, switches to the target floor, selects the clones, and toasts the result. Handler lives in `usePlanEditor.ts` as `duplicateFloor(sourceFloor, targetFloor)`. Disabled when the current floor has no rooms.
+- **Keyboard nudge** (G-7). Arrow keys nudge the selected room(s) by 1 ft in `edit` mode when focus is not in an input. `useKeyboardShortcuts.ts` exposes `onNudge` and `usePlanEditor.ts` implements `nudgeSelectedRooms(direction)` with buildable-area clamping. New analytics event `ROOM_NUDGED`.
+- **Event-based toast API** (G-12). `Toast.tsx` now dispatches a `vastuplan:show-toast` CustomEvent and exports `showToastEvent(message, type?)`, so code outside React trees (e.g., pure helpers or hook-level handlers) can show toasts without the `(window as any).showToast` hack.
 
 ### Changed
 
@@ -23,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **E2E selectors post-0.1.1** (`tests/e2e/basic.spec.ts`). Updated the dynamic-floor-selector assertion for U-13 (the "+ Add floor" button moves `currentFloor` to the next slot, so the previous floor button disappears). Hardened the B-10 shared-link autosave test by clearing `vastuplan_autosave` before adding the verification room, making the 144 sq ft built-up assertion deterministic.
 - **Vastu matrix completeness** (S-4). The new property tests found three directions missing from `IDEAL_ZONES`: Kitchen was missing `W` (now neutral), Bathroom was missing `N` (now neutral), and Balcony was missing `CENTER` (now avoid). All 9 directions are now covered for every room type without overlap.
+- **Shortcut help** (`ShortcutHelp.tsx`) and **README** now document the arrow-key nudge (`↑ ↓ ← → / Nudge selected room 1 ft`) and duplicate-floor affordance.
 
 _Nothing else in flight. Last release: **0.1.1** (2026-06-15)._
 

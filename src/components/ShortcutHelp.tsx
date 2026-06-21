@@ -45,7 +45,7 @@ const ROOM_SHORTCUTS: Shortcut[] = [
   { keys: ['Delete'], action: 'Delete selected room', icon: Trash2 },
   { keys: ['Ctrl', 'D'], action: 'Duplicate selected room', icon: Copy },
   { keys: ['R'], action: 'Rotate selected room', icon: RotateCw },
-  { keys: ['Arrows'], action: 'Move selected room', icon: Move },
+  { keys: ['↑', '↓', '←', '→'], action: 'Nudge selected room 1 ft', icon: Move },
 ];
 
 const VIEW_SHORTCUTS: Shortcut[] = [

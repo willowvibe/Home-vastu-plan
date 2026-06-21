@@ -90,6 +90,7 @@ export const EVENTS = {
   ROOM_DRAGGED: 'room_dragged',
   ROOM_RESIZED: 'room_resized',
   ROOM_ROTATED: 'room_rotated',
+  ROOM_NUDGED: 'room_nudged',
   ROOM_ELEMENT_ADDED: 'room_element_added',
   ROOM_ELEMENT_ROTATED: 'room_element_rotated',
 

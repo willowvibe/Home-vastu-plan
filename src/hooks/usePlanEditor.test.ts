@@ -33,6 +33,7 @@ vi.mock('../services/analytics', () => ({
     ROOM_ADDED: 'room_added',
     ROOM_DELETED: 'room_deleted',
     ROOM_ROTATED: 'room_rotated',
+    ROOM_NUDGED: 'room_nudged',
     AI_ANALYZED: 'ai_analyzed',
     EXPORT_PNG: 'export_png',
     EXPORT_SVG: 'export_svg',
@@ -119,6 +120,7 @@ describe('usePlanEditor public API', () => {
         'currentFloor',
         'deleteRoom',
         'deleteSelectedRooms',
+        'duplicateFloor',
         'duplicateRoom',
         'duplicateSelectedRooms',
         'handleAnalyze',
@@ -144,6 +146,7 @@ describe('usePlanEditor public API', () => {
         'linkSetbacks',
         'measuring',
         'mobileTab',
+        'nudgeSelectedRooms',
         'plan',
         'redo',
         'replacePlanPreservingHistory',
@@ -280,6 +283,35 @@ describe('usePlanEditor room editing', () => {
     expect(result.current.plan.rooms[0].w).toBe(10);
     expect(result.current.plan.rooms[0].h).toBe(12);
   });
+
+  it('nudges selected rooms 1 ft with arrow keys', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.addRoom('Bedroom', 12, 12));
+    const room = result.current.plan.rooms[0];
+    const startX = room.x;
+    const startY = room.y;
+
+    act(() => result.current.nudgeSelectedRooms('right'));
+    expect(result.current.plan.rooms[0].x).toBe(startX + 1);
+    expect(result.current.plan.rooms[0].y).toBe(startY);
+
+    act(() => result.current.nudgeSelectedRooms('down'));
+    expect(result.current.plan.rooms[0].y).toBe(startY + 1);
+  });
+
+  it('does not nudge in view mode', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.addRoom('Bedroom', 12, 12));
+    act(() => result.current.setAppMode('view'));
+
+    const startX = result.current.plan.rooms[0].x;
+    act(() => result.current.nudgeSelectedRooms('right'));
+    expect(result.current.plan.rooms[0].x).toBe(startX);
+  });
 });
 
 describe('usePlanEditor floor + history', () => {
@@ -295,6 +327,32 @@ describe('usePlanEditor floor + history', () => {
     expect(result.current.currentFloor).toBe(1);
     expect(result.current.plan.rooms.length).toBe(roomCount);
     expect(result.current.builtUpArea).toBe(0);
+  });
+
+  it('duplicates the current floor to a target floor', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.addRoom('Bedroom', 12, 12));
+    act(() => result.current.addRoom('Kitchen', 10, 10));
+
+    act(() => result.current.duplicateFloor(0, 1));
+
+    expect(result.current.plan.rooms).toHaveLength(4);
+    expect(result.current.currentFloor).toBe(1);
+    expect(result.current.plan.rooms.filter((r) => r.floor === 1)).toHaveLength(2);
+    expect(result.current.selectedRoomIds).toHaveLength(2);
+    expect(showToast).toHaveBeenCalledWith('Duplicated 2 room(s) to 1st', 'success');
+  });
+
+  it('does not duplicate an empty floor', () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.duplicateFloor(0, 1));
+
+    expect(result.current.plan.rooms).toHaveLength(0);
+    expect(showToast).toHaveBeenCalledWith('No rooms on 0th to duplicate', 'warning');
   });
 
   it('undo reverts an addRoom', () => {
