@@ -518,9 +518,9 @@ Dead import. Remove or wire up.
 
 Add a `docker-build.yml` workflow.
 
-### Q-18. No changelog for v0.2.x
+### Q-18. No changelog for v0.2.x ✅ Resolved 2026-06-21
 
-`CHANGELOG.md` stops at v2.1.0 / Unreleased, but `VERSION` is `0.1.0`. The README says "v2.0" / "v2.1" features. Mismatch.
+`CHANGELOG.md` was collapsed onto the actual `0.1.x` alpha line in the 0.1.1 release sweep (`8b6ae08`). `VERSION`, `package.json`, `CHANGELOG.md`, and `README.md` now all agree at `0.1.1`. This batch (`fix/s4-b9-q18-batch`) updated `CHANGELOG.md` under `[Unreleased]` for S-4 and kept the release note accurate; `VERSION` remains `0.1.1` until the next release.
 
 ### Q-19. `tasks.md` says "30/30 completed" but doesn't reference the current `feature/v0.2-alpha` branch or v0.1.0 version
 
