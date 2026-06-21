@@ -1,6 +1,6 @@
 # VastuPlan 2D — Code Review & Improvement Log
 
-> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-21 to add the G-2/G-7/G-12 batch (`fix/g2-g7-g12-batch`, merged via PR #68) and the G-6/G-8/G-11 batch (`fix/g6-g8-g11-batch`, PR pending).
+> **Status:** Living document — created 2026-06-07 from a full sweep of the repository. Updated 2026-06-21 to add the G-2/G-7/G-12 batch (`fix/g2-g7-g12-batch`, merged via PR #68) and the G-6/G-8/G-11 batch (`fix/g6-g8-g11-batch`, merged via PR #70).
 > **Source tree reviewed:** `src/`, `server/`, `tests/`, configuration files, CI workflows, docs.
 > **Scope:** Correctness bugs, security/data-safety issues, performance concerns, accessibility gaps, code quality, and developer-experience improvements.
 >
@@ -599,7 +599,7 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## ✅ Resolved in G-6/G-8/G-11 batch
 
-> The 2026-06-21 feature batch (`fix/g6-g8-g11-batch`) shipped 3 high-impact nice-to-haves from `docs/CODE_REVIEW.md` §5: G-6 (compliance report PDF), G-8 (per-room cost estimation), and G-11 (share-with-annotation mode). PR pending manual creation. All three are user-facing, tested, and documented. The original §5 entries are kept above for traceability and marked resolved in-place.
+> The 2026-06-21 feature batch (`fix/g6-g8-g11-batch`) shipped 3 high-impact nice-to-haves from `docs/CODE_REVIEW.md` §5: G-6 (compliance report PDF), G-8 (per-room cost estimation), and G-11 (share-with-annotation mode). Merged via **PR #70** (merge commit `ea3e41d`). All three are user-facing, tested, and documented. The original §5 entries are kept above for traceability and marked resolved in-place.
 
 | ID   | Title                      | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                  |
 | ---- | -------------------------- | ------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
