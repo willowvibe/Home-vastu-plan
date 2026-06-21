@@ -2,8 +2,21 @@ import { afterAll, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { expect } from 'vitest';
+import { webcrypto } from 'node:crypto';
 
 expect.extend(matchers);
+
+// Polyfill Web Crypto for jsdom so share-link encryption and other subtle
+// operations can run in unit tests. jsdom exposes `crypto` but not
+// `crypto.subtle`, and the property is read-only, so we patch the subtle
+// object directly rather than replacing the whole `crypto` global.
+if (!globalThis.crypto?.subtle) {
+  Object.defineProperty(globalThis.crypto, 'subtle', {
+    value: webcrypto.subtle,
+    writable: true,
+    configurable: true,
+  });
+}
 
 // Mock localStorage for tests. The full Storage interface (length, key)
 // isn't used by the codebase, so a minimal cast is fine here.

@@ -2,7 +2,7 @@
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
 > **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
-> **Last updated:** 2026-06-21 (G-6/G-8/G-11 batch resolved on `fix/g6-g8-g11-batch`; G-2/G-7/G-12 batch resolved on `fix/g2-g7-g12-batch`; S-1 `App.tsx` split resolved on `fix/s1-split-app`; B-8 marquee drag-select resolved on `fix/b-8-marquee-select`.)
+> **Last updated:** 2026-06-21 (G-1/G-13/G-14 batch in progress on `fix/g1-g13-g14-batch`; G-6/G-8/G-11 batch resolved on `fix/g6-g8-g11-batch`; G-2/G-7/G-12 batch resolved on `fix/g2-g7-g12-batch`; S-1 `App.tsx` split resolved on `fix/s1-split-app`; B-8 marquee drag-select resolved on `fix/b-8-marquee-select`.)
 
 ## Quick links
 
@@ -238,7 +238,8 @@ _All P2 refactor backlog items are now resolved._
 
 Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
-- G-1, G-2, G-7 (multi-user undo, duplicate floor, arrow-key nudge)
+- G-13, G-14 (`@testing-library/user-event` keyboard tests, password-protected share links)
+- G-2, G-7 (duplicate floor, arrow-key nudge)
 - G-12 (replace `(window as any).showToast` with real API)
 
 ---

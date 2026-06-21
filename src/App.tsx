@@ -12,6 +12,7 @@ import { ComplianceReportExport } from './components/ComplianceReportExport';
 import { ShortcutHelp } from './components/ShortcutHelp';
 import { Onboarding } from './components/Onboarding';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { CollaborationPanel } from './components/CollaborationPanel';
 import { trackEvent, EVENTS } from './services/analytics';
 import { usePlanEditor } from './hooks/usePlanEditor';
 import { formatFloor } from './constants/floorPlanConstants';
@@ -198,6 +199,24 @@ export default function App() {
       )}
 
       <OfflineIndicator />
+
+      <CollaborationPanel
+        isConnected={editor.isConnected}
+        isConnecting={editor.isConnecting}
+        roomId={editor.roomId}
+        userId={editor.userId}
+        userName={editor.userName}
+        users={editor.users}
+        messages={editor.messages}
+        error={editor.error}
+        showPanel={editor.showPanel}
+        setShowPanel={editor.setShowPanel}
+        joinRoom={editor.joinRoom}
+        leaveRoom={editor.leaveRoom}
+        sendMessage={editor.sendMessage}
+        requestUndo={editor.requestUndo}
+        requestRedo={editor.requestRedo}
+      />
 
       {/* Print Modal - hidden on screen, visible when printing */}
       <div className="hidden print:block fixed inset-0 bg-white p-8">

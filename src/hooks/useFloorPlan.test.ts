@@ -60,12 +60,13 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('useFloorPlan public API (S-3)', () => {
-  it('exposes plan, updatePlan, commitHistory, undo, redo, resetPlan, replacePlanPreservingHistory, historyIndex, historyLength', () => {
+  it('exposes plan, updatePlan, commitHistory, commitHistoryUpdate, undo, redo, resetPlan, replacePlanPreservingHistory, historyIndex, historyLength', () => {
     const { result } = renderHook(() => useFloorPlan(INITIAL_PLAN));
     const keys = Object.keys(result.current).sort();
     expect(keys).toEqual(
       [
         'commitHistory',
+        'commitHistoryUpdate',
         'historyIndex',
         'historyLength',
         'plan',
@@ -326,5 +327,78 @@ describe('useFloorPlan replacePlanPreservingHistory (U-8)', () => {
     });
     expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['r2', 'r3']);
     expect(result.current.historyIndex).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// G-1: commitHistoryUpdate — remote edits are committed to local history
+// ---------------------------------------------------------------------------
+
+describe('useFloorPlan commitHistoryUpdate (G-1)', () => {
+  it('applies a functional updater and commits the result to history', () => {
+    const { result } = renderHook(() => useFloorPlan(INITIAL_PLAN));
+
+    act(() => {
+      result.current.commitHistoryUpdate((prev) => ({
+        ...prev,
+        rooms: [...prev.rooms, makeRoom('remote')],
+      }));
+    });
+
+    expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['remote']);
+    expect(result.current.historyLength).toBe(2);
+    expect(result.current.historyIndex).toBe(1);
+  });
+
+  it('applies a value directly and commits it to history', () => {
+    const { result } = renderHook(() => useFloorPlan(INITIAL_PLAN));
+
+    const nextPlan = makePlanWithRooms([makeRoom('synced')]);
+    act(() => {
+      result.current.commitHistoryUpdate(nextPlan);
+    });
+
+    expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['synced']);
+    expect(result.current.historyLength).toBe(2);
+    expect(result.current.historyIndex).toBe(1);
+  });
+
+  it('does not grow history when the updater produces an identical plan', () => {
+    const { result } = renderHook(() => useFloorPlan(INITIAL_PLAN));
+
+    act(() => {
+      result.current.commitHistoryUpdate((prev) => prev);
+    });
+
+    expect(result.current.historyLength).toBe(1);
+    expect(result.current.historyIndex).toBe(0);
+  });
+
+  it('truncates future history when committing after an undo', () => {
+    const { result } = renderHook(() => useFloorPlan(INITIAL_PLAN));
+
+    act(() => {
+      result.current.commitHistoryUpdate((prev) => ({
+        ...prev,
+        rooms: [...prev.rooms, makeRoom('a')],
+      }));
+    });
+    act(() => {
+      result.current.commitHistoryUpdate((prev) => ({
+        ...prev,
+        rooms: [...prev.rooms, makeRoom('b')],
+      }));
+    });
+    act(() => result.current.undo()); // back to initial
+
+    act(() => {
+      result.current.commitHistoryUpdate((prev) => ({
+        ...prev,
+        rooms: [...prev.rooms, makeRoom('c')],
+      }));
+    });
+
+    expect(result.current.historyLength).toBe(3); // initial, a, c (b dropped)
+    expect(result.current.plan.rooms.map((r) => r.id)).toEqual(['a', 'c']);
   });
 });

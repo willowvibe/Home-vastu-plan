@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { CollaborationUser, ChatMessage } from '../types';
-import { X, Send, Users, MessageCircle, LogIn, LogOut, Radio } from 'lucide-react';
+import { X, Send, Users, MessageCircle, LogIn, LogOut, Radio, Undo2, Redo2 } from 'lucide-react';
 
 interface CollaborationPanelProps {
   isConnected: boolean;
@@ -16,6 +16,8 @@ interface CollaborationPanelProps {
   joinRoom: (roomId: string, name: string) => void;
   leaveRoom: () => void;
   sendMessage: (text: string) => void;
+  requestUndo?: () => void;
+  requestRedo?: () => void;
 }
 
 export function CollaborationPanel({
@@ -32,6 +34,8 @@ export function CollaborationPanel({
   joinRoom,
   leaveRoom,
   sendMessage,
+  requestUndo,
+  requestRedo,
 }: CollaborationPanelProps) {
   const [inputRoomId, setInputRoomId] = useState('');
   const [inputName, setInputName] = useState('');
@@ -173,6 +177,24 @@ export function CollaborationPanel({
                   >
                     <LogOut className="w-3 h-3" />
                     Leave
+                  </button>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={requestUndo}
+                    disabled={!requestUndo}
+                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                    title="Request undo from all collaborators"
+                  >
+                    <Undo2 className="w-3 h-3" /> Undo
+                  </button>
+                  <button
+                    onClick={requestRedo}
+                    disabled={!requestRedo}
+                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                    title="Request redo from all collaborators"
+                  >
+                    <Redo2 className="w-3 h-3" /> Redo
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
