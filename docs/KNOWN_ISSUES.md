@@ -2,7 +2,7 @@
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
 > **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
-> **Last updated:** 2026-06-21 (E2E in CI — Q-4 resolved on `fix/e2e-in-ci`. 2 E2E selector fixes, CI job added, Playwright artifacts ignored.)
+> **Last updated:** 2026-06-21 (B-8 marquee drag-select resolved on `fix/b-8-marquee-select`. Shift+click toggle + marquee drag-select implemented; 231/231 unit tests, 9/9 E2E tests, lint 0 errors, build clean.)
 
 ## Quick links
 
@@ -16,10 +16,10 @@
 
 > **2026-06-14 — `fix/room-props-and-drag-freeze` (merged).** The 2026-06-14 UX walkthrough surfaced 1 P0 (U-3) and 1 P1 (B-8) on the same code path: `Room.tsx`'s room-body `onPointerDown` only ever fired the drag branch, never `onSelectRoom`. The fix adds an optional `onSelectRoom?: (roomId, isShiftKey) => void` prop to `Room.tsx`, calls `onSelectRoom?.(room.id, e.shiftKey)` from the room-body handler (guarded by `e.target === e.currentTarget` so child clicks still bail), and passes the existing `Canvas.tsx` `onSelectRoom` prop down to `<Room>`. The shift path goes through the existing `useSelection` toggle branch, which was already implemented — it just had no UI affordance to invoke it.
 
-| ID  | Title                                                                                                                        | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| --- | ---------------------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| U-3 | Clicking a room on the canvas does not select it (P0 from [2026-06-14 walkthrough](./ux-audit/2026-06-14-ux-walkthrough.md)) | ✅ Resolved | `Room.tsx` + `Canvas.tsx` wiring only — 2-line behavioural change plus 5 new tests in `Room.test.tsx` (plain click → `onSelectRoom(id, false)`; shift+click → `onSelectRoom(id, true)`; resize handle click → does NOT call `onSelectRoom`; label span click → does NOT call `onSelectRoom`; optional-prop safety — `onSelectRoom?.(…)`). 194/194 tests pass (was 189), 0 lint errors, build clean. Manual repro: add Bedroom → click on it in canvas → ROOM PROPERTIES populates. |
-| B-8 | Shift+click advertised but does nothing (no marquee select)                                                                  | 🟡 Partial  | The shift+click **toggle** path is now wired (B-8 was waiting on this UI affordance). **Marquee select** (drag-to-select a rectangle) is still unimplemented and remains a separate P1 — see the [P1 table](#-p1--fix-this-sprint-robustness) below.                                                                                                                                                                                                                               |
+| ID  | Title                                                                                                                        | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --- | ---------------------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| U-3 | Clicking a room on the canvas does not select it (P0 from [2026-06-14 walkthrough](./ux-audit/2026-06-14-ux-walkthrough.md)) | ✅ Resolved | `Room.tsx` + `Canvas.tsx` wiring only — 2-line behavioural change plus 5 new tests in `Room.test.tsx` (plain click → `onSelectRoom(id, false)`; shift+click → `onSelectRoom(id, true)`; resize handle click → does NOT call `onSelectRoom`; label span click → does NOT call `onSelectRoom`; optional-prop safety — `onSelectRoom?.(…)`). 194/194 tests pass (was 189), 0 lint errors, build clean. Manual repro: add Bedroom → click on it in canvas → ROOM PROPERTIES populates.                                                                                                                                                                   |
+| B-8 | Shift+click advertised but does nothing (no marquee select)                                                                  | ✅ Resolved | `useSelection.ts` gained `selectMany(ids, shiftKey)` for batch replace/merge. `Canvas.tsx` now implements marquee drag-select: background pointerdown starts a live box, pointermove updates it, pointerup computes axis-aligned intersection against `floorRooms` and calls `onSelectMany`. Shift+drag merges into the existing selection; plain drag replaces it. Measuring mode and non-`edit` app modes skip marquee. New tests in `Canvas.test.tsx` (6) + `useSelection.test.ts` (2), plus a Playwright E2E test that adds two bedrooms, marquee-selects both, and deletes them. 231/231 unit tests, 9/9 E2E tests, lint 0 errors, build clean. |
 
 ---
 
@@ -162,9 +162,11 @@ _All P0 items from the 2026-06-07 sweep are resolved. The next P0 will be filed 
 
 ## 🟠 P1 — Fix this sprint (robustness)
 
-| ID  | Title                                                       | File(s)                                                | Effort |
-| --- | ----------------------------------------------------------- | ------------------------------------------------------ | ------ |
-| B-8 | Shift+click toggle works; marquee drag-select still missing | `src/components/Canvas.tsx` (marquee), `Header.tsx:94` | 2-3 h  |
+_All P1 items from the 2026-06-07 sweep and the 2026-06-14 walkthrough are now resolved._
+
+| ID  | Title | File(s) | Effort |
+| --- | ----- | ------- | ------ |
+| —   | —     | —       | —      |
 
 ---
 
@@ -283,18 +285,18 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-> **State as of 2026-06-21 (post E2E-in-CI batch on `fix/e2e-in-ci`).** All 9 P0s and 9 of 10 P1s resolved. P1: only B-8 remains. P2: 2 items / ~12-16 h. P3/Q: 17 resolved, 1 remaining (Q-18 — CHANGELOG/VERSION sync).
+> **State as of 2026-06-21 (post B-8 marquee-select batch on `fix/b-8-marquee-select`).** All 9 P0s and all P1s resolved. P2: 2 items / ~12-16 h. P3/Q: 17 resolved, 1 remaining (Q-18 — CHANGELOG/VERSION sync).
 
 | Bucket | Items | Effort   | Status                                                                     |
 | ------ | ----- | -------- | -------------------------------------------------------------------------- |
 | P0     | 0     | —        | ✅ All resolved (PR #28)                                                   |
-| P1     | 1     | ~2 h     | 🟡 5 resolved (#43), 1 remaining (B-8)                                     |
+| P1     | 0     | —        | ✅ All resolved (B-8 shipped)                                              |
 | P2     | 2     | ~12-16 h | 🟡 14 resolved (#43 + #44 + #45 + Q-2 + Q-3 + Q-1), 2 remaining (S-1, S-4) |
 | P3 / Q | many  | ongoing  | 🟡 17 resolved, 1 remaining (Q-18 — CHANGELOG/VERSION sync)                |
 
-See [✅ Recently Resolved (Post-deploy polish batch)](#-recently-resolved-post-deploy-polish-batch) for the most recent resolutions, [✅ Recently Resolved (Test coverage batch — Q-1)](#-recently-resolved-test-coverage-batch--q-1) for Q-1 hook tests, [✅ Recently Resolved (Test coverage batch)](#-recently-resolved-test-coverage-batch) for Q-2 + Q-3, and the [✅ Recently Resolved](#-recently-resolved) section above for the P0 sweep.
+See [✅ Recently Resolved (U-3 click-to-select + B-8 multi-select)](#-recently-resolved-u-3-click-to-select--b-8-multi-select) for the latest resolution, plus the other `✅ Recently Resolved` sections above for earlier batches.
 
-**Suggested next batch:** Q-4 is now resolved, and no more P2 hooks-test work remains (Q-1, Q-2, Q-3 all done). The next move is **S-1** (split `App.tsx`, 8-12 h) — the single biggest structural win in the backlog. Coordinate with the user before starting since a 1,000+-line diff benefits from its own branch. Alternative low-risk small wins: **S-4** (4 h, property tests for Vastu matrix) or **Q-18** (CHANGELOG/VERSION sync, small).
+**Suggested next batch:** All P1 work is done. The next structural win is **S-1** (split `App.tsx`, 8-12 h). Coordinate with the user before starting since a 1,000+-line diff benefits from its own branch. Alternative low-risk small wins: **S-4** (4 h, property tests for Vastu matrix) or **Q-18** (CHANGELOG/VERSION sync, small).
 
 ## How to use this document
 

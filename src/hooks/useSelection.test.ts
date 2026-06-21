@@ -59,4 +59,19 @@ describe('useSelection (reducer for selectedRoomIds)', () => {
     act(() => result.current.replace(['x', 'y', 'z']));
     expect(result.current.selectedRoomIds).toEqual(['x', 'y', 'z']);
   });
+
+  it('selectMany(ids) without shift replaces the selection', () => {
+    const { result } = renderHook(() => useSelection());
+    act(() => result.current.select('a'));
+    act(() => result.current.selectMany(['b', 'c']));
+    expect(result.current.selectedRoomIds).toEqual(['b', 'c']);
+  });
+
+  it('selectMany(ids) with shift merges unique ids into the selection', () => {
+    const { result } = renderHook(() => useSelection());
+    act(() => result.current.select('a'));
+    act(() => result.current.select('b', true));
+    act(() => result.current.selectMany(['a', 'c', 'b'], true));
+    expect(result.current.selectedRoomIds).toEqual(['a', 'b', 'c']);
+  });
 });
