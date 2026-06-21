@@ -43,5 +43,22 @@ export function useSelection() {
     setSelectedRoomIds(ids);
   }, []);
 
-  return { selectedRoomIds, select, clear, replace };
+  /**
+   * Bulk select from a marquee or similar multi-target gesture.
+   *   - no shift  -> replace selection with the intersected ids
+   *   - shift     -> merge intersected ids into the current selection,
+   *                  preserving order and avoiding duplicates
+   */
+  const selectMany = useCallback((ids: string[], isShiftKey: boolean = false) => {
+    if (isShiftKey) {
+      setSelectedRoomIds((prev) => {
+        const added = ids.filter((id) => !prev.includes(id));
+        return added.length === 0 ? prev : [...prev, ...added];
+      });
+    } else {
+      setSelectedRoomIds(ids);
+    }
+  }, []);
+
+  return { selectedRoomIds, select, clear, replace, selectMany };
 }

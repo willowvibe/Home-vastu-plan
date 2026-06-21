@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Marquee drag-select** (B-8). `Canvas.tsx` now supports click-and-drag selection boxes on the canvas background. Plain drag replaces the selection with intersected rooms; shift+drag merges them. Measuring mode and non-`edit` app modes skip marquee. `useSelection.ts` gained `selectMany(ids, shiftKey)` for batch replace/merge. `App.tsx` wires `selectMany` into `<Canvas>`. Includes 6 new unit tests in `Canvas.test.tsx`, 2 new `useSelection.test.ts` tests, 1 new Playwright E2E test, and a `data-testid="canvas"` marker on the canvas root.
 - **E2E tests in CI** (Q-4). New `e2e` job in `.github/workflows/ci.yml` installs Playwright Chromium deps and runs `npm run test:e2e` on every PR. Playwright report is uploaded as an artifact on failure. `playwright-report/` and `test-results/` are now ignored by git; previously tracked generated files were removed from the index.
 
 ### Fixed

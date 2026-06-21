@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Room as RoomType, FloorPlan, RoomLayer, AppMode } from '../types';
 import { useCanvasDrag } from '../hooks/useCanvasDrag';
 import { Room } from './Room';
@@ -19,6 +19,7 @@ interface CanvasProps {
   onUpdateRoom: (id: string, updates: Partial<RoomType>) => void;
   onUpdateRoomEnd?: () => void;
   onSelectRoom: (roomId: string | null, isShiftKey?: boolean) => void;
+  onSelectMany?: (roomIds: string[], isShiftKey?: boolean) => void;
   selectedRoomIds: string[];
   layers?: RoomLayer[];
   appMode?: AppMode;
@@ -35,6 +36,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   onUpdateRoom,
   onUpdateRoomEnd,
   onSelectRoom,
+  onSelectMany,
   selectedRoomIds,
   layers,
   appMode = 'edit',
@@ -47,6 +49,14 @@ export const Canvas: React.FC<CanvasProps> = ({
     y: number;
   } | null>(null);
   const [measureEnd, setMeasureEnd] = useState<{ x: number; y: number } | null>(null);
+
+  // B-8: marquee drag-select state. Coordinates are in feet relative to
+  // the canvas origin. The overlay renders the active selection box.
+  const [marquee, setMarquee] = useState<{
+    start: { x: number; y: number };
+    current: { x: number; y: number };
+    shiftKey: boolean;
+  } | null>(null);
 
   // Reset measurement state when measuring mode is toggled on
   useEffect(() => {
@@ -77,6 +87,70 @@ export const Canvas: React.FC<CanvasProps> = ({
     return layer.visible;
   });
 
+  // B-8: marquee pointer lifecycle. Updates the live box on move and
+  // commits the selection on up/cancel/loss-of-focus.
+  const toCanvasFeet = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!canvasRef.current) return null;
+      const rect = canvasRef.current.getBoundingClientRect();
+      return {
+        x: (clientX - rect.left) / PIXELS_PER_FOOT,
+        y: (clientY - rect.top) / PIXELS_PER_FOOT,
+      };
+    },
+    [PIXELS_PER_FOOT]
+  );
+
+  useEffect(() => {
+    if (!marquee) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const pos = toCanvasFeet(e.clientX, e.clientY);
+      if (!pos) return;
+      setMarquee((prev) => (prev ? { ...prev, current: pos } : prev));
+    };
+
+    const finalize = (e: PointerEvent) => {
+      setMarquee((prev) => {
+        if (!prev) return prev;
+        const x1 = Math.min(prev.start.x, prev.current.x);
+        const y1 = Math.min(prev.start.y, prev.current.y);
+        const x2 = Math.max(prev.start.x, prev.current.x);
+        const y2 = Math.max(prev.start.y, prev.current.y);
+        // Degenerate clicks produce an empty box; those were already handled
+        // by onSelectRoom(null) in pointerdown for non-shift clicks.
+        const ids = floorRooms
+          .filter((r) => r.x < x2 && r.x + r.w > x1 && r.y < y2 && r.y + r.h > y1)
+          .map((r) => r.id);
+        if (ids.length > 0) {
+          onSelectMany?.(ids, prev.shiftKey);
+        }
+        return null;
+      });
+      if (canvasRef.current) {
+        try {
+          canvasRef.current.releasePointerCapture(e.pointerId);
+        } catch {
+          // ignore release failures
+        }
+      }
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', finalize);
+    window.addEventListener('pointercancel', finalize);
+    window.addEventListener('blur', finalize as EventListener);
+    document.addEventListener('visibilitychange', finalize as EventListener);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', finalize);
+      window.removeEventListener('pointercancel', finalize);
+      window.removeEventListener('blur', finalize as EventListener);
+      document.removeEventListener('visibilitychange', finalize as EventListener);
+    };
+  }, [marquee, floorRooms, onSelectMany, toCanvasFeet]);
+
   return (
     <div
       className="relative bg-white border-2 border-slate-300 shadow-inner overflow-visible mx-auto mt-8 ml-8"
@@ -87,9 +161,31 @@ export const Canvas: React.FC<CanvasProps> = ({
           'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)',
         backgroundSize: `${PIXELS_PER_FOOT}px ${PIXELS_PER_FOOT}px`,
       }}
+      data-testid="canvas"
       ref={canvasRef}
       onPointerDown={(e) => {
-        if (!e.shiftKey) onSelectRoom(null);
+        // B-5: only the edit surface may manipulate selection.
+        if (appMode !== 'edit') return;
+
+        // B-8: start a marquee drag-select from the canvas background.
+        // Room pointerdowns stop propagation, so this only fires on the
+        // background. Measuring mode consumes the pointer instead.
+        if (!measuring) {
+          if (!e.shiftKey) onSelectRoom(null);
+          const rect = canvasRef.current?.getBoundingClientRect();
+          if (rect && canvasRef.current) {
+            const x = (e.clientX - rect.left) / PIXELS_PER_FOOT;
+            const y = (e.clientY - rect.top) / PIXELS_PER_FOOT;
+            setMarquee({ start: { x, y }, current: { x, y }, shiftKey: e.shiftKey });
+            try {
+              canvasRef.current.setPointerCapture(e.pointerId);
+            } catch {
+              // setPointerCapture can fail for unsupported input; marquee
+              // still works via the window pointerup listener.
+            }
+          }
+        }
+
         if (measuring && setMeasuring) {
           const rect = canvasRef.current?.getBoundingClientRect();
           if (rect) {
@@ -179,6 +275,21 @@ export const Canvas: React.FC<CanvasProps> = ({
       )}
 
       <RoadIndicator roadDirection={plan.roadDirection} />
+
+      {/* B-8: live marquee selection box. pointer-events-none so it never
+          steals pointer events from the canvas or rooms. */}
+      {marquee && (
+        <div
+          data-testid="canvas-marquee"
+          className="absolute border-2 border-blue-500 bg-blue-500/10 pointer-events-none z-30"
+          style={{
+            left: Math.min(marquee.start.x, marquee.current.x) * PIXELS_PER_FOOT,
+            top: Math.min(marquee.start.y, marquee.current.y) * PIXELS_PER_FOOT,
+            width: Math.abs(marquee.current.x - marquee.start.x) * PIXELS_PER_FOOT,
+            height: Math.abs(marquee.current.y - marquee.start.y) * PIXELS_PER_FOOT,
+          }}
+        />
+      )}
     </div>
   );
 };

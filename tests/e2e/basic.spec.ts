@@ -211,3 +211,39 @@ test('shared link URL is stripped after first load (B-10)', async ({ page }) => 
     { timeout: 5000 }
   );
 });
+
+test('can multi-select rooms with marquee drag (B-8)', async ({ page }) => {
+  await skipOnboarding(page);
+  await page.waitForSelector('button:has-text("0th")', { timeout: 10000 });
+
+  // Add two bedrooms on the 0th floor.
+  await page.getByRole('button', { name: "Bedroom 12'x12'" }).click();
+  await page.getByRole('button', { name: "Bedroom 12'x12'" }).click();
+
+  await page.waitForFunction(
+    () => /Built-up[\s\S]*288\s*sq\s*ft/.test(document.body.textContent || ''),
+    null,
+    { timeout: 5000 }
+  );
+
+  // Drag a marquee across the entire canvas to select both rooms.
+  // There are multiple canvas mounts (design + print-only + image tab);
+  // target the first visible one.
+  const canvas = page.locator('[data-testid="canvas"]').first();
+  await canvas.waitFor({ timeout: 5000 });
+  const box = await canvas.boundingBox();
+  expect(box).not.toBeNull();
+
+  await page.mouse.move(box!.x + 5, box!.y + 5);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width - 5, box!.y + box!.height - 5);
+  await page.mouse.up();
+
+  // Delete the selected rooms and confirm both are gone.
+  await page.keyboard.press('Delete');
+  await page.waitForFunction(
+    () => /Built-up[\s\S]*0\s*sq\s*ft/.test(document.body.textContent || ''),
+    null,
+    { timeout: 5000 }
+  );
+});

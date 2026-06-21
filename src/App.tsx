@@ -88,6 +88,7 @@ export default function App() {
     select: handleSelectRoom,
     clear: clearSelection,
     replace: replaceSelection,
+    selectMany: handleSelectMany,
   } = useSelection();
   // P3: replaces the 50ms setTimeout in handleExport. The new hook
   // uses requestAnimationFrame to synchronize the restore with the
@@ -1363,6 +1364,7 @@ export default function App() {
                   onUpdateRoom={updateRoom}
                   onUpdateRoomEnd={commitHistory}
                   onSelectRoom={handleSelectRoom}
+                  onSelectMany={handleSelectMany}
                   selectedRoomIds={selectedRoomIds}
                   layers={plan.layers}
                 />

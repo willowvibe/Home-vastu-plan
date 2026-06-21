@@ -119,20 +119,18 @@ The component reset effect only clears `measureStart/End` when `measuring` toggl
 
 ---
 
-### B-8. `Canvas` `onPointerDown` always deselects on canvas click — but shift+click on canvas never adds anything (so the shift-key path is meaningless there)
+### ✅ B-8. `Canvas` `onPointerDown` always deselects on canvas click — but shift+click on canvas never adds anything (so the shift-key path is meaningless there)
 
-**File:** `src/components/Canvas.tsx:87-103`
+**Status:** Resolved in `fix/b-8-marquee-select` (2026-06-21).
 
-```ts
-onPointerDown={(e) => {
-  if (!e.shiftKey) onSelectRoom(null);
-  ...
-}}
-```
+**Files:** `src/hooks/useSelection.ts`, `src/components/Canvas.tsx`, `src/App.tsx`, `tests/e2e/basic.spec.ts`
 
-If the user shift-clicks on empty canvas intending to start a multi-select rectangle, nothing happens — there's no marquee select. The header advertises "Multi-select via Shift+Click" but the only place shift+click is meaningful is when clicking on a `Room` (via `Room.tsx`'s pointer down which doesn't pass shift). Effectively **shift+click does nothing today**.
+**What changed:**
 
-**Fix:** Either implement marquee select on the canvas, or remove the misleading mention from the header / help modal.
+- `useSelection.ts` added `selectMany(ids, shiftKey)` for batch replace (plain drag) or merge (shift+drag).
+- `Canvas.tsx` now tracks a live marquee selection box from canvas background `pointerdown` through `pointermove` to `pointerup`. The final box is intersected against `floorRooms` and the resulting ids are passed to `onSelectMany`. Plain drag clears the previous selection before computing the box; shift+drag preserves it. The marquee is skipped while measuring or when `appMode !== 'edit'`.
+- `App.tsx` wires the hook's `selectMany` into the design `<Canvas>`.
+- Tests: 6 new unit tests in `Canvas.test.tsx`, 2 in `useSelection.test.ts`, and 1 Playwright E2E test that adds two bedrooms, marquee-selects both, and deletes them.
 
 ---
 
@@ -576,14 +574,14 @@ The define block works in client code at build time. But `gemini.ts` has a fallb
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-11 (post PRs #28, #39, #43, #44, #45, #46 + this Q-1 branch, awaiting PR):** All 9 P0s and 9 of 10 P1s are resolved. The remaining P1 is B-8 (shift+click marquee, design call needed). P2 has 2 items totaling ~12-16 h. P3 is ongoing.
+> **State as of 2026-06-21 (post `fix/b-8-marquee-select`):** All 9 P0s and all P1s are resolved. P2 has 2 items totaling ~12-16 h. P3 is ongoing.
 
-| Bucket                   | Items                                 | Suggested owner track | Effort   |
-| ------------------------ | ------------------------------------- | --------------------- | -------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_ | —                     | —        |
-| **P1 — Fix this sprint** | B-8                                   | robustness            | 2 h      |
-| **P2 — Refactor**        | S-1, S-4                              | health                | ~12-16 h |
-| **P3 — Polish**          | All Q and G items                     | DX / features         | ongoing  |
+| Bucket                   | Items                                   | Suggested owner track | Effort   |
+| ------------------------ | --------------------------------------- | --------------------- | -------- |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —        |
+| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —        |
+| **P2 — Refactor**        | S-1, S-4                                | health                | ~12-16 h |
+| **P3 — Polish**          | All Q and G items                       | DX / features         | ongoing  |
 
 **Where to start:** **S-1** (split `App.tsx` — 8-12 h, the single biggest structural win). The P2 hooks-test trio (Q-1, Q-2, Q-3) is now complete. The remaining P2 items are both larger refactors; coordinate with the user before starting since both touch many files.
 
