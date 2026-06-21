@@ -2,7 +2,7 @@
 
 > **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
 > **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
-> **Last updated:** 2026-06-21 (B-8 marquee drag-select resolved on `fix/b-8-marquee-select`. Shift+click toggle + marquee drag-select implemented; 231/231 unit tests, 9/9 E2E tests, lint 0 errors, build clean.)
+> **Last updated:** 2026-06-21 (S-1 `App.tsx` split resolved on `fix/s1-split-app`; B-8 marquee drag-select resolved on `fix/b-8-marquee-select`.)
 
 ## Quick links
 
@@ -144,6 +144,18 @@
 
 ---
 
+## ✅ Recently Resolved (`App.tsx` split — S-1)
+
+> 2026-06-21 — `fix/s1-split-app`. The 1,839-line `src/App.tsx` is now a 220-line orchestrator. All editor state and handlers moved into `usePlanEditor` (`src/hooks/usePlanEditor.ts`); the UI shell was split into layout modules under `src/components/layout/` (`Sidebar.tsx`, `Toolbar.tsx`, `CanvasArea.tsx`, `PropertiesPanel.tsx`, `MobileTabs.tsx`) with a barrel export in `index.ts`. The public app behavior is preserved by moving the original handlers verbatim into the hook and returning a single state/handlers object consumed by the layout modules. `canvasContainerRef` stays in `App.tsx` and is passed into the hook for export wiring.
+
+| ID  | Title                                                                            | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --- | -------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-1 | Split `App.tsx` (1,839 lines) into Sidebar / Properties / Toolbar / hook modules | ✅ Resolved | New `usePlanEditor` hook consolidates plan/history, `currentFloor`, selection, UI state, room CRUD, import/export/share/analyze, and derived metrics. Layout modules receive only the slices they need. 13 tests in `usePlanEditor.test.ts` cover the public API, add/update/delete/duplicate/rotate rooms, floor switching, undo/redo, and derived metrics. 8 smoke tests in `src/components/layout/layout.test.tsx` verify each module renders. `npm run lint` 0 errors, `npm test` 291/291, `npm run build` clean. `App.tsx` shrank from ~1,839 lines to ~220 lines. |
+
+**No regressions** in `npm run lint` (0 errors), `npm test` (291/291), or `npm run build`.
+
+---
+
 ## ✅ Recently Resolved
 
 > The P0 sweep shipped in PR #28 ([merge commit `22224ac`](https://github.com/willowvibe/Home-vastu-plan/pull/28)) on 2026-06-08. All 9 P0 bugs from the 2026-06-07 review are now fixed. The full per-bug change log is in [`CHANGELOG.md`](../CHANGELOG.md) under `[Unreleased]`. Per-bug commit refs:
@@ -184,11 +196,13 @@ _All P1 items from the 2026-06-07 sweep and the 2026-06-14 walkthrough are now r
 
 ## 🟡 P2 — Refactor (health)
 
-| ID  | Title                                                                            | File(s)       | Effort |
-| --- | -------------------------------------------------------------------------------- | ------------- | ------ |
-| S-1 | Split `App.tsx` (1,839 lines) into Sidebar / Properties / Toolbar / hook modules | `src/App.tsx` | 8-12 h |
+_All P2 refactor backlog items are now resolved._
 
-**Subtotal:** ~8-12 h
+| ID  | Title | File(s) | Effort |
+| --- | ----- | ------- | ------ |
+| —   | —     | —       | —      |
+
+**Subtotal:** 0 h
 
 ---
 

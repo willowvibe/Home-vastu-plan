@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **E2E tests in CI** (Q-4). New `e2e` job in `.github/workflows/ci.yml` installs Playwright Chromium deps and runs `npm run test:e2e` on every PR. Playwright report is uploaded as an artifact on failure. `playwright-report/` and `test-results/` are now ignored by git; previously tracked generated files were removed from the index.
 - **Vastu matrix property tests** (S-4). New property-style tests in `src/services/vastu.test.ts` enumerate every `RoomType × direction` combination against the exported `IDEAL_ZONES` matrix, pinning scores (100/good, 60/average, 20/poor) and verifying `northAngle` rotation shifts the evaluated direction. `IDEAL_ZONES` is now exported from `src/services/vastu.ts` so tests verify the canonical rule set.
 
+### Changed
+
+- **App.tsx split** (S-1). The 1,839-line `src/App.tsx` is now a 220-line orchestrator. All editor state and handlers moved into the new `usePlanEditor` hook (`src/hooks/usePlanEditor.ts`), and the UI shell was split into `Sidebar`, `Toolbar`, `CanvasArea`, `PropertiesPanel`, and `MobileTabs` layout modules under `src/components/layout/`. The public app behavior is unchanged; handlers were moved verbatim into the hook and consumed via a single state/handlers object. Includes 13 tests in `src/hooks/usePlanEditor.test.ts` and 8 smoke tests in `src/components/layout/layout.test.tsx`.
+
 ### Fixed
 
 - **E2E selectors post-0.1.1** (`tests/e2e/basic.spec.ts`). Updated the dynamic-floor-selector assertion for U-13 (the "+ Add floor" button moves `currentFloor` to the next slot, so the previous floor button disappears). Hardened the B-10 shared-link autosave test by clearing `vastuplan_autosave` before adding the verification room, making the 144 sq ft built-up assertion deterministic.
