@@ -4,15 +4,17 @@
 
 This document lists all identified bugs and usability improvements for the VastuPlan 2D application.
 
+## Version context
+
+> The 30 tasks below were the original **0.1.0 alpha** scope. They were all completed before the project moved to **0.1.1** (see [`VERSION`](./VERSION), [`CHANGELOG.md`](./CHANGELOG.md), and [`README.md`](./README.md)). This file is preserved as a historical snapshot; **active backlog** is now tracked in [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md).
+
 ## Progress Update
 
 > **Note (2026-06-11):** This document is a historical snapshot of the original 30-task list and the "Launch Readiness" production checklist. **It is no longer the source of truth for active work** — see [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md) for the current backlog (P0/P1/P2/P3 items filed during the 2026-06-07 review and after). The original entries below are kept for traceability.
 
-## Progress Update
-
 ### Completed Tasks (30/30)
 
-All 30 originally-filed tasks are complete (per `tasks-completed.md`). The list below was the original v2.0 / v2.1 plan; the actual shipped version is `0.1.0` (see `CHANGELOG.md` and `VERSION`).
+All 30 originally-filed tasks are complete (per `tasks-completed.md`). The list below was the original v2.0 / v2.1 plan; the actual shipped version is **0.1.0** (rolled up into the current **0.1.1** release — see `CHANGELOG.md` and `VERSION`).
 
 - ✅ **Task 1**: Room Element Rotation Bounds Constraint - Fixed in `src/components/Canvas.tsx`
 - ✅ **Task 2**: Wall Thickness Change Element Positions - Fixed in `src/App.tsx`

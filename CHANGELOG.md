@@ -39,6 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Vastu matrix completeness** (S-4). The new property tests found three directions missing from `IDEAL_ZONES`: Kitchen was missing `W` (now neutral), Bathroom was missing `N` (now neutral), and Balcony was missing `CENTER` (now avoid). All 9 directions are now covered for every room type without overlap.
 - **Shortcut help** (`ShortcutHelp.tsx`) and **README** now document the arrow-key nudge (`↑ ↓ ← → / Nudge selected room 1 ft`) and duplicate-floor affordance.
 
+### Documentation
+
+- **Tie `tasks.md` to versions** (Q-19). Added a "Version context" note at the top of `tasks.md` clarifying that the original 30 tasks were the **0.1.0 alpha** scope and that active backlog now lives in `docs/KNOWN_ISSUES.md` and `docs/CODE_REVIEW.md`.
+- **README accessibility section** (Q-22). Expanded the README accessibility coverage: skip link, ARIA labels, focus trap / `Esc` / focus restore, keyboard-shortcut table, read-only mode locking, and `prefers-reduced-motion`. Also documents known gaps (canvas spatial navigation, screen-reader zone announcements).
+- **README internationalization section** (Q-23). Added an "Internationalization" section stating the app is English-only and outlining the future i18n path (`messages.ts` or `react-i18next`) plus locale-aware formatting, unit conversion, and RTL considerations.
+- **Document `metadata.json`** (Q-24). Added a README section explaining the repo-root `metadata.json` host-discovery file and its fields (`name`, `description`, `requestFramePermissions`).
+
 _Last release: **0.1.1** (2026-06-15)._
 
 ## [0.1.1] - 2026-06-15 — Polish & UX sweep

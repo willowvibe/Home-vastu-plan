@@ -166,12 +166,49 @@ This alpha release includes the full feature set advertised in earlier preview b
 
 ## ♿ Accessibility
 
-- Skip link to main canvas for keyboard users
-- `tabIndex` and `aria-label` on interactive elements
-- Focus-visible outlines
-- `aria-modal` + focus trap + Esc-to-close on dialogs (Onboarding, Project Manager, etc.)
-- View / comment modes lock the canvas and keyboard shortcuts so the app is read-only
-- Honor `prefers-reduced-motion` (no decorative animations in core flows)
+VastuPlan 2D is built to be usable without a mouse:
+
+- **Skip link** — a "Skip to canvas" link is the first focusable element so keyboard users can jump straight to the main workspace.
+- **ARIA labels** — interactive controls (toolbar buttons, room add buttons, resize handles, layer toggles, etc.) carry stable `aria-label` attributes.
+- **Focus management** — all focusable elements show a visible `focus-visible` outline. Modals (`Onboarding`, `Project Manager`, `Presentation Export`, `Compliance Report`, and the keyboard-shortcut help dialog) use `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, an internal focus trap, and `Esc` to close. Focus is restored to the trigger when a modal closes.
+- **Keyboard shortcuts** — common actions are keyboard-driven:
+  - `Ctrl+Z` / `Ctrl+Y` for Undo/Redo
+  - `Delete` / `Backspace` to remove selected rooms or elements
+  - `Ctrl+D` to duplicate rooms
+  - `R` to rotate selected rooms
+  - `↑` `↓` `←` `→` to nudge selected rooms 1 ft
+  - `G` to toggle the Vastu grid
+  - `Ctrl+Plus` / `Ctrl+Minus` to zoom in/out
+  - `Ctrl+S` to save the canvas as PNG
+  - `?` to open the shortcut help dialog
+- **Read-only modes** — when a plan is opened in `view` or `comment` mode, the canvas, sidebars, and keyboard shortcuts are locked so the plan is read-only.
+- **Reduced motion** — the app honors `prefers-reduced-motion`; there are no decorative motion animations in core flows.
+
+Known gaps: the SVG canvas itself is a single focusable region; rooms and elements are currently navigated via click/keyboard shortcuts rather than as individually tabbable shapes. Screen-reader announcements for spatial relationships (e.g., "Kitchen is in the South-East") are not yet implemented.
+
+## 🌍 Internationalization
+
+The app is currently **English-only**. All user-facing strings are hardcoded in source files.
+
+When the project is ready to support additional languages, the recommended path is to centralize strings in a `messages.ts` (or `react-i18next`) catalog and replace inline labels with a typed `t('key')` helper. At that point we will also need:
+
+- Locale-aware number formatting for dimensions and costs.
+- Unit conversion between feet/meters that follows the active locale.
+- RTL layout review (the canvas coordinate system assumes left-to-right).
+
+Until then, all docs, UI labels, AI prompts, and exported PDFs are produced in English.
+
+## 🤖 `metadata.json`
+
+The repo-root [`metadata.json`](./metadata.json) is a small host-discovery file. It is consumed by the hosting environment (e.g., Google AI Studio / project listings) and contains:
+
+| Field                     | Description                                                   |
+| ------------------------- | ------------------------------------------------------------- |
+| `name`                    | Project name: `VastuPlan 2D`.                                 |
+| `description`             | One-line summary of the app.                                  |
+| `requestFramePermissions` | Empty array; the app does not request host-frame permissions. |
+
+Do not delete this file. If the project name or description changes, update `metadata.json` so the host listing stays in sync.
 
 ## 🚀 Deploy
 
