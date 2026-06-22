@@ -1,4 +1,5 @@
 import React from 'react';
+import { getVastuZone, getVastuZoneInfo } from '../constants/vastuZones';
 
 interface VastuGridProps {
   plotWidth: number;
@@ -7,34 +8,6 @@ interface VastuGridProps {
   northAngle: number;
   pixelsPerFoot: number;
 }
-
-const getVastuZone = (index: number, northAngle: number): string => {
-  if (index === 4) return 'Brahmasthan';
-
-  const col = index % 3;
-  const row = Math.floor(index / 3);
-  const dx = col - 1;
-  const dy = row - 1;
-
-  const cellAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-  let compassAngle = (cellAngle + 90 - northAngle) % 360;
-  if (compassAngle < 0) compassAngle += 360;
-
-  const snapped = (Math.round(compassAngle / 45) * 45) % 360;
-
-  const zones: Record<number, string> = {
-    0: 'North',
-    45: 'North-East',
-    90: 'East',
-    135: 'South-East',
-    180: 'South',
-    225: 'South-West',
-    270: 'West',
-    315: 'North-West',
-  };
-
-  return zones[snapped] || '';
-};
 
 export const VastuGrid: React.FC<VastuGridProps> = React.memo(
   ({ plotWidth, plotHeight, setbacks, northAngle, pixelsPerFoot }) => {
@@ -58,17 +31,23 @@ export const VastuGrid: React.FC<VastuGridProps> = React.memo(
           {buildableH}'
         </div>
 
-        <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none z-30">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div
-              key={i}
-              className="border border-indigo-500/20 flex flex-col items-center justify-center bg-indigo-50/10 backdrop-blur-[1px]"
-            >
-              <span className="text-[10px] font-bold text-indigo-800/60 uppercase tracking-wider text-center px-1">
-                {getVastuZone(i, northAngle)}
-              </span>
-            </div>
-          ))}
+        <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
+          {Array.from({ length: 9 }).map((_, i) => {
+            const zone = getVastuZone(i, northAngle);
+            const info = getVastuZoneInfo(zone);
+            return (
+              <div
+                key={i}
+                data-testid={`vastu-zone-${zone.toLowerCase().replace(/\s+/g, '-')}`}
+                title={`${info.name}\nElement: ${info.element}\nIdeal for: ${info.idealFor}\nTip: ${info.tip}`}
+                className="border border-indigo-500/20 flex flex-col items-center justify-center bg-indigo-50/10 backdrop-blur-[1px]"
+              >
+                <span className="text-[10px] font-bold text-indigo-800/60 uppercase tracking-wider text-center px-1">
+                  {zone}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     );

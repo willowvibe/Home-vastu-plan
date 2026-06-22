@@ -135,6 +135,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
       plan?: FloorPlan;
       pixelsPerFoot?: number;
       snapToGrid?: boolean;
+      gridSize?: number;
       currentFloor?: number;
     } = {}
   ) => {
@@ -148,6 +149,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
         currentFloor: overrides.currentFloor ?? 0,
         pixelsPerFoot,
         snapToGrid: overrides.snapToGrid ?? true,
+        gridSize: overrides.gridSize,
         canvasRef: canvasRef({ left: 0, top: 0, width: 1000, height: 1000 }),
         onUpdateRoom,
         onUpdateRoomEnd,
@@ -212,6 +214,20 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     expect(updates.x).not.toBe(3);
     expect(updates.x).toBeCloseTo(3.2, 5);
     expect(updates.y).toBeCloseTo(2.4, 5);
+  });
+
+  it('uses a custom gridSize when snapToGrid is enabled', () => {
+    const { result, onUpdateRoom } = setup({ snapToGrid: true, gridSize: 2 });
+    act(() => {
+      result.current.handlePointerDown(
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        PLAN.rooms[0],
+        'drag'
+      );
+    });
+    // 3.5 ft should round to nearest 2 ft -> 4 ft.
+    pointerMove(70, 70);
+    expect(onUpdateRoom).toHaveBeenLastCalledWith('r1', { x: 4, y: 4 });
   });
 
   it('clamps drag x to plot-right bound (room cannot pass setback.right)', () => {

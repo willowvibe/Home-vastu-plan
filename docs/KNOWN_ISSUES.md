@@ -238,7 +238,7 @@ _All P2 refactor backlog items are now resolved._
 
 Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
-- G-3, G-4, G-5, G-9, G-10, G-15 (staircase, plumbing overlay, sun path, configurable grid, Vastu zone tour, auto-named floors)
+- G-3, G-4, G-5 (staircase, plumbing overlay, sun path)
 
 ---
 
@@ -336,7 +336,7 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-> **State as of 2026-06-21 (post `fix/q-20-q21-q25-batch`).** All 9 P0s, all P1s, all P2 items, and all P3/Q items are resolved. Remaining work is the outstanding G nice-to-haves: G-3, G-4, G-5, G-9, G-10, G-15.
+> **State as of 2026-06-21 (post `fix/g9-g10-g15-batch`).** All 9 P0s, all P1s, all P2 items, and all P3/Q items are resolved. G-9, G-10, and G-15 are resolved. Remaining work is the outstanding G nice-to-haves: G-3, G-4, G-5.
 
 | Bucket | Items | Effort | Status                                                 |
 | ------ | ----- | ------ | ------------------------------------------------------ |
@@ -347,7 +347,7 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 See the `✅ Recently Resolved` sections above for earlier batches.
 
-**Suggested next batch:** Pick a feature batch from the remaining G items. Candidates: **G-3 + G-4 + G-5** (multi-floor construction visualization theme) or **G-9 + G-10 + G-15** (Vastu UX / floor-label theme).
+**Suggested next batch:** The remaining G nice-to-haves are **G-3 staircase + G-4 plumbing overlay + G-5 sun path** (multi-floor construction visualization theme).
 
 ## ✅ Recently Resolved (Q-20/Q-21/Q-25 env/docs batch)
 
@@ -360,6 +360,18 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 | Q-25 | Gemini env standardization         | ✅ Resolved | `VITE_GEMINI_API_KEY` is the only supported source. Removed the `process.env.GEMINI_API_KEY` `define` from `vite.config.ts`, removed `process.env.*` fallbacks from `src/services/gemini.ts`, and dropped `GEMINI_API_KEY` from `.env.example`. |
 
 **No regressions** in `npm run lint` (0 errors; 72 pre-existing warnings unchanged), `npm test`, or `npm run build`.
+
+## ✅ Recently Resolved (G-9 / G-10 / G-15 Vastu UX batch)
+
+> 2026-06-21 — `fix/g9-g10-g15-batch`. Closed the Vastu-UX / floor-label theme from `docs/CODE_REVIEW.md` §5.
+
+| ID   | Title                         | Status      | Notes                                                                                                                                                                                                                                       |
+| ---- | ----------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G-9  | Configurable snap grid        | ✅ Resolved | `FloorPlan.gridSize` (default 1 ft) with a `Sidebar` selector (0.5, 1, 2, 3, 5 ft / meters). Wired through `Canvas`, `CanvasArea`, and `useCanvasDrag`. New `DEFAULT_GRID_SIZE_FT` / `GRID_SIZE_OPTIONS_FT` in `src/constants/geometry.ts`. |
+| G-10 | Vastu zone tour + hover cards | ✅ Resolved | Toolbar compass button opens a guided 9-step zone tour (`VastuTour.tsx`). Grid cells show `title` tooltips with element, ideal use, and tip. Zone metadata and direction math extracted to `src/constants/vastuZones.ts`.                   |
+| G-15 | Auto-named floors             | ✅ Resolved | New `formatFloorLabel(n, floorNames?)` defaults to `Ground Floor`, `First Floor`, etc., with optional custom names via `plan.floorNames`. Updated all UI call sites, print/PDF exports, and E2E selectors.                                  |
+
+**No regressions** in `npm run lint` (0 errors; 72 pre-existing warnings unchanged), `npm test -- --run` (366 tests), or `npm run build`.
 
 ## How to use this document
 

@@ -559,18 +559,18 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 - **G-5.** Sun-path / shadow calculation for each room based on orientation and date.
 - **G-6.** A "compliance" report PDF that combines Vastu score, AI analysis, and the floor plan in one document. — ✅ resolved in G-6/G-8/G-11 batch
 - **G-8.** Per-room cost estimation (not just total). — ✅ resolved in G-6/G-8/G-11 batch
-- **G-9.** Snap-to-grid configurable to imperial or metric base.
-- **G-10.** A "tour" of all Vastu zones with hover cards on the grid (currently only the cell label appears).
+- **G-9.** Snap-to-grid configurable to imperial or metric base. — ✅ resolved in G-9/G-10/G-15 batch
+- **G-10.** A "tour" of all Vastu zones with hover cards on the grid (currently only the cell label appears). — ✅ resolved in G-9/G-10/G-15 batch
 - **G-11.** A "share with annotation" mode that allows collaborators to drop comments on the canvas. — ✅ resolved in G-6/G-8/G-11 batch
 - **G-13.** Add `@testing-library/user-event` keyboard tests for `useKeyboardShortcuts`. — ✅ resolved in G-1/G-13/G-14 batch
 - **G-14.** Generate a "share" link with optional password protection (encrypts the plan blob). — ✅ resolved in G-1/G-13/G-14 batch
-- **G-15.** Auto-name floors (Ground, First, Second) based on Indian conventions.
+- **G-15.** Auto-name floors (Ground, First, Second) based on Indian conventions. — ✅ resolved in G-9/G-10/G-15 batch
 
 ---
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-21 (post `fix/q-20-q21-q25-batch`):** All 9 P0s, all P1s, all P2 items, and all P3/Q items are resolved. G-1/G-13/G-14, G-2/G-7/G-12, and G-6/G-8/G-11 are resolved. Q-19, Q-20, Q-21, Q-22, Q-23, Q-24, and Q-25 are resolved. Remaining work is the outstanding G nice-to-haves: G-3, G-4, G-5, G-9, G-10, G-15.
+> **State as of 2026-06-21 (post `fix/g9-g10-g15-batch`):** All 9 P0s, all P1s, all P2 items, and all P3/Q items are resolved. G-1/G-13/G-14, G-2/G-7/G-12, G-6/G-8/G-11, and G-9/G-10/G-15 are resolved. Q-19, Q-20, Q-21, Q-22, Q-23, Q-24, and Q-25 are resolved. Remaining work is the outstanding G nice-to-haves: G-3, G-4, G-5.
 
 | Bucket                   | Items                                   | Suggested owner track | Effort  |
 | ------------------------ | --------------------------------------- | --------------------- | ------- |
@@ -579,7 +579,7 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 | **P2 — Refactor**        | _none — S-1 and S-4 both shipped_       | health                | —       |
 | **P3 — Polish**          | Remaining G items                       | features              | ongoing |
 
-**Where to start next:** Pick a feature batch from the remaining G items. Candidates: **G-3 staircase + G-4 plumbing overlay + G-5 sun path** (multi-floor / construction visualization theme), or **G-9 configurable grid + G-10 Vastu zone tour + G-15 auto-named floors** (Vastu UX theme).
+**Where to start next:** The remaining G nice-to-haves are **G-3 staircase + G-4 plumbing overlay + G-5 sun path** (multi-floor / construction visualization theme).
 
 ---
 
@@ -594,6 +594,20 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 | Q-25 | Gemini env standardization         | §4 Q-25       | —     | `VITE_GEMINI_API_KEY` is now the only supported source. Removed `process.env.GEMINI_API_KEY` build-time `define` from `vite.config.ts`, removed `process.env.*` fallbacks from `src/services/gemini.ts`, and dropped the `GEMINI_API_KEY` alias from `.env.example`. |
 
 **Validation:** `npm run lint` ✅ (0 errors; 72 pre-existing warnings unchanged), `npm test` ✅, `npm run build` ✅.
+
+---
+
+## ✅ Resolved in G-9/G-10/G-15 batch
+
+> The 2026-06-21 Vastu-UX / floor-label batch (`fix/g9-g10-g15-batch`) shipped 3 nice-to-haves from `docs/CODE_REVIEW.md` §5. User-facing features with unit + smoke tests and updated docs. Branch target: `main` via PR.
+
+| ID   | Title                         | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---- | ----------------------------- | ------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G-9  | Configurable snap grid        | §5 G-9        | +2    | `FloorPlan.gridSize` (default 1 ft) persists with the plan. `Sidebar.tsx` shows a "Grid Step" selector when snap is on, with options 0.5/1/2/3/5 ft rendered in meters when `plan.unit === 'm'`. `Canvas.tsx` and `CanvasArea.tsx` pass `gridSize` to the background grid and to `useCanvasDrag`, which snaps drag/resize to the chosen step. New `DEFAULT_GRID_SIZE_FT` and `GRID_SIZE_OPTIONS_FT` in `src/constants/geometry.ts` plus tests. |
+| G-10 | Vastu zone tour + hover cards | §5 G-10       | +4    | New toolbar compass button toggles a guided 9-step tour overlay (`VastuTour.tsx`) that highlights each zone and displays element, ideal use, and tip. `VastuGrid.tsx` cells render `title` tooltips from `src/constants/vastuZones.ts`. Tour auto-enables the Vastu grid. New `VASTU_TOUR_TOGGLED` analytics event.                                                                                                                            |
+| G-15 | Auto-named floors             | §5 G-15       | +2    | New `formatFloorLabel(n, floorNames?)` in `src/constants/floorPlanConstants.ts` defaults to Indian conventions (`Ground Floor`, `First Floor`, `Second Floor`, …) and supports custom names via `plan.floorNames`. Replaced ordinal `formatFloor()` in UI, prints/PDF exports, and E2E selectors. New `getDefaultFloorName()` helper and tests.                                                                                                |
+
+**Validation:** `npm run lint` ✅ (0 errors; 72 pre-existing warnings unchanged), `npm test -- --run` (366/366, +9 new) ✅, `npm run build` ✅.
 
 ---
 

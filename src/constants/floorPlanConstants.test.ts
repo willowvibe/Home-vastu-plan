@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatFloor } from './floorPlanConstants';
+import { formatFloor, getDefaultFloorName, formatFloorLabel } from './floorPlanConstants';
 
 describe('formatFloor', () => {
   it('formats single-digit floors with the correct ordinal suffix', () => {
@@ -27,5 +27,31 @@ describe('formatFloor', () => {
     expect(formatFloor(100)).toBe('100th');
     expect(formatFloor(111)).toBe('111th'); // 111 % 100 = 11 → special case
     expect(formatFloor(121)).toBe('121st'); // 121 % 100 = 21 → 1st
+  });
+});
+
+describe('getDefaultFloorName', () => {
+  it('uses Indian convention names for the first four floors', () => {
+    expect(getDefaultFloorName(0)).toBe('Ground Floor');
+    expect(getDefaultFloorName(1)).toBe('First Floor');
+    expect(getDefaultFloorName(2)).toBe('Second Floor');
+    expect(getDefaultFloorName(3)).toBe('Third Floor');
+  });
+
+  it('falls back to an ordinal floor name for higher floors', () => {
+    expect(getDefaultFloorName(4)).toBe('4th Floor');
+    expect(getDefaultFloorName(11)).toBe('11th Floor');
+  });
+});
+
+describe('formatFloorLabel', () => {
+  it('returns a custom name when one is provided', () => {
+    expect(formatFloorLabel(0, { 0: 'Basement' })).toBe('Basement');
+  });
+
+  it('falls back to the default Indian convention name when no custom name is set', () => {
+    expect(formatFloorLabel(0)).toBe('Ground Floor');
+    expect(formatFloorLabel(1)).toBe('First Floor');
+    expect(formatFloorLabel(4)).toBe('4th Floor');
   });
 });

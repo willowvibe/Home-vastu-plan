@@ -15,7 +15,7 @@ import { OfflineIndicator } from './components/OfflineIndicator';
 import { CollaborationPanel } from './components/CollaborationPanel';
 import { trackEvent, EVENTS } from './services/analytics';
 import { usePlanEditor } from './hooks/usePlanEditor';
-import { formatFloor } from './constants/floorPlanConstants';
+import { formatFloorLabel } from './constants/floorPlanConstants';
 import { Canvas } from './components/Canvas';
 
 export default function App() {
@@ -84,6 +84,7 @@ export default function App() {
                 historyLength={editor.historyLength}
                 showVastuGrid={editor.showVastuGrid}
                 onToggleGrid={editor.handleToggleGrid}
+                onToggleTour={editor.handleToggleTour}
                 onShare={editor.handleShare}
                 onExport={editor.handleExport}
                 isExporting={editor.isExporting}
@@ -100,6 +101,8 @@ export default function App() {
                 currentFloor={editor.currentFloor}
                 zoom={editor.zoom}
                 showVastuGrid={editor.showVastuGrid}
+                showVastuTour={editor.showVastuTour}
+                onToggleVastuTour={editor.handleToggleTour}
                 snapToGrid={editor.snapToGrid}
                 measuring={editor.measuring}
                 setMeasuring={editor.setMeasuring}
@@ -223,8 +226,8 @@ export default function App() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">VastuPlan Floor Plan</h1>
           <p className="text-sm text-slate-600 mb-8">
-            Floor {formatFloor(editor.currentFloor)} | {new Date().toLocaleDateString()} | Generated
-            on {new Date().toLocaleTimeString()}
+            {formatFloorLabel(editor.currentFloor, editor.plan.floorNames)} |{' '}
+            {new Date().toLocaleDateString()} | Generated on {new Date().toLocaleTimeString()}
           </p>
           <div className="border border-slate-200 p-4">
             <Canvas

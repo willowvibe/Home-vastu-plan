@@ -4,8 +4,8 @@ import {
   TOLERANCE_FT,
   INCHES_PER_FOOT,
   DEFAULT_WALL_THICKNESS_IN,
-  SNAP_GRID_FT,
   SNAP_GRID_SUB_FT,
+  DEFAULT_GRID_SIZE_FT,
 } from '../constants/geometry';
 import { clampRoomToBuildableArea } from '../utils';
 
@@ -14,6 +14,7 @@ interface UseCanvasDragOptions {
   currentFloor: number;
   pixelsPerFoot: number;
   snapToGrid: boolean;
+  gridSize?: number;
   canvasRef: React.RefObject<HTMLDivElement | null>;
   onUpdateRoom: (id: string, updates: Partial<Room>) => void;
   onUpdateRoomEnd?: () => void;
@@ -65,6 +66,7 @@ export function useCanvasDrag({
   currentFloor,
   pixelsPerFoot,
   snapToGrid,
+  gridSize,
   canvasRef,
   onUpdateRoom,
   onUpdateRoomEnd,
@@ -212,7 +214,7 @@ export function useCanvasDrag({
         const room = currentPlan.rooms.find((r) => r.id === currentState.draggingRoom);
         if (!room) return;
 
-        const snapValue = snapToGrid ? SNAP_GRID_FT : SNAP_GRID_SUB_FT;
+        const snapValue = snapToGrid ? (gridSize ?? DEFAULT_GRID_SIZE_FT) : SNAP_GRID_SUB_FT;
         let newX =
           Math.round((e.clientX - currentState.dragOffset.x) / pixelsPerFoot / snapValue) *
           snapValue;
@@ -439,6 +441,7 @@ export function useCanvasDrag({
     draggingElement,
     pixelsPerFoot,
     snapToGrid,
+    gridSize,
     currentFloor,
     canvasRef,
   ]);

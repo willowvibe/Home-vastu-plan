@@ -1,6 +1,6 @@
 import { FloorPlan } from '../types';
 import { analyzeRoomVastu } from '../services/vastu';
-import { formatFloor } from '../constants/floorPlanConstants';
+import { formatFloorLabel } from '../constants/floorPlanConstants';
 
 export interface ComplianceRoomRow {
   type: string;
@@ -70,7 +70,7 @@ export function buildComplianceReportData(
     generatedAt: new Date().toLocaleDateString(),
     overallScore,
     overallStatus: statusFromScore(overallScore),
-    currentFloorLabel: formatFloor(currentFloor),
+    currentFloorLabel: formatFloorLabel(currentFloor, plan.floorNames),
     projectName,
     clientName,
     consultantName,

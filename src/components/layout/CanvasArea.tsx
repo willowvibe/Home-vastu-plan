@@ -1,7 +1,8 @@
 import React, { type RefObject } from 'react';
 import { Canvas } from '../Canvas';
 import { FloorPlan, AppMode, Room } from '../../types';
-import { formatFloor } from '../../constants/floorPlanConstants';
+import { formatFloorLabel } from '../../constants/floorPlanConstants';
+import { DEFAULT_GRID_SIZE_FT } from '../../constants/geometry';
 
 export interface CanvasAreaProps {
   canvasContainerRef: RefObject<HTMLDivElement | null>;
@@ -9,6 +10,8 @@ export interface CanvasAreaProps {
   currentFloor: number;
   zoom: number;
   showVastuGrid: boolean;
+  showVastuTour?: boolean;
+  onToggleVastuTour?: () => void;
   snapToGrid: boolean;
   measuring: boolean;
   setMeasuring: (value: boolean) => void;
@@ -30,6 +33,8 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   currentFloor,
   zoom,
   showVastuGrid,
+  showVastuTour,
+  onToggleVastuTour,
   snapToGrid,
   measuring,
   setMeasuring,
@@ -45,6 +50,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   onAddComment,
 }) => {
   const isViewOnly = appMode === 'view';
+  const gridSize = plan.gridSize ?? DEFAULT_GRID_SIZE_FT;
 
   return (
     <>
@@ -60,7 +66,10 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
           currentFloor={currentFloor}
           zoom={zoom}
           showVastuGrid={showVastuGrid}
+          showVastuTour={showVastuTour}
+          onToggleVastuTour={onToggleVastuTour}
           snapToGrid={snapToGrid}
+          gridSize={gridSize}
           measuring={measuring}
           setMeasuring={setMeasuring}
           onUpdateRoom={onUpdateRoom}
@@ -81,7 +90,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
         <div className="p-8 bg-white">
           <h1 className="text-2xl font-bold mb-4">VastuPlan Floor Plan</h1>
           <p className="text-sm text-slate-600 mb-4">
-            Floor {formatFloor(currentFloor)} - {new Date().toLocaleDateString()}
+            {formatFloorLabel(currentFloor, plan.floorNames)} - {new Date().toLocaleDateString()}
           </p>
           <div className="print-only">
             <Canvas
@@ -90,6 +99,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               zoom={zoom}
               showVastuGrid={showVastuGrid}
               snapToGrid={snapToGrid}
+              gridSize={gridSize}
               measuring={measuring}
               setMeasuring={setMeasuring}
               onUpdateRoom={() => {}}

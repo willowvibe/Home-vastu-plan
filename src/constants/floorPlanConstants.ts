@@ -181,3 +181,26 @@ export function formatFloor(n: number): string {
       return `${n}th`;
   }
 }
+
+/**
+ * Default Indian-convention floor name for a floor index.
+ * 0 → "Ground Floor", 1 → "First Floor", 2 → "Second Floor", etc.
+ */
+export function getDefaultFloorName(n: number): string {
+  if (n === 0) return 'Ground Floor';
+  if (n === 1) return 'First Floor';
+  if (n === 2) return 'Second Floor';
+  if (n === 3) return 'Third Floor';
+  return `${formatFloor(n)} Floor`;
+}
+
+/**
+ * Format a floor number for display, honoring any custom `floorNames`
+ * mapping. Falls back to Indian-convention default names (Ground, First,
+ * Second, ...) so new floors are auto-named without manual input.
+ */
+export function formatFloorLabel(n: number, floorNames?: Record<number, string>): string {
+  const custom = floorNames?.[n];
+  if (custom) return custom;
+  return getDefaultFloorName(n);
+}

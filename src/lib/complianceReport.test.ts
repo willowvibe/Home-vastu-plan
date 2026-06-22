@@ -29,7 +29,7 @@ describe('buildComplianceReportData (G-6)', () => {
     expect(data.projectName).toBe('Project X');
     expect(data.clientName).toBe('Client A');
     expect(data.consultantName).toBe('Consultant B');
-    expect(data.currentFloorLabel).toBe('0th');
+    expect(data.currentFloorLabel).toBe('Ground Floor');
     expect(data.analysis).toBe('AI analysis text');
   });
 

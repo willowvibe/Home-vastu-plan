@@ -21,6 +21,8 @@ import {
   WALL_THICKNESS_OPTIONS_IN,
   SNAP_GRID_FT,
   SNAP_GRID_SUB_FT,
+  DEFAULT_GRID_SIZE_FT,
+  GRID_SIZE_OPTIONS_FT,
   PIXELS_PER_FOOT,
   DEFAULT_ZOOM,
   MIN_ZOOM,
@@ -53,6 +55,15 @@ describe('geometry constants', () => {
 
     it('SNAP_GRID_SUB_FT is 0.1 ft (≈ 1.2 in) when "Snap to Grid" is OFF', () => {
       expect(SNAP_GRID_SUB_FT).toBe(0.1);
+    });
+
+    it('DEFAULT_GRID_SIZE_FT matches the legacy snap grid default (1 ft)', () => {
+      expect(DEFAULT_GRID_SIZE_FT).toBe(1);
+      expect(GRID_SIZE_OPTIONS_FT).toContain(DEFAULT_GRID_SIZE_FT);
+    });
+
+    it('GRID_SIZE_OPTIONS_FT offers a sensible imperial/metric range', () => {
+      expect(GRID_SIZE_OPTIONS_FT).toEqual([0.5, 1, 2, 3, 5]);
     });
   });
 

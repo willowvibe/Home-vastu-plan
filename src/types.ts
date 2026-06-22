@@ -117,6 +117,8 @@ export interface FloorPlan {
   rooms: Room[];
   comments?: Comment[];
   layers?: RoomLayer[];
+  floorNames?: Record<number, string>; // G-15: custom floor labels; defaults to Indian convention names
+  gridSize?: number; // G-9: snap grid step in feet
 }
 
 export interface ProjectVersion {
