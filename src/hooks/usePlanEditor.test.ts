@@ -42,6 +42,7 @@ vi.mock('../services/analytics', () => ({
     UNDO_PERFORMED: 'undo_performed',
     REDO_PERFORMED: 'redo_performed',
     VASTU_GRID_TOGGLED: 'vastu_grid_toggled',
+    VASTU_TOUR_TOGGLED: 'vastu_tour_toggled',
   },
   EVENT_METADATA: { roomTypes: {} },
 }));
@@ -143,6 +144,7 @@ describe('usePlanEditor public API', () => {
         'handleShare',
         'handleShowShortcuts',
         'handleToggleGrid',
+        'handleToggleTour',
         'handleZoomIn',
         'handleZoomOut',
         'historyIndex',
@@ -195,6 +197,7 @@ describe('usePlanEditor public API', () => {
         'setShowProjectManager',
         'setShowShortcutHelp',
         'setShowVastuGrid',
+        'setShowVastuTour',
         'setSnapToGrid',
         'setZoom',
         'showComplianceExport',
@@ -204,6 +207,7 @@ describe('usePlanEditor public API', () => {
         'showProjectManager',
         'showShortcutHelp',
         'showVastuGrid',
+        'showVastuTour',
         'snapToGrid',
         'syncPlan',
         'totalArea',
@@ -220,6 +224,28 @@ describe('usePlanEditor public API', () => {
         'zoom',
       ].sort()
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Feature toggles (G-10)
+// ---------------------------------------------------------------------------
+
+describe('usePlanEditor Vastu tour', () => {
+  it('toggles showVastuTour and automatically enables the grid', () => {
+    const { result } = renderHook(() =>
+      usePlanEditor({ canvasContainerRef: { current: document.createElement('div') } })
+    );
+
+    expect(result.current.showVastuTour).toBe(false);
+    expect(result.current.showVastuGrid).toBe(false);
+
+    act(() => {
+      result.current.handleToggleTour();
+    });
+
+    expect(result.current.showVastuTour).toBe(true);
+    expect(result.current.showVastuGrid).toBe(true);
   });
 });
 
@@ -438,7 +464,7 @@ describe('usePlanEditor floor + history', () => {
     expect(result.current.currentFloor).toBe(1);
     expect(result.current.plan.rooms.filter((r) => r.floor === 1)).toHaveLength(2);
     expect(result.current.selectedRoomIds).toHaveLength(2);
-    expect(showToast).toHaveBeenCalledWith('Duplicated 2 room(s) to 1st', 'success');
+    expect(showToast).toHaveBeenCalledWith('Duplicated 2 room(s) to First Floor', 'success');
   });
 
   it('does not duplicate an empty floor', () => {
@@ -448,7 +474,7 @@ describe('usePlanEditor floor + history', () => {
     act(() => result.current.duplicateFloor(0, 1));
 
     expect(result.current.plan.rooms).toHaveLength(0);
-    expect(showToast).toHaveBeenCalledWith('No rooms on 0th to duplicate', 'warning');
+    expect(showToast).toHaveBeenCalledWith('No rooms on Ground Floor to duplicate', 'warning');
   });
 
   it('undo reverts an addRoom', () => {

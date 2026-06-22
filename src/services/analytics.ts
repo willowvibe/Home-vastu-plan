@@ -97,6 +97,7 @@ export const EVENTS = {
   // Feature events
   AI_ANALYZED: 'ai_analyzed',
   VASTU_GRID_TOGGLED: 'vastu_grid_toggled',
+  VASTU_TOUR_TOGGLED: 'vastu_tour_toggled',
   DARK_MODE_TOGGLED: 'dark_mode_toggled',
   UNDO_PERFORMED: 'undo_performed',
   REDO_PERFORMED: 'redo_performed',

@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { FloorPlan, AppMode, RoomType } from '../../types';
 import { LayerManager } from '../LayerManager';
-import { ROOM_TYPES, ROOM_CATEGORIES, formatFloor } from '../../constants/floorPlanConstants';
+import { ROOM_TYPES, ROOM_CATEGORIES, formatFloorLabel } from '../../constants/floorPlanConstants';
+import { DEFAULT_GRID_SIZE_FT, GRID_SIZE_OPTIONS_FT, FT_PER_METER } from '../../constants/geometry';
 import { DEFAULT_COST_PER_SQFT, formatCurrency, getTotalCost } from '../../utils';
 
 export interface SidebarProps {
@@ -168,6 +169,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </label>
           <span className="text-xs text-slate-400">{snapToGrid ? 'On' : 'Off'}</span>
         </div>
+
+        {snapToGrid && (
+          <div className="flex items-center justify-between mt-2 mb-2">
+            <label htmlFor="grid-step" className="text-xs text-slate-600">
+              Grid Step
+            </label>
+            <select
+              id="grid-step"
+              value={plan.gridSize ?? DEFAULT_GRID_SIZE_FT}
+              onChange={(e) => {
+                const gridSize = Number(e.target.value);
+                updatePlan((p) => ({ ...p, gridSize }));
+                commitHistory();
+              }}
+              className="text-xs border border-slate-200 rounded-lg px-2 py-1 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+            >
+              {GRID_SIZE_OPTIONS_FT.map((ft) => {
+                const label =
+                  plan.unit === 'ft' ? `${ft} ft` : `${(ft * FT_PER_METER).toFixed(2)} m`;
+                return (
+                  <option key={ft} value={ft}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        )}
 
         <div className="mb-4">
           <input
@@ -341,7 +370,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              {formatFloor(floor)}
+              {formatFloorLabel(floor, plan.floorNames)}
             </button>
           ))}
           {lastFloor < maxFloor && (
@@ -365,7 +394,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             title="Duplicate current floor to the next unused floor"
             className="flex-1 py-2 text-xs font-medium rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            Duplicate {formatFloor(currentFloor)}
+            Duplicate {formatFloorLabel(currentFloor, plan.floorNames)}
           </button>
           <button
             onClick={handleClearFloor}

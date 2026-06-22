@@ -6,6 +6,7 @@ import { FileText, X, Upload, Loader2, Download } from 'lucide-react';
 import { addBreadcrumb } from '../services/sentry';
 import { useToast } from './Toast';
 import { fitInside } from '../lib/pdfFit';
+import { formatFloorLabel } from '../constants/floorPlanConstants';
 
 interface PresentationExportProps {
   canvasRef: React.RefObject<HTMLDivElement>;
@@ -107,7 +108,7 @@ export function PresentationExport({
       pdf.setFontSize(8);
       pdf.text(`Date: ${new Date().toLocaleDateString()}`, 7.6, 8.1);
       pdf.text(`Scale: 1" = ${plan.unit === 'ft' ? '10 ft' : '3 m'} (Approx)`, 9.2, 8.1);
-      pdf.text(`Floor: ${currentFloor === 0 ? 'Ground' : `Floor ${currentFloor}`}`, 7.6, 7.3);
+      pdf.text(`Floor: ${formatFloorLabel(currentFloor, plan.floorNames)}`, 7.6, 7.3);
 
       // Add the Floor Plan Image
       // Scale it to fit the available 7 in × 7.7 in drawing area while

@@ -1,20 +1,25 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Room as RoomType, FloorPlan, RoomLayer, AppMode, Comment } from '../types';
+import { Room as RoomType, FloorPlan, RoomLayer, AppMode } from '../types';
 import { useCanvasDrag } from '../hooks/useCanvasDrag';
 import { Room } from './Room';
 import { VastuGrid } from './VastuGrid';
+import { VastuTour } from './VastuTour';
 import { Compass } from './Compass';
 import { RulerOverlay } from './RulerOverlay';
 import { RoadIndicator } from './RoadIndicator';
-import { formatFloor } from '../constants/floorPlanConstants';
+import { formatFloorLabel } from '../constants/floorPlanConstants';
 import { MessageSquare } from 'lucide-react';
+import { DEFAULT_GRID_SIZE_FT } from '../constants/geometry';
 
 interface CanvasProps {
   plan: FloorPlan;
   currentFloor: number;
   zoom: number;
   showVastuGrid?: boolean;
+  showVastuTour?: boolean;
+  onToggleVastuTour?: () => void;
   snapToGrid?: boolean;
+  gridSize?: number;
   measuring?: boolean;
   setMeasuring?: (value: boolean) => void;
   onUpdateRoom: (id: string, updates: Partial<RoomType>) => void;
@@ -34,7 +39,10 @@ export const Canvas: React.FC<CanvasProps> = ({
   currentFloor,
   zoom,
   showVastuGrid,
+  showVastuTour,
+  onToggleVastuTour,
   snapToGrid = true,
+  gridSize = DEFAULT_GRID_SIZE_FT,
   measuring = false,
   setMeasuring,
   onUpdateRoom,
@@ -80,6 +88,7 @@ export const Canvas: React.FC<CanvasProps> = ({
     currentFloor,
     pixelsPerFoot: PIXELS_PER_FOOT,
     snapToGrid,
+    gridSize,
     canvasRef,
     onUpdateRoom,
     onUpdateRoomEnd,
@@ -166,7 +175,7 @@ export const Canvas: React.FC<CanvasProps> = ({
         height: plan.plotHeight * PIXELS_PER_FOOT,
         backgroundImage:
           'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)',
-        backgroundSize: `${PIXELS_PER_FOOT}px ${PIXELS_PER_FOOT}px`,
+        backgroundSize: `${gridSize * PIXELS_PER_FOOT}px ${gridSize * PIXELS_PER_FOOT}px`,
       }}
       data-testid="canvas"
       ref={canvasRef}
@@ -241,6 +250,15 @@ export const Canvas: React.FC<CanvasProps> = ({
         />
       )}
 
+      {/* G-10: guided Vastu zone tour overlay */}
+      {showVastuTour && (
+        <VastuTour
+          plan={plan}
+          pixelsPerFoot={PIXELS_PER_FOOT}
+          onClose={() => onToggleVastuTour?.()}
+        />
+      )}
+
       {/* U-12: empty-state hint shown when no rooms are on the
           current floor. Without this, switching to a fresh floor
           looks like the app is broken ("where did my rooms go?").
@@ -253,7 +271,11 @@ export const Canvas: React.FC<CanvasProps> = ({
         >
           <p className="text-sm text-slate-500 dark:text-slate-400">
             No rooms on this floor yet. Add a room from the left panel, or switch back to{' '}
-            {formatFloor(plan.rooms.length > 0 ? Math.min(...plan.rooms.map((r) => r.floor)) : 0)}.
+            {formatFloorLabel(
+              plan.rooms.length > 0 ? Math.min(...plan.rooms.map((r) => r.floor)) : 0,
+              plan.floorNames
+            )}
+            .
           </p>
         </div>
       )}
@@ -315,7 +337,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 
       {snapToGrid && (
         <div className="absolute top-4 right-4 bg-slate-900/70 text-white text-[9px] px-2 py-1 rounded z-20 pointer-events-none">
-          GRID SNAP ON
+          GRID SNAP ON · {gridSize} ft
         </div>
       )}
 

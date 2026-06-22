@@ -154,6 +154,46 @@ describe('Sidebar', () => {
     expect(addRoom).toHaveBeenCalledWith('Bedroom', 12, 12);
   });
 
+  it('lets the user change the snap grid step', () => {
+    const updatePlan = vi.fn();
+    const commitHistory = vi.fn();
+    render(
+      <Sidebar
+        plan={mockPlan}
+        currentFloor={0}
+        setCurrentFloor={vi.fn()}
+        updatePlan={updatePlan}
+        commitHistory={commitHistory}
+        handleSetbackChange={vi.fn()}
+        linkSetbacks
+        setLinkSetbacks={vi.fn()}
+        snapToGrid
+        setSnapToGrid={vi.fn()}
+        handleSelectTemplate={vi.fn()}
+        handleClearFloor={vi.fn()}
+        handleImportJSON={vi.fn()}
+        handleExportJSON={vi.fn()}
+        updateLayers={vi.fn()}
+        addRoom={vi.fn()}
+        roomSearch=""
+        setRoomSearch={vi.fn()}
+        roomCategoryFilter={null}
+        setRoomCategoryFilter={vi.fn()}
+        appMode={editMode}
+        mobileTab="settings"
+        totalArea={1200}
+        buildableArea={900}
+        builtUpArea={100}
+      />
+    );
+
+    const select = screen.getByLabelText('Grid Step');
+    fireEvent.change(select, { target: { value: '2' } });
+
+    expect(updatePlan).toHaveBeenCalledWith(expect.any(Function));
+    expect(commitHistory).toHaveBeenCalled();
+  });
+
   it('is hidden on mobile when mobileTab is not settings', () => {
     const { container } = render(
       <Sidebar
@@ -201,6 +241,7 @@ describe('Toolbar', () => {
     const onZoomIn = vi.fn();
     const onExport = vi.fn();
     const onToggleGrid = vi.fn();
+    const onToggleTour = vi.fn();
 
     render(
       <Toolbar
@@ -213,6 +254,7 @@ describe('Toolbar', () => {
         historyLength={3}
         showVastuGrid={false}
         onToggleGrid={onToggleGrid}
+        onToggleTour={onToggleTour}
         onShare={vi.fn()}
         onExport={onExport}
         isExporting={false}
@@ -236,6 +278,9 @@ describe('Toolbar', () => {
 
     fireEvent.click(screen.getByTitle('Toggle Vastu Grid'));
     expect(onToggleGrid).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTitle('Vastu Zone Tour'));
+    expect(onToggleTour).toHaveBeenCalled();
 
     fireEvent.click(screen.getByText('PNG'));
     expect(onExport).toHaveBeenCalled();

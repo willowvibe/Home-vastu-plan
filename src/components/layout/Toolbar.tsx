@@ -13,6 +13,7 @@ import {
   Download,
   Ruler,
   Loader2,
+  Compass,
 } from 'lucide-react';
 
 export interface ToolbarProps {
@@ -25,6 +26,7 @@ export interface ToolbarProps {
   historyLength: number;
   showVastuGrid: boolean;
   onToggleGrid: () => void;
+  onToggleTour: () => void;
   onShare: (mode: 'view' | 'comment', password?: string) => void;
   onExport: () => void;
   isExporting: boolean;
@@ -46,6 +48,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   historyLength,
   showVastuGrid,
   onToggleGrid,
+  onToggleTour,
   onShare,
   onExport,
   isExporting,
@@ -69,6 +72,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           title="Toggle Vastu Grid"
         >
           <Grid className="w-4 h-4" />
+        </button>
+        <button
+          onClick={onToggleTour}
+          className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm transition-colors"
+          title="Vastu Zone Tour"
+          data-testid="vastu-tour-button"
+        >
+          <Compass className="w-4 h-4" />
         </button>
         <button
           onClick={undo}

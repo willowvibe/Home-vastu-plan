@@ -28,7 +28,7 @@ import {
   generateProtectedShareLink,
   checkPlanSize,
 } from '../lib/exports';
-import { INITIAL_PLAN, PLAN_TEMPLATES, formatFloor } from '../constants/floorPlanConstants';
+import { INITIAL_PLAN, PLAN_TEMPLATES, formatFloorLabel } from '../constants/floorPlanConstants';
 import { DEFAULT_WALL_THICKNESS_IN, INCHES_PER_FOOT } from '../constants/geometry';
 
 export interface UsePlanEditorOptions {
@@ -114,6 +114,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
   const [zoom, setZoom] = useState(1);
   const [linkSetbacks, setLinkSetbacks] = useState(true);
   const [showVastuGrid, setShowVastuGrid] = useState(false);
+  const [showVastuTour, setShowVastuTour] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const { darkMode } = useTheme();
   const [measuring, setMeasuring] = useState(false);
@@ -716,7 +717,10 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
 
       const roomsToCopy = plan.rooms.filter((r) => r.floor === sourceFloor);
       if (roomsToCopy.length === 0) {
-        showToast(`No rooms on ${formatFloor(sourceFloor)} to duplicate`, 'warning');
+        showToast(
+          `No rooms on ${formatFloorLabel(sourceFloor, plan.floorNames)} to duplicate`,
+          'warning'
+        );
         return;
       }
 
@@ -738,14 +742,26 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
       setCurrentFloor(targetFloor);
       replaceSelection(newRooms.map((r) => r.id));
       showToast(
-        `Duplicated ${roomsToCopy.length} room(s) to ${formatFloor(targetFloor)}`,
+        `Duplicated ${roomsToCopy.length} room(s) to ${formatFloorLabel(
+          targetFloor,
+          plan.floorNames
+        )}`,
         'success'
       );
       trackEvent(EVENTS.ROOM_ADDED, {
         props: { source: 'duplicate_floor', count: roomsToCopy.length, targetFloor },
       });
     },
-    [appMode, plan.rooms, updatePlan, commitHistory, setCurrentFloor, replaceSelection, showToast]
+    [
+      appMode,
+      plan.rooms,
+      plan.floorNames,
+      updatePlan,
+      commitHistory,
+      setCurrentFloor,
+      replaceSelection,
+      showToast,
+    ]
   );
 
   const nudgeSelectedRooms = useCallback(
@@ -803,6 +819,15 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     });
   }, []);
 
+  const handleToggleTour = useCallback(() => {
+    setShowVastuTour((prev) => {
+      const next = !prev;
+      trackEvent(EVENTS.VASTU_TOUR_TOGGLED, { props: { enabled: next } });
+      return next;
+    });
+    setShowVastuGrid(true);
+  }, []);
+
   const handleZoomIn = useCallback(() => setZoom((z) => Math.min(3, z + 0.1)), []);
   const handleZoomOut = useCallback(() => setZoom((z) => Math.max(0.1, z - 0.1)), []);
   const handleShowShortcuts = useCallback(() => {
@@ -856,7 +881,12 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
 
   const handleClearFloor = useCallback(() => {
     if (
-      confirm(`Are you sure you want to clear all rooms on ${formatFloor(currentFloor)} floor?`)
+      confirm(
+        `Are you sure you want to clear all rooms on ${formatFloorLabel(
+          currentFloor,
+          plan.floorNames
+        )}?`
+      )
     ) {
       updatePlan((prev) => ({
         ...prev,
@@ -865,7 +895,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
       commitHistory();
       clearSelection();
     }
-  }, [currentFloor, updatePlan, commitHistory, clearSelection]);
+  }, [currentFloor, plan.floorNames, updatePlan, commitHistory, clearSelection]);
 
   return {
     // Plan + history
@@ -908,6 +938,8 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     setZoom,
     showVastuGrid,
     setShowVastuGrid,
+    showVastuTour,
+    setShowVastuTour,
     snapToGrid,
     setSnapToGrid,
     measuring,
@@ -976,6 +1008,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
 
     // Toggles
     handleToggleGrid,
+    handleToggleTour,
     handleZoomIn,
     handleZoomOut,
     handleShowShortcuts,

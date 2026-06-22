@@ -19,10 +19,10 @@ export function isSentryInitialized(): boolean {
 
 export function initSentry(config: SentryConfig = {}) {
   const {
-    dsn = process.env.SENTRY_DSN,
-    environment = process.env.SENTRY_ENVIRONMENT || 'development',
-    enabled = process.env.NODE_ENV === 'production',
-    release = process.env.VERSION || '1.0.0',
+    dsn = import.meta.env.VITE_SENTRY_DSN,
+    environment = import.meta.env.SENTRY_ENVIRONMENT || import.meta.env.MODE || 'development',
+    enabled = import.meta.env.PROD,
+    release = import.meta.env.VITE_APP_VERSION || '0.1.1',
   } = config;
 
   if (!enabled || !dsn) {

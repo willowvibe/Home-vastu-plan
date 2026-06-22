@@ -80,6 +80,18 @@ export const SNAP_GRID_FT = 1;
  */
 export const SNAP_GRID_SUB_FT = 0.1;
 
+/**
+ * Default configurable grid step (in feet). Used when the plan has no explicit
+ * gridSize. Kept equal to SNAP_GRID_FT so existing plans don't change behaviour.
+ */
+export const DEFAULT_GRID_SIZE_FT = 1;
+
+/**
+ * Allowed snap-grid step options (in feet). The UI displays these in the active
+ * display unit (ft or m). Values must be positive and at least SNAP_GRID_SUB_FT.
+ */
+export const GRID_SIZE_OPTIONS_FT: readonly number[] = [0.5, 1, 2, 3, 5] as const;
+
 // ---------------------------------------------------------------------------
 // Canvas
 // ---------------------------------------------------------------------------
