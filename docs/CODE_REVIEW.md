@@ -554,9 +554,9 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 ## 5. 🟢 Nice-to-have
 
 - **G-1.** Undo/redo across the collaboration boundary (multi-user undo). — ✅ resolved in G-1/G-13/G-14 batch
-- **G-3.** A "staircase" element with proper cut-out rendering for multi-floor plans.
-- **G-4.** A "plumbing" overlay for kitchens and bathrooms (showing water connections).
-- **G-5.** Sun-path / shadow calculation for each room based on orientation and date.
+- **G-3.** A "staircase" element with proper cut-out rendering for multi-floor plans. — ✅ resolved in G-3/G-4/G-5 batch
+- **G-4.** A "plumbing" overlay for kitchens and bathrooms (showing water connections). — ✅ resolved in G-3/G-4/G-5 batch
+- **G-5.** Sun-path / shadow calculation for each room based on orientation and date. — ✅ resolved in G-3/G-4/G-5 batch
 - **G-6.** A "compliance" report PDF that combines Vastu score, AI analysis, and the floor plan in one document. — ✅ resolved in G-6/G-8/G-11 batch
 - **G-8.** Per-room cost estimation (not just total). — ✅ resolved in G-6/G-8/G-11 batch
 - **G-9.** Snap-to-grid configurable to imperial or metric base. — ✅ resolved in G-9/G-10/G-15 batch
@@ -570,16 +570,33 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-21 (post `fix/g9-g10-g15-batch`):** All 9 P0s, all P1s, all P2 items, and all P3/Q items are resolved. G-1/G-13/G-14, G-2/G-7/G-12, G-6/G-8/G-11, and G-9/G-10/G-15 are resolved. Q-19, Q-20, Q-21, Q-22, Q-23, Q-24, and Q-25 are resolved. Remaining work is the outstanding G nice-to-haves: G-3, G-4, G-5.
+> **State as of 2026-06-26 (post `fix/g3-g4-g5-construction-overlays`):** All 9 P0s, all P1s, all P2 items, all P3/Q items, and all G nice-to-haves are resolved. G-1/G-13/G-14, G-2/G-7/G-12, G-6/G-8/G-11, G-9/G-10/G-15, and G-3/G-4/G-5 are resolved. Q-19, Q-20, Q-21, Q-22, Q-23, Q-24, and Q-25 are resolved. No open items remain on the §1–§5 lists.
 
-| Bucket                   | Items                                   | Suggested owner track | Effort  |
-| ------------------------ | --------------------------------------- | --------------------- | ------- |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —       |
-| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —       |
-| **P2 — Refactor**        | _none — S-1 and S-4 both shipped_       | health                | —       |
-| **P3 — Polish**          | Remaining G items                       | features              | ongoing |
+| Bucket                   | Items                                   | Suggested owner track | Effort |
+| ------------------------ | --------------------------------------- | --------------------- | ------ |
+| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —      |
+| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —      |
+| **P2 — Refactor**        | _none — S-1 and S-4 both shipped_       | health                | —      |
+| **P3 — Polish**          | _none — all G items resolved_           | features              | —      |
 
-**Where to start next:** The remaining G nice-to-haves are **G-3 staircase + G-4 plumbing overlay + G-5 sun path** (multi-floor / construction visualization theme).
+**Where to start next:** The §1–§5 backlog is empty. Any new work should be tracked as a fresh entry.
+
+---
+
+## ✅ Resolved in G-3/G-4/G-5 construction-overlays batch
+
+> The 2026-06-26 construction-visualization batch (`fix/g3-g4-g5-construction-overlays`) shipped the last 3 nice-to-haves from `docs/CODE_REVIEW.md` §5, plus a mobile canvas-overflow fix and a Sentry `process.env` → `import.meta.env.DEV` cleanup. User-facing features with unit tests and updated docs. Branch target: `main` via PR.
+
+| ID  | Title                        | Per-bug entry | Tests | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --- | ---------------------------- | ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G-3 | Staircase element            | §5 G-3        | +3    | `ROOM_ELEMENTS['Stairs']` in `src/constants/floorPlanConstants.ts` gains a `{ type: 'Staircase', w: 4, h: 10 }` element. `src/components/RoomElement.tsx` renders staircases with a step-hatch pattern. `STAIRCASE_ADDED` analytics event fired from `usePlanEditor.addRoomElement`. New `RoomElement.test.tsx`.                                                                                                                                                                                                                            |
+| G-4 | Plumbing overlay             | §5 G-4        | +2    | New `src/components/PlumbingOverlay.tsx` SVG layer draws water connections for kitchens and bathrooms. Wired through `usePlanEditor` (`showPlumbing`, `handleTogglePlumbing`), `CanvasArea`, `Canvas`, `App.tsx`, and a new "Overlays" section in `Sidebar`. `PLUMBING_OVERLAY_TOGGLED` analytics event. New `PlumbingOverlay.test.tsx`.                                                                                                                                                                                                    |
+| G-5 | Sun path / shadow overlay    | §5 G-5        | +6    | New `src/components/SunPathOverlay.tsx` renders convex-hull shadow polygons per room from orientation, date, time, and room height. `FloorPlan.latitude?: number` (defaults to `DEFAULT_LATITUDE` = New Delhi). `Sidebar` exposes date / time / latitude controls plus a "Now" button. New `src/utils.ts` helpers: `getSunPosition`, `formatSunTime`, `parseSunTime`, `DEFAULT_ROOM_HEIGHT_FT`, `DEFAULT_LATITUDE`. `SUN_PATH_TOGGLED` and `SUN_PATH_TIME_CHANGED` analytics events. New `SunPathOverlay.test.tsx` + `utils.test.ts` cases. |
+| —   | Mobile canvas overflow       | —             | +1    | `src/App.tsx` center wrapper `items-center` → `items-start md:items-center` so the plan's left edge stays visible on mobile. `src/components/VastuTour.tsx` splits the canvas-relative highlight from a viewport-centered `fixed` info card. Extended `VastuTour.test.tsx`.                                                                                                                                                                                                                                                                 |
+| —   | Sentry `process.env` cleanup | —             | +2    | `src/services/sentry.ts` uses `import.meta.env.DEV` instead of `process.env.NODE_ENV`. New `sentry.test.ts` cases delete `globalThis.process` and assert `captureError` / `captureMessage` do not throw.                                                                                                                                                                                                                                                                                                                                    |
+| —   | Overlay API surface          | —             | +2    | `usePlanEditor` exposes `showPlumbing`, `handleTogglePlumbing`, `showSunPath`, `sunDate`, `sunTime`, `handleToggleSunPath`, `handleSetSunDate`, `handleSetSunTime`, `handleSetSunNow`. New `usePlanEditor.test.ts` cases pin the public keys and overlay toggles.                                                                                                                                                                                                                                                                           |
+
+**Validation:** `npx tsc --noEmit` ✅, `npm run test -- --run` (382/382, +16 new) ✅, `npm run lint` ✅ (0 errors; 72 pre-existing warnings unchanged), `npm run build` ✅, `npm audit --audit-level=moderate` ✅ 0 vulnerabilities.
 
 ---
 

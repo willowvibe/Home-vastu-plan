@@ -9,6 +9,9 @@ import {
   Link as LinkIcon,
   Unlink,
   Search,
+  Eye,
+  Droplets,
+  Sun,
 } from 'lucide-react';
 import { FloorPlan, AppMode, RoomType } from '../../types';
 import { LayerManager } from '../LayerManager';
@@ -27,6 +30,17 @@ export interface SidebarProps {
   setLinkSetbacks: (value: boolean) => void;
   snapToGrid: boolean;
   setSnapToGrid: (value: boolean) => void;
+  showVastuGrid?: boolean;
+  onToggleVastuGrid?: () => void;
+  showPlumbing?: boolean;
+  onTogglePlumbing?: () => void;
+  showSunPath?: boolean;
+  onToggleSunPath?: () => void;
+  sunDate?: Date;
+  onSetSunDate?: (value: string) => void;
+  sunTime?: number;
+  onSetSunTime?: (value: string) => void;
+  onSetSunNow?: () => void;
   handleSelectTemplate: (name: string) => void;
   handleClearFloor: () => void;
   handleImportJSON: () => void;
@@ -64,6 +78,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setLinkSetbacks,
   snapToGrid,
   setSnapToGrid,
+  showVastuGrid,
+  onToggleVastuGrid,
+  showPlumbing,
+  onTogglePlumbing,
+  showSunPath,
+  onToggleSunPath,
+  sunDate,
+  onSetSunDate,
+  sunTime,
+  onSetSunTime,
+  onSetSunNow,
   handleSelectTemplate,
   handleClearFloor,
   handleImportJSON,
@@ -403,6 +428,105 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <Trash2 className="w-3 h-3" /> Clear Floor
           </button>
+        </div>
+      </div>
+
+      <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <Eye className="w-4 h-4 text-slate-400" /> Overlays
+        </h3>
+        <div className="space-y-2">
+          <label className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+            <span className="flex items-center gap-1.5">
+              <Map className="w-3.5 h-3.5" /> Vastu Grid
+            </span>
+            <input
+              type="checkbox"
+              checked={showVastuGrid}
+              onChange={onToggleVastuGrid}
+              className="rounded text-indigo-600 focus:ring-indigo-500"
+            />
+          </label>
+          <label className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+            <span className="flex items-center gap-1.5">
+              <Droplets className="w-3.5 h-3.5" /> Plumbing
+            </span>
+            <input
+              type="checkbox"
+              checked={showPlumbing}
+              onChange={onTogglePlumbing}
+              className="rounded text-indigo-600 focus:ring-indigo-500"
+            />
+          </label>
+          <label className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+            <span className="flex items-center gap-1.5">
+              <Sun className="w-3.5 h-3.5" /> Sun Path
+            </span>
+            <input
+              type="checkbox"
+              checked={showSunPath}
+              onChange={onToggleSunPath}
+              className="rounded text-indigo-600 focus:ring-indigo-500"
+            />
+          </label>
+
+          {showSunPath && (
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={sunDate ? sunDate.toISOString().split('T')[0] : ''}
+                    onChange={(e) => onSetSunDate?.(e.target.value)}
+                    className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">
+                    Time
+                  </label>
+                  <input
+                    type="time"
+                    value={
+                      sunTime !== undefined
+                        ? `${String(Math.floor(sunTime / 60)).padStart(2, '0')}:${String(sunTime % 60).padStart(2, '0')}`
+                        : ''
+                    }
+                    onChange={(e) => onSetSunTime?.(e.target.value)}
+                    className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">
+                  Latitude ({plan.latitude ?? 'default'}°)
+                </label>
+                <input
+                  type="number"
+                  min="-90"
+                  max="90"
+                  step="0.0001"
+                  value={plan.latitude ?? 28.6139}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (!Number.isNaN(val)) {
+                      updatePlan((p) => ({ ...p, latitude: Math.max(-90, Math.min(90, val)) }));
+                    }
+                  }}
+                  className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                />
+              </div>
+              <button
+                onClick={onSetSunNow}
+                className="w-full text-xs py-1.5 px-2 bg-indigo-50 border border-indigo-200 rounded hover:border-indigo-400 hover:bg-indigo-100 transition-colors text-indigo-700 font-medium dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-200"
+              >
+                Use current time
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

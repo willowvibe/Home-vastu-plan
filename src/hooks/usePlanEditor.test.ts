@@ -140,10 +140,15 @@ describe('usePlanEditor public API', () => {
         'handleImportJSON',
         'handlePrint',
         'handleSelectTemplate',
+        'handleSetSunDate',
+        'handleSetSunNow',
+        'handleSetSunTime',
         'handleSetbackChange',
         'handleShare',
         'handleShowShortcuts',
         'handleToggleGrid',
+        'handleTogglePlumbing',
+        'handleToggleSunPath',
         'handleToggleTour',
         'handleZoomIn',
         'handleZoomOut',
@@ -193,22 +198,30 @@ describe('usePlanEditor public API', () => {
         'setShowComplianceExport',
         'setShowOnboarding',
         'setShowPanel',
+        'setShowPlumbing',
         'setShowPresentationExport',
         'setShowProjectManager',
         'setShowShortcutHelp',
+        'setShowSunPath',
         'setShowVastuGrid',
         'setShowVastuTour',
         'setSnapToGrid',
+        'setSunDate',
+        'setSunTime',
         'setZoom',
         'showComplianceExport',
         'showOnboarding',
         'showPanel',
+        'showPlumbing',
         'showPresentationExport',
         'showProjectManager',
         'showShortcutHelp',
+        'showSunPath',
         'showVastuGrid',
         'showVastuTour',
         'snapToGrid',
+        'sunDate',
+        'sunTime',
         'syncPlan',
         'totalArea',
         'undo',
@@ -228,7 +241,7 @@ describe('usePlanEditor public API', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Feature toggles (G-10)
+// Feature toggles (G-10 / G-4 / G-5)
 // ---------------------------------------------------------------------------
 
 describe('usePlanEditor Vastu tour', () => {
@@ -246,6 +259,37 @@ describe('usePlanEditor Vastu tour', () => {
 
     expect(result.current.showVastuTour).toBe(true);
     expect(result.current.showVastuGrid).toBe(true);
+  });
+});
+
+describe('usePlanEditor overlay toggles', () => {
+  it('toggles plumbing overlay', () => {
+    const { result } = renderHook(() =>
+      usePlanEditor({ canvasContainerRef: { current: document.createElement('div') } })
+    );
+
+    expect(result.current.showPlumbing).toBe(false);
+    act(() => result.current.handleTogglePlumbing());
+    expect(result.current.showPlumbing).toBe(true);
+  });
+
+  it('toggles sun path overlay and updates date/time', () => {
+    const { result } = renderHook(() =>
+      usePlanEditor({ canvasContainerRef: { current: document.createElement('div') } })
+    );
+
+    expect(result.current.showSunPath).toBe(false);
+    act(() => result.current.handleToggleSunPath());
+    expect(result.current.showSunPath).toBe(true);
+
+    act(() => result.current.handleSetSunDate('2026-12-25'));
+    expect(result.current.sunDate.toISOString().startsWith('2026-12-25')).toBe(true);
+
+    act(() => result.current.handleSetSunTime('14:30'));
+    expect(result.current.sunTime).toBe(14 * 60 + 30);
+
+    act(() => result.current.handleSetSunNow());
+    expect(result.current.sunTime).toBeGreaterThan(0);
   });
 });
 

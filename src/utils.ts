@@ -291,3 +291,72 @@ export function getRoomCost(room: { w: number; h: number; costPerSqFt?: number }
 export function getTotalCost(rooms: { w: number; h: number; costPerSqFt?: number }[]): number {
   return rooms.reduce((sum, room) => sum + getRoomCost(room), 0);
 }
+
+// --- G-5 sun-path helpers -------------------------------------------------
+
+export const DEFAULT_ROOM_HEIGHT_FT = 10;
+export const DEFAULT_LATITUDE = 28.6139; // New Delhi, India
+
+export interface SunPosition {
+  altitude: number; // radians, angle above horizon
+  azimuth: number; // radians, 0 = north, clockwise
+}
+
+/**
+ * Compute a simplified solar position for a given latitude, date, and time.
+ *
+ * Uses the equations from the NOAA solar calculator approximations:
+ *   - Declination of the Earth based on day of year.
+ *   - Hour angle from local solar time (15° per hour from solar noon).
+ *   - Altitude = asin(sin(lat)*sin(decl) + cos(lat)*cos(decl)*cos(hourAngle)).
+ *   - Azimuth = atan2(sin(hourAngle), cos(hourAngle)*sin(lat) - tan(decl)*cos(lat)).
+ *
+ * This is accurate enough for an illustrative shadow overlay; it does not
+ * account for atmospheric refraction, equation of time, or longitude offset.
+ */
+export function getSunPosition(
+  latitude: number,
+  date: Date,
+  minutesSinceMidnight: number
+): SunPosition {
+  const dayOfYear = Math.floor(
+    (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) -
+      Date.UTC(date.getFullYear(), 0, 0)) /
+      86400000
+  );
+
+  const latRad = (latitude * Math.PI) / 180;
+  const declination = 23.45 * Math.sin(((284 + dayOfYear) * 2 * Math.PI) / 365);
+  const declRad = (declination * Math.PI) / 180;
+
+  const solarTimeHours = minutesSinceMidnight / 60;
+  const hourAngleDeg = 15 * (solarTimeHours - 12);
+  const hourAngleRad = (hourAngleDeg * Math.PI) / 180;
+
+  const sinAlt =
+    Math.sin(latRad) * Math.sin(declRad) +
+    Math.cos(latRad) * Math.cos(declRad) * Math.cos(hourAngleRad);
+  const altitude = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+
+  const y = Math.sin(hourAngleRad);
+  const x = Math.cos(hourAngleRad) * Math.sin(latRad) - Math.tan(declRad) * Math.cos(latRad);
+  let azimuth = Math.atan2(y, x);
+  if (azimuth < 0) azimuth += 2 * Math.PI;
+
+  return { altitude, azimuth };
+}
+
+/** Format minutes-since-midnight as HH:mm for <input type="time">. */
+export function formatSunTime(minutes: number): string {
+  const clamped = Math.max(0, Math.min(1439, Math.round(minutes)));
+  const h = Math.floor(clamped / 60);
+  const m = clamped % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+/** Parse a HH:mm string into minutes since midnight. */
+export function parseSunTime(value: string): number {
+  const [h, m] = value.split(':').map((v) => Number(v));
+  if (Number.isNaN(h) || Number.isNaN(m)) return 0;
+  return Math.max(0, Math.min(1439, h * 60 + m));
+}

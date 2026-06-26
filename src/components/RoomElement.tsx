@@ -24,6 +24,7 @@ const ELEMENT_COLORS: Record<string, string> = {
   Shelf: 'bg-neutral-200 border-neutral-400 text-neutral-700',
   Car: 'bg-slate-300 border-slate-500 text-slate-800',
   Bike: 'bg-gray-300 border-gray-500 text-gray-800',
+  Staircase: 'bg-amber-100 border-amber-400 text-amber-800',
   Door: 'bg-amber-700 border-amber-900 text-white z-20 shadow-md',
   Window:
     'bg-sky-200/80 border-sky-400 border-[1.5px] text-sky-800 z-20 shadow-sm backdrop-blur-sm',
@@ -40,6 +41,9 @@ export const RoomElement: React.FC<RoomElementProps> = React.memo(
   ({ element, pixelsPerFoot, onPointerDown, onDoubleClick }) => {
     const colorClass =
       ELEMENT_COLORS[element.type] || 'bg-white/80 border-slate-400 text-slate-600';
+    const isStaircase = element.type === 'Staircase';
+    const pxW = element.w * pixelsPerFoot;
+    const pxH = element.h * pixelsPerFoot;
 
     return (
       <div
@@ -50,14 +54,33 @@ export const RoomElement: React.FC<RoomElementProps> = React.memo(
         style={{
           left: element.x * pixelsPerFoot,
           top: element.y * pixelsPerFoot,
-          width: element.w * pixelsPerFoot,
-          height: element.h * pixelsPerFoot,
+          width: pxW,
+          height: pxH,
           transform: `rotate(${element.rotation}deg)`,
+          ...(isStaircase && {
+            backgroundImage:
+              'repeating-linear-gradient(135deg, transparent, transparent 4px, rgba(120, 53, 15, 0.15) 4px, rgba(120, 53, 15, 0.15) 8px)',
+          }),
         }}
         onPointerDown={onPointerDown}
         onDoubleClick={onDoubleClick}
       >
-        {element.type}
+        {isStaircase ? (
+          <>
+            <span className="z-10 px-0.5 bg-amber-100/80 dark:bg-amber-900/80 rounded">
+              {element.type}
+            </span>
+            {/* Step hatch lines — drawn as simple horizontal rules so the cut-out
+                reads as a staircase even at small sizes. */}
+            <div className="absolute inset-0 flex flex-col justify-between py-0.5 pointer-events-none">
+              {Array.from({ length: Math.max(3, Math.floor(pxH / 8)) }, (_, i) => (
+                <div key={i} className="w-full h-px bg-amber-700/30 dark:bg-amber-300/30" />
+              ))}
+            </div>
+          </>
+        ) : (
+          element.type
+        )}
       </div>
     );
   }

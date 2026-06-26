@@ -15,10 +15,13 @@ import {
   copyToClipboardWithFallback,
   DEFAULT_COST_PER_SQFT,
   formatCurrency,
+  formatSunTime,
   getAnalyzeButtonState,
   getErrorMessage,
   getRoomCost,
+  getSunPosition,
   getTotalCost,
+  parseSunTime,
 } from './utils';
 
 describe('cn', () => {
@@ -322,5 +325,26 @@ describe('copyToClipboardWithFallback (U-10: handle clipboard rejection)', () =>
     document.execCommand = vi.fn().mockReturnValue(false);
     const result = await copyToClipboardWithFallback('https://example.com/plan');
     expect(result).toEqual({ ok: false });
+  });
+});
+
+describe('sun-path helpers (G-5)', () => {
+  it('computes high solar noon altitude in Delhi on the summer solstice', () => {
+    const pos = getSunPosition(28.6139, new Date('2026-06-21'), 12 * 60);
+    // At solar noon the altitude should be close to 90° - lat + decl (~23.45°).
+    expect(pos.altitude).toBeGreaterThan(1.2); // > ~69°
+    expect(pos.altitude).toBeLessThan(Math.PI / 2);
+  });
+
+  it('reports the sun below the horizon at midnight', () => {
+    const pos = getSunPosition(28.6139, new Date('2026-06-21'), 0);
+    expect(pos.altitude).toBeLessThan(0);
+  });
+
+  it('round-trips time through format/parse', () => {
+    expect(formatSunTime(14 * 60 + 5)).toBe('14:05');
+    expect(parseSunTime('14:05')).toBe(14 * 60 + 5);
+    expect(parseSunTime('bad')).toBe(0);
+    expect(formatSunTime(1500)).toBe('23:59');
   });
 });

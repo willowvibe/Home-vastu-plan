@@ -34,27 +34,29 @@ export const VastuTour: React.FC<VastuTourProps> = ({ plan, pixelsPerFoot, onClo
   const active = cells[step];
 
   return (
-    <div
-      className="absolute inset-0 z-50 pointer-events-none"
-      data-testid="vastu-tour-overlay"
-      aria-modal="true"
-      role="dialog"
-    >
+    <>
+      {/* Canvas-relative highlight: scrolls with the plan. */}
       {active && (
         <div
-          className="absolute border-2 border-emerald-400 bg-emerald-400/20 rounded transition-all duration-300"
+          className="absolute border-2 border-emerald-400 bg-emerald-400/20 rounded transition-all duration-300 z-40 pointer-events-none"
           style={{
             left: active.left,
             top: active.top,
             width: active.width,
             height: active.height,
-            pointerEvents: 'auto',
           }}
           data-testid="vastu-tour-highlight"
         />
       )}
 
-      <div className="absolute inset-0 flex items-center justify-center p-8">
+      {/* Viewport-centered info card: stays on-screen even when the canvas
+          is much larger than the viewport (especially on mobile). */}
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 pointer-events-none"
+        data-testid="vastu-tour-overlay"
+        aria-modal="true"
+        role="dialog"
+      >
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl p-6 max-w-md w-full pointer-events-auto">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
@@ -114,6 +116,6 @@ export const VastuTour: React.FC<VastuTourProps> = ({ plan, pixelsPerFoot, onClo
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };

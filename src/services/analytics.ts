@@ -122,6 +122,12 @@ export const EVENTS = {
   COMMENT_ADDED: 'comment_added',
   COMMENT_DELETED: 'comment_deleted',
   COMMENT_UPDATED: 'comment_updated',
+
+  // Construction overlay events (G-3 / G-4 / G-5)
+  STAIRCASE_ADDED: 'staircase_added',
+  PLUMBING_OVERLAY_TOGGLED: 'plumbing_overlay_toggled',
+  SUN_PATH_TOGGLED: 'sun_path_toggled',
+  SUN_PATH_TIME_CHANGED: 'sun_path_time_changed',
 };
 
 // Default metadata for events

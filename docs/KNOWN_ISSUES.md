@@ -238,7 +238,7 @@ _All P2 refactor backlog items are now resolved._
 
 Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
-- G-3, G-4, G-5 (staircase, plumbing overlay, sun path)
+- _none remaining — G-3, G-4, G-5 (staircase, plumbing overlay, sun path) resolved in the 2026-06-26 `fix/g3-g4-g5-construction-overlays` batch_
 
 ---
 
@@ -336,7 +336,7 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 
 ## Triage (mirroring `CODE_REVIEW.md` §6)
 
-> **State as of 2026-06-21 (post `fix/g9-g10-g15-batch`).** All 9 P0s, all P1s, all P2 items, and all P3/Q items are resolved. G-9, G-10, and G-15 are resolved. Remaining work is the outstanding G nice-to-haves: G-3, G-4, G-5.
+> **State as of 2026-06-26 (post `fix/g3-g4-g5-construction-overlays`).** All 9 P0s, all P1s, all P2 items, all P3/Q items, and all G nice-to-haves are resolved. G-3, G-4, and G-5 are resolved. No open items remain on the `CODE_REVIEW.md` §1–§5 lists.
 
 | Bucket | Items | Effort | Status                                                 |
 | ------ | ----- | ------ | ------------------------------------------------------ |
@@ -344,10 +344,25 @@ Selected items; see full list in `docs/CODE_REVIEW.md` §5.
 | P1     | 0     | —      | ✅ All resolved (B-8 shipped)                          |
 | P2     | 0     | —      | ✅ All resolved (S-1 shipped in PR #67, S-4 in PR #66) |
 | P3 / Q | 0     | —      | ✅ All resolved                                        |
+| G      | 0     | —      | ✅ All resolved (G-3/G-4/G-5 shipped 2026-06-26)       |
 
 See the `✅ Recently Resolved` sections above for earlier batches.
 
-**Suggested next batch:** The remaining G nice-to-haves are **G-3 staircase + G-4 plumbing overlay + G-5 sun path** (multi-floor construction visualization theme).
+**Suggested next batch:** The `CODE_REVIEW.md` §1–§5 backlog is empty. Any new work should be tracked as a fresh entry.
+
+## ✅ Recently Resolved (G-3/G-4/G-5 construction-overlays batch)
+
+> 2026-06-26 — `fix/g3-g4-g5-construction-overlays`. Shipped the last 3 G nice-to-haves from `docs/CODE_REVIEW.md` §5, plus a mobile canvas-overflow fix and a Sentry `process.env` → `import.meta.env.DEV` cleanup. Empties the §1–§5 backlog.
+
+| ID  | Title                        | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --- | ---------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G-3 | Staircase element            | ✅ Resolved | `ROOM_ELEMENTS['Stairs']` gains a `{ type: 'Staircase', w: 4, h: 10 }` element; `RoomElement.tsx` renders a step-hatch pattern. `STAIRCASE_ADDED` analytics event. New `RoomElement.test.tsx` (+3).                                                                                                                                                                                                                                     |
+| G-4 | Plumbing overlay             | ✅ Resolved | New `PlumbingOverlay.tsx` SVG layer for kitchen/bathroom water connections. Wired through `usePlanEditor`, `CanvasArea`, `Canvas`, `App.tsx`, and a new `Sidebar` "Overlays" section. `PLUMBING_OVERLAY_TOGGLED` analytics. New `PlumbingOverlay.test.tsx` (+2).                                                                                                                                                                        |
+| G-5 | Sun path / shadow overlay    | ✅ Resolved | New `SunPathOverlay.tsx` convex-hull shadow polygons from orientation/date/time/room height. `FloorPlan.latitude?` (default New Delhi). `Sidebar` date/time/latitude controls + "Now". New `utils.ts` helpers `getSunPosition` / `formatSunTime` / `parseSunTime` / `DEFAULT_ROOM_HEIGHT_FT` / `DEFAULT_LATITUDE`. `SUN_PATH_TOGGLED` + `SUN_PATH_TIME_CHANGED` analytics. New `SunPathOverlay.test.tsx` (+3) and `utils.test.ts` (+3). |
+| —   | Mobile canvas overflow       | ✅ Resolved | `App.tsx` center wrapper `items-center` → `items-start md:items-center`; `VastuTour.tsx` splits the canvas highlight from a viewport-centered `fixed` info card. Extended `VastuTour.test.tsx` (+1).                                                                                                                                                                                                                                    |
+| —   | Sentry `process.env` cleanup | ✅ Resolved | `sentry.ts` uses `import.meta.env.DEV` instead of `process.env.NODE_ENV`. New `sentry.test.ts` (+2) deletes `globalThis.process` and asserts no throw.                                                                                                                                                                                                                                                                                  |
+
+**Validation:** `npx tsc --noEmit` ✅, `npm run test -- --run` (382/382, +16 new) ✅, `npm run lint` ✅ (0 errors; 72 pre-existing warnings unchanged), `npm run build` ✅, `npm audit --audit-level=moderate` ✅ 0 vulnerabilities.
 
 ## ✅ Recently Resolved (Q-20/Q-21/Q-25 env/docs batch)
 

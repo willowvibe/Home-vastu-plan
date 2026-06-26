@@ -115,6 +115,13 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
   const [linkSetbacks, setLinkSetbacks] = useState(true);
   const [showVastuGrid, setShowVastuGrid] = useState(false);
   const [showVastuTour, setShowVastuTour] = useState(false);
+  const [showPlumbing, setShowPlumbing] = useState(false);
+  const [showSunPath, setShowSunPath] = useState(false);
+  const [sunDate, setSunDate] = useState(() => new Date());
+  const [sunTime, setSunTime] = useState(() => {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  });
   const [snapToGrid, setSnapToGrid] = useState(true);
   const { darkMode } = useTheme();
   const [measuring, setMeasuring] = useState(false);
@@ -690,6 +697,9 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
         }),
       }));
       commitHistory();
+      if (type === 'Staircase') {
+        trackEvent(EVENTS.STAIRCASE_ADDED, { props: { roomId } });
+      }
     },
     [updatePlan, commitHistory]
   );
@@ -828,6 +838,44 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     setShowVastuGrid(true);
   }, []);
 
+  const handleTogglePlumbing = useCallback(() => {
+    setShowPlumbing((prev) => {
+      const next = !prev;
+      trackEvent(EVENTS.PLUMBING_OVERLAY_TOGGLED, { props: { enabled: next } });
+      return next;
+    });
+  }, []);
+
+  const handleToggleSunPath = useCallback(() => {
+    setShowSunPath((prev) => {
+      const next = !prev;
+      trackEvent(EVENTS.SUN_PATH_TOGGLED, { props: { enabled: next } });
+      return next;
+    });
+  }, []);
+
+  const handleSetSunDate = useCallback((value: string) => {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      setSunDate(parsed);
+      trackEvent(EVENTS.SUN_PATH_TIME_CHANGED, { props: { type: 'date', value } });
+    }
+  }, []);
+
+  const handleSetSunTime = useCallback((value: string) => {
+    const [h, m] = value.split(':').map((v) => Number(v));
+    if (Number.isNaN(h) || Number.isNaN(m)) return;
+    setSunTime(Math.max(0, Math.min(1439, h * 60 + m)));
+    trackEvent(EVENTS.SUN_PATH_TIME_CHANGED, { props: { type: 'time', value } });
+  }, []);
+
+  const handleSetSunNow = useCallback(() => {
+    const now = new Date();
+    setSunDate(now);
+    setSunTime(now.getHours() * 60 + now.getMinutes());
+    trackEvent(EVENTS.SUN_PATH_TIME_CHANGED, { props: { type: 'now' } });
+  }, []);
+
   const handleZoomIn = useCallback(() => setZoom((z) => Math.min(3, z + 0.1)), []);
   const handleZoomOut = useCallback(() => setZoom((z) => Math.max(0.1, z - 0.1)), []);
   const handleShowShortcuts = useCallback(() => {
@@ -940,6 +988,14 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     setShowVastuGrid,
     showVastuTour,
     setShowVastuTour,
+    showPlumbing,
+    setShowPlumbing,
+    showSunPath,
+    setShowSunPath,
+    sunDate,
+    setSunDate,
+    sunTime,
+    setSunTime,
     snapToGrid,
     setSnapToGrid,
     measuring,
@@ -1009,6 +1065,11 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     // Toggles
     handleToggleGrid,
     handleToggleTour,
+    handleTogglePlumbing,
+    handleToggleSunPath,
+    handleSetSunDate,
+    handleSetSunTime,
+    handleSetSunNow,
     handleZoomIn,
     handleZoomOut,
     handleShowShortcuts,
