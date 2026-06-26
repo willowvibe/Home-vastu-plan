@@ -37,15 +37,14 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      // S-12: the no-explicit-any rule is now ON (was off) so any new
-      // `catch (error: any)` or stray `: any` fails the lint step. It is
-      // still 'warn' (not 'error') for now because there are 30+ existing
-      // uses in 3rd-party type defs (`sw-types.d.ts`), test mocks
-      // (`test/setup.ts`, `useCanvasDrag.test.ts`), the `Room.tsx:54` B-13
-      // cast, and the shared `PlanUpdateEvent.data` type (Q-9 is the
-      // proper fix). Promoting to 'error' is a follow-up: fix the existing
-      // 30+ sites in a separate PR, then flip this to 'error'.
-      '@typescript-eslint/no-explicit-any': 'warn',
+      // S-12: no-explicit-any is now 'error'. The existing 67 sites (3rd-party
+      // type defs in `sw-types.d.ts`, test mocks in `test/setup.ts` and
+      // `useCanvasDrag.test.ts`, the `Room.tsx:54` B-13 cast, the shared
+      // `PlanUpdateEvent.data` type, etc.) have all been cleaned up in this
+      // PR — every `any` is now either a precise type or an `as unknown as T`
+      // cast through `unknown`. Any NEW `any` now fails CI. (Q-9 remains
+      // the proper long-term fix for the `PlanUpdateEvent.data` shape.)
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },

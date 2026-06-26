@@ -59,7 +59,7 @@ export const Room: React.FC<RoomProps> = React.memo(
     // intentional and tracked in KNOWN_ISSUES §B-13; remove if the dep ever
     // needs to widen.
     const vastu = useMemo(
-      () => analyzeRoomVastu(room, plan as any),
+      () => analyzeRoomVastu(room, plan),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [room, plan.plotWidth, plan.plotHeight, plan.northAngle]
     );

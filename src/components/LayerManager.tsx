@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Plus, Trash2, Layers } from 'lucide-react';
 import { RoomLayer, Room } from '../types';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface LayerManagerProps {
   layers: RoomLayer[];
@@ -28,7 +27,6 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
   currentFloor,
 }) => {
   const [newLayerName, setNewLayerName] = useState('');
-  const { darkMode } = useTheme();
 
   const toggleVisibility = (layerId: string) => {
     onUpdateLayers(layers.map((l) => (l.id === layerId ? { ...l, visible: !l.visible } : l)));

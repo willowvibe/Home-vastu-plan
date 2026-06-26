@@ -83,7 +83,7 @@ sw.addEventListener('fetch', (event) => {
 // Push notification support (optional)
 sw.addEventListener('push', (event) => {
   const dataPromise: Promise<{ title: string; body: string }> = event.data
-    ? event.data.json()
+    ? (event.data.json() as Promise<{ title: string; body: string }>)
     : Promise.resolve({ title: 'VastuPlan', body: 'New update available' });
   event.waitUntil(
     dataPromise.then((data) =>

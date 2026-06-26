@@ -61,12 +61,12 @@ describe('Room (B-13: vastu useMemo dep narrowing)', () => {
     const planA = { plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' as const };
     const planB = { plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'm' as const };
 
-    const { rerender } = render(<Room room={STABLE_ROOM} plan={planA as any} {...baseProps()} />);
+    const { rerender } = render(<Room room={STABLE_ROOM} plan={planA} {...baseProps()} />);
     expect(analyzeRoomVastu).toHaveBeenCalledTimes(1);
 
     // New plan object reference, same plot primitives, different unit
     // (the unit field is NOT a vastu input — confirms we didn't over-narrow).
-    rerender(<Room room={STABLE_ROOM} plan={planB as any} {...baseProps()} />);
+    rerender(<Room room={STABLE_ROOM} plan={planB} {...baseProps()} />);
     expect(analyzeRoomVastu).toHaveBeenCalledTimes(1);
   });
 
@@ -74,10 +74,10 @@ describe('Room (B-13: vastu useMemo dep narrowing)', () => {
     const planA = { plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' as const };
     const planB = { plotWidth: 60, plotHeight: 40, northAngle: 0, unit: 'ft' as const };
 
-    const { rerender } = render(<Room room={STABLE_ROOM} plan={planA as any} {...baseProps()} />);
+    const { rerender } = render(<Room room={STABLE_ROOM} plan={planA} {...baseProps()} />);
     expect(analyzeRoomVastu).toHaveBeenCalledTimes(1);
 
-    rerender(<Room room={STABLE_ROOM} plan={planB as any} {...baseProps()} />);
+    rerender(<Room room={STABLE_ROOM} plan={planB} {...baseProps()} />);
     expect(analyzeRoomVastu).toHaveBeenCalledTimes(2);
   });
 
@@ -85,10 +85,10 @@ describe('Room (B-13: vastu useMemo dep narrowing)', () => {
     const plan = { plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' as const };
     const moved: RoomType = { ...STABLE_ROOM, x: 15 };
 
-    const { rerender } = render(<Room room={STABLE_ROOM} plan={plan as any} {...baseProps()} />);
+    const { rerender } = render(<Room room={STABLE_ROOM} plan={plan} {...baseProps()} />);
     expect(analyzeRoomVastu).toHaveBeenCalledTimes(1);
 
-    rerender(<Room room={moved} plan={plan as any} {...baseProps()} />);
+    rerender(<Room room={moved} plan={plan} {...baseProps()} />);
     expect(analyzeRoomVastu).toHaveBeenCalledTimes(2);
   });
 
@@ -96,10 +96,10 @@ describe('Room (B-13: vastu useMemo dep narrowing)', () => {
     const planA = { plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' as const };
     const planB = { plotWidth: 30, plotHeight: 40, northAngle: 45, unit: 'ft' as const };
 
-    const { rerender } = render(<Room room={STABLE_ROOM} plan={planA as any} {...baseProps()} />);
+    const { rerender } = render(<Room room={STABLE_ROOM} plan={planA} {...baseProps()} />);
     expect(analyzeRoomVastu).toHaveBeenCalledTimes(1);
 
-    rerender(<Room room={STABLE_ROOM} plan={planB as any} {...baseProps()} />);
+    rerender(<Room room={STABLE_ROOM} plan={planB} {...baseProps()} />);
     expect(analyzeRoomVastu).toHaveBeenCalledTimes(2);
   });
 });
@@ -116,7 +116,7 @@ describe('Room (B-20: outer onPointerDown bails on child click)', () => {
     const { container } = render(
       <Room
         room={STABLE_ROOM}
-        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' }}
         pixelsPerFoot={20}
         isSelected={true}
         floorRooms={[]}
@@ -141,7 +141,7 @@ describe('Room (B-20: outer onPointerDown bails on child click)', () => {
     const { container } = render(
       <Room
         room={STABLE_ROOM}
-        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' }}
         pixelsPerFoot={20}
         isSelected={true}
         floorRooms={[]}
@@ -181,7 +181,7 @@ describe('Room (U-3: room-body click selects the room)', () => {
     const { container } = render(
       <Room
         room={STABLE_ROOM}
-        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' }}
         pixelsPerFoot={20}
         isSelected={false}
         floorRooms={[]}
@@ -204,7 +204,7 @@ describe('Room (U-3: room-body click selects the room)', () => {
     const { container } = render(
       <Room
         room={STABLE_ROOM}
-        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' }}
         pixelsPerFoot={20}
         isSelected={false}
         floorRooms={[]}
@@ -228,7 +228,7 @@ describe('Room (U-3: room-body click selects the room)', () => {
     const { container } = render(
       <Room
         room={STABLE_ROOM}
-        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' }}
         pixelsPerFoot={20}
         isSelected={true}
         floorRooms={[]}
@@ -252,7 +252,7 @@ describe('Room (U-3: room-body click selects the room)', () => {
     const { container } = render(
       <Room
         room={STABLE_ROOM}
-        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' }}
         pixelsPerFoot={20}
         isSelected={false}
         floorRooms={[]}
@@ -276,7 +276,7 @@ describe('Room (U-3: room-body click selects the room)', () => {
     const { container } = render(
       <Room
         room={STABLE_ROOM}
-        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' }}
         pixelsPerFoot={20}
         isSelected={false}
         floorRooms={[]}
@@ -305,7 +305,7 @@ describe('Room (U-15: 8-direction resize handles)', () => {
     render(
       <Room
         room={STABLE_ROOM}
-        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' } as any}
+        plan={{ plotWidth: 30, plotHeight: 40, northAngle: 0, unit: 'ft' }}
         pixelsPerFoot={20}
         isSelected={true}
         floorRooms={[]}

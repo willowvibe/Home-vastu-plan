@@ -12,7 +12,7 @@ interface ServiceWorkerGlobalScope extends EventTarget {
   skipWaiting(): Promise<void>;
   addEventListener<K extends keyof ServiceWorkerGlobalScopeEventMap>(
     type: K,
-    listener: (this: ServiceWorkerGlobalScope, ev: ServiceWorkerGlobalScopeEventMap[K]) => any,
+    listener: (this: ServiceWorkerGlobalScope, ev: ServiceWorkerGlobalScopeEventMap[K]) => void,
     options?: boolean | AddEventListenerOptions
   ): void;
   addEventListener(
@@ -22,7 +22,7 @@ interface ServiceWorkerGlobalScope extends EventTarget {
   ): void;
   removeEventListener<K extends keyof ServiceWorkerGlobalScopeEventMap>(
     type: K,
-    listener: (this: ServiceWorkerGlobalScope, ev: ServiceWorkerGlobalScopeEventMap[K]) => any,
+    listener: (this: ServiceWorkerGlobalScope, ev: ServiceWorkerGlobalScopeEventMap[K]) => void,
     options?: boolean | EventListenerOptions
   ): void;
 }
@@ -49,7 +49,7 @@ interface Client {
   id: string;
   url: string;
   type: 'window' | 'worker' | 'sharedworker';
-  postMessage(message: any, transfer?: Transferable[]): void;
+  postMessage(message: unknown, transfer?: Transferable[]): void;
 }
 
 interface ServiceWorkerGlobalScopeEventMap {
@@ -61,7 +61,7 @@ interface ServiceWorkerGlobalScopeEventMap {
 }
 
 interface ExtendableEvent extends Event {
-  waitUntil(promise: Promise<any>): void;
+  waitUntil(promise: Promise<unknown>): void;
 }
 
 interface FetchEvent extends Event {
@@ -75,7 +75,7 @@ interface PushEvent extends ExtendableEvent {
 }
 
 interface PushData {
-  json(): Promise<any>;
+  json(): Promise<unknown>;
   text(): Promise<string>;
   arrayBuffer(): Promise<ArrayBuffer>;
   blob(): Promise<Blob>;
@@ -91,7 +91,7 @@ interface PushNotification {
   body?: string;
   icon?: string;
   tag?: string;
-  data?: any;
+  data?: unknown;
   close(): void;
 }
 

@@ -62,7 +62,12 @@ describe('useCanvasDrag (B-5: no drag in non-edit mode)', () => {
     expect(result.current.draggingRoom).toBeNull();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 10, clientY: 10, target: null, stopPropagation: () => {} } as any,
+        {
+          clientX: 10,
+          clientY: 10,
+          target: null,
+          stopPropagation: () => {},
+        } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -77,7 +82,12 @@ describe('useCanvasDrag (B-5: no drag in non-edit mode)', () => {
     const { result } = setup('comment');
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 10, clientY: 10, target: null, stopPropagation: () => {} } as any,
+        {
+          clientX: 10,
+          clientY: 10,
+          target: null,
+          stopPropagation: () => {},
+        } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -89,7 +99,12 @@ describe('useCanvasDrag (B-5: no drag in non-edit mode)', () => {
     const { result } = setup('edit');
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 10, clientY: 10, target: null, stopPropagation: () => {} } as any,
+        {
+          clientX: 10,
+          clientY: 10,
+          target: null,
+          stopPropagation: () => {},
+        } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -171,7 +186,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -187,7 +202,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ snapToGrid: true });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -201,7 +216,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ snapToGrid: false });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -220,7 +235,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ snapToGrid: true, gridSize: 2 });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -239,7 +254,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ plan: planWithSetback });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -258,7 +273,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ plan: planWithSetback });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -276,7 +291,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ plan: planWithSetback });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 1000, clientY: 0, stopPropagation: () => {} } as any, // start far right
+        { clientX: 1000, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent, // start far right
         PLAN.rooms[0],
         'drag'
       );
@@ -297,7 +312,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ plan: planWithNeighbor });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -318,7 +333,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ plan: planWithNeighbor });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -339,7 +354,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom } = setup({ plan: planWithOtherFloor });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -353,7 +368,7 @@ describe('useCanvasDrag (Q-1: room drag behaviour)', () => {
     const { result, onUpdateRoom: _onUpdateRoom, onUpdateRoomEnd } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -394,7 +409,7 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
     const { result } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'resize',
         'se'
@@ -408,7 +423,7 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
     const { result, onUpdateRoom } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'resize',
         'se'
@@ -424,7 +439,7 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
     const { result, onUpdateRoom } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'resize',
         'se'
@@ -444,7 +459,7 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
     const { result, onUpdateRoom } = setup({ plan: planWithSetback });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'resize',
         'se'
@@ -475,7 +490,7 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
     const { result, onUpdateRoom } = setup({ plan: planWithFullSetback });
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         planWithFullSetback.rooms[0],
         'resize',
         'se'
@@ -493,7 +508,7 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
     const { result, onUpdateRoom } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'resize',
         'sw'
@@ -509,7 +524,7 @@ describe('useCanvasDrag (Q-1: room resize behaviour)', () => {
     const { result, onUpdateRoomEnd } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'resize',
         'se'
@@ -561,7 +576,7 @@ describe('useCanvasDrag (Q-1: element drag behaviour)', () => {
     const element = planWithElement.rooms[0].elements![0];
     act(() => {
       result.current.handleElementPointerDown(
-        { clientX: 40, clientY: 40, stopPropagation: () => {} } as any,
+        { clientX: 40, clientY: 40, stopPropagation: () => {} } as unknown as React.PointerEvent,
         planWithElement.rooms[0],
         element
       );
@@ -577,7 +592,7 @@ describe('useCanvasDrag (Q-1: element drag behaviour)', () => {
     // click at element center: clientX = 1.75*20 = 35, clientY = 35.
     act(() => {
       result.current.handleElementPointerDown(
-        { clientX: 35, clientY: 35, stopPropagation: () => {} } as any,
+        { clientX: 35, clientY: 35, stopPropagation: () => {} } as unknown as React.PointerEvent,
         planWithElement.rooms[0],
         element
       );
@@ -599,7 +614,7 @@ describe('useCanvasDrag (Q-1: element drag behaviour)', () => {
     const element = planWithElement.rooms[0].elements![0];
     act(() => {
       result.current.handleElementPointerDown(
-        { clientX: 35, clientY: 35, stopPropagation: () => {} } as any,
+        { clientX: 35, clientY: 35, stopPropagation: () => {} } as unknown as React.PointerEvent,
         planWithElement.rooms[0],
         element
       );
@@ -641,7 +656,7 @@ describe('useCanvasDrag (Q-1: element drag behaviour)', () => {
     const door = planWithDoor.rooms[0].elements![0];
     act(() => {
       result.current.handleElementPointerDown(
-        { clientX: 100, clientY: 100, stopPropagation: () => {} } as any,
+        { clientX: 100, clientY: 100, stopPropagation: () => {} } as unknown as React.PointerEvent,
         planWithDoor.rooms[0],
         door
       );
@@ -662,7 +677,7 @@ describe('useCanvasDrag (Q-1: element drag behaviour)', () => {
     const element = planWithElement.rooms[0].elements![0];
     act(() => {
       result.current.handleElementPointerDown(
-        { clientX: 35, clientY: 35, stopPropagation: () => {} } as any,
+        { clientX: 35, clientY: 35, stopPropagation: () => {} } as unknown as React.PointerEvent,
         planWithElement.rooms[0],
         element
       );
@@ -818,7 +833,7 @@ describe('useCanvasDrag (pointer lifecycle cleanup)', () => {
     const { result, onUpdateRoomEnd } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -835,7 +850,7 @@ describe('useCanvasDrag (pointer lifecycle cleanup)', () => {
     const { result, onUpdateRoomEnd } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -849,7 +864,7 @@ describe('useCanvasDrag (pointer lifecycle cleanup)', () => {
     const { result, onUpdateRoomEnd } = setup();
     act(() => {
       result.current.handlePointerDown(
-        { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+        { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
         PLAN.rooms[0],
         'drag'
       );
@@ -892,7 +907,7 @@ describe('useCanvasDrag (pointer lifecycle cleanup)', () => {
       );
       act(() => {
         result.current.handlePointerDown(
-          { clientX: 0, clientY: 0, stopPropagation: () => {} } as any,
+          { clientX: 0, clientY: 0, stopPropagation: () => {} } as unknown as React.PointerEvent,
           PLAN.rooms[0],
           'drag'
         );
