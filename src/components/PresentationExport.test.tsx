@@ -71,12 +71,7 @@ describe('PresentationExport (S-15: logo MIME validation)', () => {
   it('accepts a valid PNG (no toast is shown)', async () => {
     showToast.mockClear();
     render(
-      <PresentationExport
-        canvasRef={noopRef as any}
-        plan={PLAN}
-        currentFloor={0}
-        onClose={vi.fn()}
-      />
+      <PresentationExport canvasRef={noopRef} plan={PLAN} currentFloor={0} onClose={vi.fn()} />
     );
     const file = makeFile([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], 'image/png');
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
@@ -89,12 +84,7 @@ describe('PresentationExport (S-15: logo MIME validation)', () => {
   it('rejects a non-image (PDF magic) — toast is shown', async () => {
     showToast.mockClear();
     render(
-      <PresentationExport
-        canvasRef={noopRef as any}
-        plan={PLAN}
-        currentFloor={0}
-        onClose={vi.fn()}
-      />
+      <PresentationExport canvasRef={noopRef} plan={PLAN} currentFloor={0} onClose={vi.fn()} />
     );
     const file = makeFile(
       [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34],
@@ -112,12 +102,7 @@ describe('PresentationExport (S-15: logo MIME validation)', () => {
   it('rejects files larger than 5 MB — toast is shown', async () => {
     showToast.mockClear();
     render(
-      <PresentationExport
-        canvasRef={noopRef as any}
-        plan={PLAN}
-        currentFloor={0}
-        onClose={vi.fn()}
-      />
+      <PresentationExport canvasRef={noopRef} plan={PLAN} currentFloor={0} onClose={vi.fn()} />
     );
     // 6 MB of zeros with PNG magic prefix.
     const big = new Uint8Array(6 * 1024 * 1024);
@@ -151,9 +136,7 @@ describe('PresentationExport (U-6: PDF generation uses the ref element)', () => 
     document.body.appendChild(div);
     const ref = { current: div };
     const onClose = vi.fn();
-    render(
-      <PresentationExport canvasRef={ref as any} plan={PLAN} currentFloor={0} onClose={onClose} />
-    );
+    render(<PresentationExport canvasRef={ref} plan={PLAN} currentFloor={0} onClose={onClose} />);
     const buttons = Array.from(document.querySelectorAll('button'));
     const gen = buttons.find((b) => b.textContent?.includes('Generate PDF')) as
       | HTMLButtonElement

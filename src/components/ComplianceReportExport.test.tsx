@@ -69,7 +69,7 @@ describe('ComplianceReportExport (G-6)', () => {
 
     render(
       <ComplianceReportExport
-        canvasRef={ref as any}
+        canvasRef={ref}
         plan={PLAN}
         currentFloor={0}
         analysis={null}
@@ -95,7 +95,7 @@ describe('ComplianceReportExport (G-6)', () => {
   it('renders project metadata inputs', () => {
     render(
       <ComplianceReportExport
-        canvasRef={{ current: null } as any}
+        canvasRef={{ current: null }}
         plan={PLAN}
         currentFloor={0}
         analysis={null}

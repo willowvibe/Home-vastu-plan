@@ -164,7 +164,7 @@ export function useCanvasDrag({
         y: e.clientY - elementAbsY,
       });
     },
-    [pixelsPerFoot, canvasRef]
+    [pixelsPerFoot, canvasRef, currentFloor]
   );
 
   useEffect(() => {

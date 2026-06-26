@@ -126,7 +126,10 @@ export function getDirection(
   return 'CENTER';
 }
 
-export function analyzeRoomVastu(room: Room, plan: FloorPlan): VastuResult {
+export function analyzeRoomVastu(
+  room: Room,
+  plan: Pick<FloorPlan, 'plotWidth' | 'plotHeight' | 'northAngle'>
+): VastuResult {
   const cx = plan.plotWidth / 2;
   const cy = plan.plotHeight / 2;
   const rx = room.x + room.w / 2;

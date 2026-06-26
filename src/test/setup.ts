@@ -33,8 +33,8 @@ globalThis.localStorage = localStorageMock as unknown as Storage;
 // Mock FileReader for tests
 const fileReaderMock = {
   readAsText: vi.fn(),
-  onload: null as any,
-  onerror: null as any,
+  onload: null as ((e: Event) => void) | null,
+  onerror: null as ((e: Event) => void) | null,
   result: null as string | ArrayBuffer | null,
 };
 globalThis.FileReader = class FileReader {
@@ -52,7 +52,7 @@ globalThis.FileReader = class FileReader {
     fileReaderMock.readAsText(file);
     setTimeout(() => {
       if (this.onload) {
-        this.onload({ target: { result: fileReaderMock.result } } as any);
+        this.onload({ target: { result: fileReaderMock.result } } as unknown as Event);
       }
     }, 0);
   }
@@ -60,7 +60,9 @@ globalThis.FileReader = class FileReader {
   readAsDataURL(file: File) {
     setTimeout(() => {
       if (this.onload) {
-        this.onload({ target: { result: `data:${file.type};base64,dGVzdA==` } } as any);
+        this.onload({
+          target: { result: `data:${file.type};base64,dGVzdA==` },
+        } as unknown as Event);
       }
     }, 0);
   }

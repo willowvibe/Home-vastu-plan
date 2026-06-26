@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { ProjectManager } from './ProjectManager';
+import type { FloorPlan } from '../types';
 
 // Spy that the mock exposes; the test asserts it was called.
 const showToast = vi.fn();
@@ -11,7 +12,7 @@ vi.mock('./Toast', () => ({
 
 const noop = () => {};
 
-const makePlan = () => ({
+const makePlan = (): FloorPlan => ({
   rooms: [],
   plotWidth: 30,
   plotHeight: 40,
@@ -33,7 +34,7 @@ describe('ProjectManager (S-16: localStorage try/catch + toast)', () => {
     (localStorage.setItem as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
       // No-op: no error.
     });
-    render(<ProjectManager currentPlan={makePlan() as any} onLoadPlan={noop} onClose={noop} />);
+    render(<ProjectManager currentPlan={makePlan()} onLoadPlan={noop} onClose={noop} />);
     const input = screen.getByPlaceholderText(/New Project Name/i) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'My House' } });
     // The "+" create button is the one immediately following the input.
@@ -51,7 +52,7 @@ describe('ProjectManager (S-16: localStorage try/catch + toast)', () => {
     (localStorage.setItem as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
       throw quotaErr;
     });
-    render(<ProjectManager currentPlan={makePlan() as any} onLoadPlan={noop} onClose={noop} />);
+    render(<ProjectManager currentPlan={makePlan()} onLoadPlan={noop} onClose={noop} />);
     const input = screen.getByPlaceholderText(/New Project Name/i) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Will Fail' } });
     const createBtn = input.nextElementSibling as HTMLButtonElement;
@@ -65,7 +66,7 @@ describe('ProjectManager (S-16: localStorage try/catch + toast)', () => {
     (localStorage.setItem as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
       throw otherErr;
     });
-    render(<ProjectManager currentPlan={makePlan() as any} onLoadPlan={noop} onClose={noop} />);
+    render(<ProjectManager currentPlan={makePlan()} onLoadPlan={noop} onClose={noop} />);
     const input = screen.getByPlaceholderText(/New Project Name/i) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Also Fails' } });
     const createBtn = input.nextElementSibling as HTMLButtonElement;

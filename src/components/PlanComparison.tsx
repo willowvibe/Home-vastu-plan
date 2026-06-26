@@ -15,9 +15,11 @@ interface RoomDiff {
   prevRoom?: Room;
 }
 
+type DiffType = 'all' | 'added' | 'removed' | 'modified';
+
 export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }) => {
   const [viewMode, setViewMode] = useState<'side-by-side' | 'merged'>('side-by-side');
-  const [diffType, setDiffType] = useState<'all' | 'added' | 'removed' | 'modified'>('all');
+  const [diffType, setDiffType] = useState<DiffType>('all');
 
   // Get the two most recent plans for comparison
   const basePlan = plans[0]?.plan || null;
@@ -146,15 +148,17 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({ plans, onClose }
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-slate-600">Filter:</span>
             <div className="flex rounded-lg bg-slate-100 p-1 overflow-x-auto">
-              {[
-                { id: 'all', label: 'All' },
-                { id: 'added', label: 'Added' },
-                { id: 'modified', label: 'Modified' },
-                { id: 'removed', label: 'Removed' },
-              ].map((filter) => (
+              {(
+                [
+                  { id: 'all', label: 'All' },
+                  { id: 'added', label: 'Added' },
+                  { id: 'modified', label: 'Modified' },
+                  { id: 'removed', label: 'Removed' },
+                ] as { id: DiffType; label: string }[]
+              ).map((filter) => (
                 <button
                   key={filter.id}
-                  onClick={() => setDiffType(filter.id as any)}
+                  onClick={() => setDiffType(filter.id)}
                   className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
                     diffType === filter.id
                       ? 'bg-white text-indigo-600 shadow-sm'
