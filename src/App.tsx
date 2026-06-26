@@ -51,6 +51,17 @@ export default function App() {
               setLinkSetbacks={editor.setLinkSetbacks}
               snapToGrid={editor.snapToGrid}
               setSnapToGrid={editor.setSnapToGrid}
+              showVastuGrid={editor.showVastuGrid}
+              onToggleVastuGrid={editor.handleToggleGrid}
+              showPlumbing={editor.showPlumbing}
+              onTogglePlumbing={editor.handleTogglePlumbing}
+              showSunPath={editor.showSunPath}
+              onToggleSunPath={editor.handleToggleSunPath}
+              sunDate={editor.sunDate}
+              onSetSunDate={editor.handleSetSunDate}
+              sunTime={editor.sunTime}
+              onSetSunTime={editor.handleSetSunTime}
+              onSetSunNow={editor.handleSetSunNow}
               handleSelectTemplate={editor.handleSelectTemplate}
               handleClearFloor={editor.handleClearFloor}
               handleImportJSON={editor.handleImportJSON}
@@ -70,7 +81,7 @@ export default function App() {
             />
 
             <div
-              className={`flex-1 overflow-auto p-4 md:p-8 flex-col items-center relative ${
+              className={`flex-1 overflow-auto p-4 md:p-8 flex-col items-start md:items-center relative ${
                 editor.mobileTab === 'canvas' ? 'flex' : 'hidden md:flex'
               } bg-slate-100 dark:bg-slate-900`}
             >
@@ -103,6 +114,10 @@ export default function App() {
                 showVastuGrid={editor.showVastuGrid}
                 showVastuTour={editor.showVastuTour}
                 onToggleVastuTour={editor.handleToggleTour}
+                showPlumbing={editor.showPlumbing}
+                showSunPath={editor.showSunPath}
+                sunDate={editor.sunDate}
+                sunTime={editor.sunTime}
                 snapToGrid={editor.snapToGrid}
                 measuring={editor.measuring}
                 setMeasuring={editor.setMeasuring}

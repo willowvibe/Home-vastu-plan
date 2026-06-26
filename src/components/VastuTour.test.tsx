@@ -59,4 +59,18 @@ describe('VastuTour', () => {
     const prev = screen.getByTestId('vastu-tour-prev');
     expect(prev).toBeDisabled();
   });
+
+  it('anchors the info card to the viewport, not the canvas', () => {
+    const { container } = render(
+      <VastuTour plan={mockPlan} pixelsPerFoot={20} onClose={vi.fn()} />
+    );
+
+    const overlay = container.querySelector('[data-testid="vastu-tour-overlay"]');
+    expect(overlay).toHaveClass('fixed');
+    expect(overlay).toHaveClass('z-50');
+
+    const highlight = container.querySelector('[data-testid="vastu-tour-highlight"]');
+    expect(highlight).toHaveClass('absolute');
+    expect(highlight).not.toHaveClass('fixed');
+  });
 });

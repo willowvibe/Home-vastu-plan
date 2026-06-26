@@ -4,6 +4,8 @@ import { useCanvasDrag } from '../hooks/useCanvasDrag';
 import { Room } from './Room';
 import { VastuGrid } from './VastuGrid';
 import { VastuTour } from './VastuTour';
+import { PlumbingOverlay } from './PlumbingOverlay';
+import { SunPathOverlay } from './SunPathOverlay';
 import { Compass } from './Compass';
 import { RulerOverlay } from './RulerOverlay';
 import { RoadIndicator } from './RoadIndicator';
@@ -18,6 +20,10 @@ interface CanvasProps {
   showVastuGrid?: boolean;
   showVastuTour?: boolean;
   onToggleVastuTour?: () => void;
+  showPlumbing?: boolean;
+  showSunPath?: boolean;
+  sunDate?: Date;
+  sunTime?: number;
   snapToGrid?: boolean;
   gridSize?: number;
   measuring?: boolean;
@@ -41,6 +47,10 @@ export const Canvas: React.FC<CanvasProps> = ({
   showVastuGrid,
   showVastuTour,
   onToggleVastuTour,
+  showPlumbing,
+  showSunPath,
+  sunDate,
+  sunTime,
   snapToGrid = true,
   gridSize = DEFAULT_GRID_SIZE_FT,
   measuring = false,
@@ -256,6 +266,22 @@ export const Canvas: React.FC<CanvasProps> = ({
           plan={plan}
           pixelsPerFoot={PIXELS_PER_FOOT}
           onClose={() => onToggleVastuTour?.()}
+        />
+      )}
+
+      {/* G-4: plumbing route overlay for kitchens and bathrooms */}
+      {showPlumbing && (
+        <PlumbingOverlay plan={plan} rooms={floorRooms} pixelsPerFoot={PIXELS_PER_FOOT} />
+      )}
+
+      {/* G-5: sun-path shadow overlay */}
+      {showSunPath && sunDate && sunTime !== undefined && (
+        <SunPathOverlay
+          plan={plan}
+          rooms={floorRooms}
+          pixelsPerFoot={PIXELS_PER_FOOT}
+          date={sunDate}
+          minutesSinceMidnight={sunTime}
         />
       )}
 

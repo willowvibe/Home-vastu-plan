@@ -143,7 +143,7 @@ export const ROOM_ELEMENTS: Record<RoomType, { type: string; w: number; h: numbe
     { type: 'Chair', w: 2, h: 2 },
     { type: 'Plants', w: 1.5, h: 1.5 },
   ],
-  Stairs: [],
+  Stairs: [{ type: 'Staircase', w: 4, h: 10 }],
   Study: [
     { type: 'Desk', w: 4, h: 2 },
     { type: 'Chair', w: 2, h: 2 },

@@ -65,7 +65,7 @@ export function initSentry(config: SentryConfig = {}) {
 
 export function captureError(error: Error | string, context?: Record<string, unknown>) {
   if (!isSentryInitialized()) return;
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.error('Error captured (Sentry disabled in dev):', error);
     return;
   }
@@ -82,7 +82,7 @@ export function captureError(error: Error | string, context?: Record<string, unk
 
 export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info') {
   if (!isSentryInitialized()) return;
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.log(`[Sentry] ${level}: ${message}`);
     return;
   }

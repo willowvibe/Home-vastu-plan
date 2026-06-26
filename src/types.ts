@@ -119,6 +119,7 @@ export interface FloorPlan {
   layers?: RoomLayer[];
   floorNames?: Record<number, string>; // G-15: custom floor labels; defaults to Indian convention names
   gridSize?: number; // G-9: snap grid step in feet
+  latitude?: number; // G-5: latitude for sun-path calculations (defaults to New Delhi)
 }
 
 export interface ProjectVersion {

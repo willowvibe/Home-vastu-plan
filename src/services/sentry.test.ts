@@ -34,3 +34,29 @@ describe('sentry (S-7: setUser/addBreadcrumb are no-ops when not initialized)', 
     expect(Sentry.addBreadcrumb).not.toHaveBeenCalled();
   });
 });
+
+describe('sentry (process.env regression)', () => {
+  it('capture helpers do not throw when global process is undefined', async () => {
+    vi.stubGlobal('process', undefined);
+    try {
+      const { captureError, captureMessage } = await import('./sentry');
+      expect(() => captureError(new Error('boom'))).not.toThrow();
+      expect(() => captureMessage('hello')).not.toThrow();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('captureError is a dev-mode log when initialized in test (import.meta.env.DEV)', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { initSentry, captureError } = await import('./sentry');
+    initSentry({ dsn: 'https://abc@example.com/1', enabled: true });
+    captureError(new Error('boom'));
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error captured (Sentry disabled in dev):',
+      expect.any(Error)
+    );
+    consoleSpy.mockRestore();
+  });
+});

@@ -12,6 +12,10 @@ export interface CanvasAreaProps {
   showVastuGrid: boolean;
   showVastuTour?: boolean;
   onToggleVastuTour?: () => void;
+  showPlumbing?: boolean;
+  showSunPath?: boolean;
+  sunDate?: Date;
+  sunTime?: number;
   snapToGrid: boolean;
   measuring: boolean;
   setMeasuring: (value: boolean) => void;
@@ -35,6 +39,10 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   showVastuGrid,
   showVastuTour,
   onToggleVastuTour,
+  showPlumbing,
+  showSunPath,
+  sunDate,
+  sunTime,
   snapToGrid,
   measuring,
   setMeasuring,
@@ -68,6 +76,10 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
           showVastuGrid={showVastuGrid}
           showVastuTour={showVastuTour}
           onToggleVastuTour={onToggleVastuTour}
+          showPlumbing={showPlumbing}
+          showSunPath={showSunPath}
+          sunDate={sunDate}
+          sunTime={sunTime}
           snapToGrid={snapToGrid}
           gridSize={gridSize}
           measuring={measuring}
