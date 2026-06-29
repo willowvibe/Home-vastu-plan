@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@google/genai": "^2.10.0",
-    "@sentry/react": "^10.50.0",
+    "@sentry/react": "^10.62.0",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.1",
     "@vitejs/plugin-react": "^5.0.4",
