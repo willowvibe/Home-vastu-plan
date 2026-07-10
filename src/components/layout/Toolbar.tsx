@@ -66,8 +66,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           onClick={onToggleGrid}
           className={`flex items-center justify-center w-10 h-10 border rounded-lg shadow-sm transition-colors ${
             showVastuGrid
-              ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 dark:bg-slate-800 dark:border-slate-600 dark:hover:bg-slate-700 dark:text-slate-300'
+              ? 'bg-surface-warm border-border text-accent'
+              : 'bg-surface border-border hover:bg-surface-warm text-fg-2    dark:text-meta'
           }`}
           title="Toggle Vastu Grid"
         >
@@ -75,7 +75,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </button>
         <button
           onClick={onToggleTour}
-          className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm transition-colors"
+          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
           title="Vastu Zone Tour"
           data-testid="vastu-tour-button"
         >
@@ -84,7 +84,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           onClick={undo}
           disabled={historyIndex === 0}
-          className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Undo (Ctrl+Z)"
         >
           <Undo2 className="w-4 h-4" />
@@ -92,7 +92,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           onClick={redo}
           disabled={historyIndex === historyLength - 1}
-          className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Redo (Ctrl+Y)"
         >
           <Redo2 className="w-4 h-4" />
@@ -102,17 +102,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       <div className="flex gap-2">
         <button
           onClick={onZoomOut}
-          className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm transition-colors"
+          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
           title="Zoom Out"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
-        <div className="flex items-center justify-center px-2 text-xs font-mono text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-sm">
+        <div className="flex items-center justify-center px-2 text-xs font-mono text-muted bg-surface border border-border  rounded-lg shadow-sm">
           {Math.round(zoom * 100)}%
         </div>
         <button
           onClick={onZoomIn}
-          className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm transition-colors"
+          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
           title="Zoom In"
         >
           <ZoomIn className="w-4 h-4" />
@@ -120,17 +120,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       </div>
 
       <div className="flex gap-2 flex-wrap">
-        <div className="flex rounded-lg shadow-sm overflow-hidden border border-slate-200 dark:border-slate-600">
+        <div className="flex rounded-lg shadow-sm overflow-hidden border border-border ">
           <button
             onClick={() => onShare('view')}
-            className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta transition-colors"
             title="Share View-Only Link (read-only)"
           >
             <Share2 className="w-4 h-4" />
           </button>
           <button
             onClick={() => onShare('comment')}
-            className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-l border-slate-200 dark:border-slate-600 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
             title="Share Comment-Enabled Link (reviewers can add notes)"
           >
             <MessageSquare className="w-4 h-4" />
@@ -142,7 +142,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               );
               if (password) onShare('view', password);
             }}
-            className="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-l border-slate-200 dark:border-slate-600 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
             title="Password-Protected Share Link (view-only)"
           >
             <Lock className="w-4 h-4" />
@@ -150,14 +150,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
         <button
           onClick={onPresentationExport}
-          className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">Presentation Export</span>
         </button>
         <button
           onClick={onComplianceExport}
-          className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
           title="Export Vastu compliance report PDF"
         >
           <FileCheck className="w-4 h-4" />
@@ -166,7 +166,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           onClick={onExport}
           disabled={isExporting}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-accent-on px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           {isExporting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -177,28 +177,28 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </button>
         <button
           onClick={onPrint}
-          className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">Print</span>
         </button>
         <button
           onClick={onExportJSON}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">JSON Export</span>
         </button>
         <button
           onClick={onMeasure}
-          className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           <Ruler className="w-4 h-4" />
           <span className="hidden sm:inline">Ruler</span>
         </button>
         <button
           onClick={onExportSVG}
-          className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">SVG Export</span>

@@ -9,7 +9,7 @@ export const RoadIndicator: React.FC<RoadIndicatorProps> = React.memo(({ roadDir
   return (
     <div
       className={cn(
-        'absolute bg-slate-800 text-white text-xs font-bold flex items-center justify-center pointer-events-none z-20',
+        'absolute bg-fg text-accent-on text-xs font-bold flex items-center justify-center pointer-events-none z-20',
         roadDirection === 'N'
           ? 'top-0 left-0 right-0 h-4'
           : roadDirection === 'S'

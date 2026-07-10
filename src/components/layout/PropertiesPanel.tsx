@@ -55,7 +55,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     <div
       className={`w-full md:w-80 flex-col overflow-hidden shrink-0 ${
         mobileTab === 'properties' ? 'flex' : 'hidden md:flex'
-      } bg-white border-l border-slate-200 dark:bg-slate-900 dark:border-slate-700`}
+      } bg-bg border-l border-border`}
     >
       <CommentPropertiesPanel
         selectedCommentId={selectedCommentId}
@@ -83,8 +83,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
       <div className="p-5 flex-1 overflow-y-auto flex flex-col custom-scrollbar">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500" /> AI Vastu & Build Guide
+          <h3 className="text-sm font-semibold text-fg  uppercase tracking-wider flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-warn" /> AI Vastu & Build Guide
           </h3>
         </div>
 
@@ -93,7 +93,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             onClick={onAnalyze}
             disabled={analyzeBtn.disabled}
             title={analyzeBtn.title}
-            className="w-full font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 shrink-0 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white"
+            className="w-full font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 shrink-0 bg-accent hover:bg-accent-hover text-accent-on"
           >
             {isAnalyzing ? (
               <>
@@ -104,9 +104,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             )}
           </button>
           {isAnalyzing && (
-            <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-surface  rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-600 transition-all duration-200 ease-out"
+                className="h-full bg-accent transition-all duration-200 ease-out"
                 style={{ width: `${analysisProgress}%` }}
               />
             </div>
@@ -115,25 +115,25 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         {isAnalyzing && !analysis ? (
           <div className="flex-1 flex flex-col gap-3 animate-pulse">
-            <div className="h-5 rounded w-3/4 bg-slate-200 dark:bg-slate-700" />
-            <div className="h-3 rounded w-full bg-slate-200 dark:bg-slate-700" />
-            <div className="h-3 rounded w-5/6 bg-slate-200 dark:bg-slate-700" />
-            <div className="h-4 rounded w-1/2 mt-2 bg-slate-200 dark:bg-slate-700" />
-            <div className="h-3 rounded w-full bg-slate-200 dark:bg-slate-700" />
-            <div className="h-3 rounded w-4/5 bg-slate-200 dark:bg-slate-700" />
-            <div className="h-3 rounded w-2/3 bg-slate-200 dark:bg-slate-700" />
-            <div className="h-4 rounded w-2/3 mt-2 bg-slate-200 dark:bg-slate-700" />
-            <div className="h-3 rounded w-full bg-slate-200 dark:bg-slate-700" />
-            <div className="h-3 rounded w-3/4 bg-slate-200 dark:bg-slate-700" />
+            <div className="h-5 rounded w-3/4 bg-surface " />
+            <div className="h-3 rounded w-full bg-surface " />
+            <div className="h-3 rounded w-5/6 bg-surface " />
+            <div className="h-4 rounded w-1/2 mt-2 bg-surface " />
+            <div className="h-3 rounded w-full bg-surface " />
+            <div className="h-3 rounded w-4/5 bg-surface " />
+            <div className="h-3 rounded w-2/3 bg-surface " />
+            <div className="h-4 rounded w-2/3 mt-2 bg-surface " />
+            <div className="h-3 rounded w-full bg-surface " />
+            <div className="h-3 rounded w-3/4 bg-surface " />
           </div>
         ) : analysis ? (
-          <div className="prose prose-sm prose-slate dark:prose-invert max-w-none flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
+          <div className="prose prose-sm max-w-none dark:prose-invert flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
             <ReactMarkdown>{analysis}</ReactMarkdown>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800">
-            <Info className="w-8 h-8 text-slate-400 mb-3" />
-            <p className="text-sm text-slate-600 dark:text-slate-300">
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-border  rounded-xl bg-bg dark:bg-surface">
+            <Info className="w-8 h-8 text-meta mb-3" />
+            <p className="text-sm text-muted dark:text-meta">
               Add rooms to your floor plan and click analyze to get Vastu Shastra compliance scores
               and construction tips.
             </p>

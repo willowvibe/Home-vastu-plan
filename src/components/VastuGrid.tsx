@@ -16,7 +16,7 @@ export const VastuGrid: React.FC<VastuGridProps> = React.memo(
 
     return (
       <div
-        className="absolute border-2 border-dashed border-emerald-500/30 bg-emerald-50/10 pointer-events-none"
+        className="absolute border-2 border-dashed border-success/30 bg-success/10 pointer-events-none"
         style={{
           left: setbacks.left * pixelsPerFoot,
           top: setbacks.top * pixelsPerFoot,
@@ -24,10 +24,10 @@ export const VastuGrid: React.FC<VastuGridProps> = React.memo(
           height: buildableH * pixelsPerFoot,
         }}
       >
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded-t font-mono">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full bg-success text-accent-on text-[10px] px-1.5 py-0.5 rounded-t font-mono">
           {buildableW}'
         </div>
-        <div className="absolute top-1/2 left-0 -translate-x-full -translate-y-1/2 bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded-l font-mono -rotate-90 origin-right">
+        <div className="absolute top-1/2 left-0 -translate-x-full -translate-y-1/2 bg-success text-accent-on text-[10px] px-1.5 py-0.5 rounded-l font-mono -rotate-90 origin-right">
           {buildableH}'
         </div>
 
@@ -40,9 +40,9 @@ export const VastuGrid: React.FC<VastuGridProps> = React.memo(
                 key={i}
                 data-testid={`vastu-zone-${zone.toLowerCase().replace(/\s+/g, '-')}`}
                 title={`${info.name}\nElement: ${info.element}\nIdeal for: ${info.idealFor}\nTip: ${info.tip}`}
-                className="border border-indigo-500/20 flex flex-col items-center justify-center bg-indigo-50/10 backdrop-blur-[1px]"
+                className="border border-accent/20 flex flex-col items-center justify-center bg-accent/10 backdrop-blur-[1px]"
               >
-                <span className="text-[10px] font-bold text-indigo-800/60 uppercase tracking-wider text-center px-1">
+                <span className="text-[10px] font-bold text-accent/60 uppercase tracking-wider text-center px-1">
                   {zone}
                 </span>
               </div>

@@ -185,16 +185,16 @@ export function ComplianceReportExport({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-indigo-600" />
+    <div className="fixed inset-0 bg-fg/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-bg dark:bg-surface rounded-2xl shadow-elev-raised w-full max-w-md overflow-hidden">
+        <div className="px-6 py-4 border-b border-border-soft dark:border-border flex items-center justify-between bg-bg dark:bg-fg/50">
+          <h2 className="text-lg font-bold text-fg-2 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-accent" />
             Compliance Report
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 text-meta hover:text-muted dark:hover:text-meta hover:bg-surface dark:hover:bg-surface rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -202,7 +202,7 @@ export function ComplianceReportExport({
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-sm font-medium text-fg-2 dark:text-meta mb-1">
               Project Name
             </label>
             <input
@@ -211,12 +211,12 @@ export function ComplianceReportExport({
               onChange={(e) => setProjectName(e.target.value)}
               placeholder="e.g. Villa 104 Design"
               data-testid="compliance-project-name"
-              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent outline-none bg-bg dark:bg-surface text-fg dark:text-fg-2"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-sm font-medium text-fg-2 dark:text-meta mb-1">
               Client Name
             </label>
             <input
@@ -225,12 +225,12 @@ export function ComplianceReportExport({
               onChange={(e) => setClientName(e.target.value)}
               placeholder="e.g. Mr. Sharma"
               data-testid="compliance-client-name"
-              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent outline-none bg-bg dark:bg-surface text-fg dark:text-fg-2"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-sm font-medium text-fg-2 dark:text-meta mb-1">
               Consultant / Architect Name
             </label>
             <input
@@ -239,15 +239,15 @@ export function ComplianceReportExport({
               onChange={(e) => setConsultantName(e.target.value)}
               placeholder="e.g. Vastu Experts Inc."
               data-testid="compliance-consultant-name"
-              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent outline-none bg-bg dark:bg-surface text-fg dark:text-fg-2"
             />
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
+        <div className="px-6 py-4 bg-bg dark:bg-fg/50 border-t border-border-soft dark:border-border flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted dark:text-meta hover:bg-surface dark:hover:bg-surface rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -255,7 +255,7 @@ export function ComplianceReportExport({
             onClick={handleExportPDF}
             disabled={isExporting}
             data-testid="generate-compliance-report"
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-on text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
           >
             {isExporting ? (
               <Loader2 className="w-4 h-4 animate-spin" />

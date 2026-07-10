@@ -89,7 +89,7 @@ export const SunPathOverlay: React.FC<SunPathOverlayProps> = ({
   if (!isDaytime) {
     return (
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-        <p className="text-xs text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-900/80 px-2 py-1 rounded">
+        <p className="text-xs text-muted dark:text-meta bg-surface-100/80 dark:bg-fg/80 px-2 py-1 rounded">
           Sun is below the horizon at this time.
         </p>
       </div>
@@ -99,7 +99,7 @@ export const SunPathOverlay: React.FC<SunPathOverlayProps> = ({
   if (shadows.length === 0) {
     return (
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-        <p className="text-xs text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-900/80 px-2 py-1 rounded">
+        <p className="text-xs text-muted dark:text-meta bg-surface-100/80 dark:bg-fg/80 px-2 py-1 rounded">
           Add rooms to see sun-path shadows.
         </p>
       </div>
@@ -119,8 +119,10 @@ export const SunPathOverlay: React.FC<SunPathOverlayProps> = ({
           points={shadow.points
             .map((p) => `${p.x * pixelsPerFoot},${p.y * pixelsPerFoot}`)
             .join(' ')}
-          fill="rgba(15, 23, 42, 0.25)"
-          stroke="rgba(15, 23, 42, 0.4)"
+          fill="var(--fg)"
+          fillOpacity={0.25}
+          stroke="var(--fg)"
+          strokeOpacity={0.4}
           strokeWidth={1}
         />
       ))}

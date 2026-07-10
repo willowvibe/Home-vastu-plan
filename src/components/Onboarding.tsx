@@ -136,7 +136,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-fg/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
       <div
         ref={dialogRef}
         role="dialog"
@@ -146,17 +146,17 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
         // the focusable query returns nothing.
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden outline-none"
+        className="bg-bg rounded-2xl shadow-elev-raised w-full max-w-md overflow-hidden outline-none"
       >
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-border-soft flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-meta">
               Step {step + 1} of {STEPS.length}
             </span>
           </div>
           <button
             onClick={handleSkip}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-1.5 text-meta hover:text-muted hover:bg-surface-warm rounded-lg transition-colors"
             aria-label="Skip onboarding"
           >
             <X className="w-4 h-4" />
@@ -164,13 +164,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
         </div>
 
         <div className="p-8 text-center">
-          <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-5">
-            <Icon className="w-8 h-8 text-indigo-600" />
+          <div className="w-16 h-16 bg-accent/15 rounded-full flex items-center justify-center mx-auto mb-5">
+            <Icon className="w-8 h-8 text-accent" />
           </div>
-          <h2 id={titleId} className="text-xl font-bold text-slate-900 mb-2">
+          <h2 id={titleId} className="text-xl font-bold text-fg mb-2">
             {current.title}
           </h2>
-          <p className="text-sm text-slate-500 leading-relaxed">{current.description}</p>
+          <p className="text-sm text-muted leading-relaxed">{current.description}</p>
         </div>
 
         <div className="px-6 pb-6">
@@ -182,7 +182,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
                 aria-label={`Go to step ${i + 1}`}
                 aria-current={i === step ? 'step' : undefined}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  i === step ? 'bg-indigo-600' : 'bg-slate-200 hover:bg-slate-300'
+                  i === step ? 'bg-accent' : 'bg-surface hover:bg-surface'
                 }`}
               />
             ))}
@@ -192,7 +192,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
             {step > 0 && (
               <button
                 onClick={() => setStep(step - 1)}
-                className="flex-1 flex items-center justify-center gap-1 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1 py-2.5 border border-border rounded-lg text-sm font-medium text-muted hover:bg-bg transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back
@@ -200,7 +200,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onClose }) => {
             )}
             <button
               onClick={handleNext}
-              className="flex-1 flex items-center justify-center gap-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
+              className="flex-1 flex items-center justify-center gap-1 py-2.5 bg-accent hover:bg-accent-hover text-accent-on rounded-lg text-sm font-medium transition-colors"
             >
               {step < STEPS.length - 1 ? (
                 <>

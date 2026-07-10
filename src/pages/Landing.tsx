@@ -175,7 +175,7 @@ export function Landing() {
           <div className="container stack">
             <div className="section-header center">
               <p className="eyebrow">What’s different</p>
-              <h2>Three things you’ll notice in the first ten minutes.</h2>
+              <h2>Everything you need to plan a Vastu-aware home.</h2>
             </div>
             <div className="grid-3">
               <div className="feature card">
@@ -188,7 +188,7 @@ export function Landing() {
                 <h3>Live Vastu score</h3>
                 <p>
                   Every room is scored out of 100 as you move it. Green, yellow, and red zones show
-                  exactly where your layout aligns with tradition.
+                  exactly where your layout aligns with Vastu Shastra.
                 </p>
               </div>
               <div className="feature card">
@@ -199,8 +199,8 @@ export function Landing() {
                 </div>
                 <h3>Smart floor plans</h3>
                 <p>
-                  Drag rooms, resize with handles, and let collision detection keep walls flush.
-                  Multi-floor support for ground, first, and terrace levels.
+                  Drag, resize, and snap rooms from a library of 12 room types. Add multiple floors,
+                  toggle plumbing and sun-path overlays, and keep walls flush automatically.
                 </p>
               </div>
               <div className="feature card">
@@ -211,8 +211,59 @@ export function Landing() {
                 </div>
                 <h3>AI design review</h3>
                 <p>
-                  Send your plan to Gemini for an instant Vastu + architecture report. Get
-                  plain-language fixes you can drag into place right away.
+                  Ask Gemini for an instant Vastu + architecture report with plain-language fixes,
+                  construction tips, and cost estimates you can act on right away.
+                </p>
+              </div>
+              <div className="feature card">
+                <div className="feature-mark">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                    <path d="m16 6-4-4-4 4" />
+                    <path d="M12 2v13" />
+                  </svg>
+                </div>
+                <h3>Export & share</h3>
+                <p>
+                  Save PNG, SVG, or JSON instantly. Generate a vector PDF or a password-protected
+                  share link for your architect, contractor, or family.
+                </p>
+              </div>
+              <div className="feature card">
+                <div className="feature-mark">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+                    <path d="M3 7v14a2 2 0 0 0 2 2h14" />
+                    <path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2" />
+                    <path d="M7 5v16" />
+                    <path d="M11 5v16" />
+                    <path d="M15 5v16" />
+                    <path d="M19 5v16" />
+                  </svg>
+                </div>
+                <h3>Projects & versions</h3>
+                <p>
+                  Save projects locally with named versions, compare floor-plan diffs, and revert to
+                  an earlier layout whenever you want.
+                </p>
+              </div>
+              <div className="feature card">
+                <div className="feature-mark">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+                    <circle cx="12" cy="12" r="5" />
+                    <path d="M12 1v2" />
+                    <path d="M12 21v2" />
+                    <path d="M4.22 4.22l1.42 1.42" />
+                    <path d="M18.36 18.36l1.42 1.42" />
+                    <path d="M1 12h2" />
+                    <path d="M21 12h2" />
+                    <path d="M4.22 19.78l1.42-1.42" />
+                    <path d="M18.36 5.64l1.42-1.42" />
+                  </svg>
+                </div>
+                <h3>Sun path & plumbing</h3>
+                <p>
+                  Overlay the Vastu grid, plumbing layout, and animated sun path by date and time so
+                  you can validate light, airflow, and utility runs before you build.
                 </p>
               </div>
             </div>
@@ -227,10 +278,17 @@ export function Landing() {
             </div>
             <div className="grid-2" style={{ alignItems: 'center' }}>
               <ul className="split-list">
-                <li>Enter plot width, length, road facing, and north angle.</li>
-                <li>Add bedrooms, kitchen, pooja room, parking, and more.</li>
-                <li>Toggle the Vastu grid overlay to see zones instantly.</li>
-                <li>Export PNG, PDF, SVG, or a shareable link for your architect.</li>
+                <li>Enter plot width, length, road facing, north angle, and display unit.</li>
+                <li>
+                  Add bedrooms, kitchen, pooja room, parking, and more from the 12-room library.
+                </li>
+                <li>
+                  Toggle the Vastu grid, plumbing, and sun-path overlays to see zones instantly.
+                </li>
+                <li>
+                  Export PNG, SVG, JSON, or a vector PDF — or share a view-only link with your
+                  architect.
+                </li>
               </ul>
               <div className="product-mock" aria-label="Floor plan canvas mockup with Vastu zones">
                 <div className="energy-ring" aria-hidden="true">
@@ -422,7 +480,7 @@ export function Landing() {
               </thead>
               <tbody>
                 <tr>
-                  <td>Drag-and-drop floor plans</td>
+                  <td>Drag-and-drop floor plans (12 room types)</td>
                   <td className="num-col">✓</td>
                   <td className="num-col">✓</td>
                 </tr>
@@ -432,19 +490,44 @@ export function Landing() {
                   <td className="num-col">✓</td>
                 </tr>
                 <tr>
-                  <td>PNG / PDF / SVG export</td>
-                  <td className="num-col">PNG</td>
-                  <td className="num-col">All</td>
+                  <td>Plumbing + sun-path overlays</td>
+                  <td className="num-col">✓</td>
+                  <td className="num-col">✓</td>
                 </tr>
                 <tr>
-                  <td>Multi-floor projects</td>
+                  <td>PNG / SVG / JSON export</td>
+                  <td className="num-col">✓</td>
+                  <td className="num-col">✓</td>
+                </tr>
+                <tr>
+                  <td>Share view / comment links</td>
+                  <td className="num-col">✓</td>
+                  <td className="num-col">✓</td>
+                </tr>
+                <tr>
+                  <td>Save projects & versions locally</td>
+                  <td className="num-col">✓</td>
+                  <td className="num-col">✓</td>
+                </tr>
+                <tr>
+                  <td>Multi-floor projects (up to 9 floors)</td>
                   <td className="num-col">1 floor</td>
-                  <td className="num-col">Unlimited</td>
+                  <td className="num-col">All floors</td>
                 </tr>
                 <tr>
-                  <td>AI design review</td>
+                  <td>Vector PDF export</td>
+                  <td className="num-col">Watermarked</td>
+                  <td className="num-col">Watermark-free</td>
+                </tr>
+                <tr>
+                  <td>AI design review + cost estimates</td>
                   <td className="num-col">3/month</td>
                   <td className="num-col">Unlimited</td>
+                </tr>
+                <tr>
+                  <td>AI image editor</td>
+                  <td className="num-col">—</td>
+                  <td className="num-col">✓</td>
                 </tr>
                 <tr style={{ borderTop: '1px solid var(--border-strong)' }}>
                   <td>

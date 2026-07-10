@@ -65,7 +65,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
       <div
         ref={canvasContainerRef}
         data-testid="canvas-container"
-        className={`p-4 rounded-xl shadow-sm border inline-block bg-white border-slate-200 dark:bg-slate-800 dark:border-slate-700 ${
+        className={`p-4 rounded-xl shadow-sm border inline-block bg-surface border-border   ${
           isViewOnly ? 'pointer-events-none' : ''
         }`}
       >
@@ -99,9 +99,9 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
       {/* Print Area (hidden on screen, visible when printing) */}
       <div className="hidden print-area print:block">
-        <div className="p-8 bg-white">
+        <div className="p-8 bg-surface">
           <h1 className="text-2xl font-bold mb-4">VastuPlan Floor Plan</h1>
-          <p className="text-sm text-slate-600 mb-4">
+          <p className="text-sm text-muted mb-4">
             {formatFloorLabel(currentFloor, plan.floorNames)} - {new Date().toLocaleDateString()}
           </p>
           <div className="print-only">

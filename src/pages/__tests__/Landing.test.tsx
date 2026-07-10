@@ -46,11 +46,14 @@ describe('Landing', () => {
     expect(screen.getByText(/Design Indian homes that feel/i)).toBeInTheDocument();
   });
 
-  it('renders the three feature cards', () => {
+  it('renders the feature cards', () => {
     renderLanding();
     expect(screen.getByText('Live Vastu score')).toBeInTheDocument();
     expect(screen.getByText('Smart floor plans')).toBeInTheDocument();
-    expect(screen.getAllByText('AI design review')).toHaveLength(2);
+    expect(screen.getByText('AI design review')).toBeInTheDocument();
+    expect(screen.getByText('Export & share')).toBeInTheDocument();
+    expect(screen.getByText('Projects & versions')).toBeInTheDocument();
+    expect(screen.getByText('Sun path & plumbing')).toBeInTheDocument();
   });
 
   it('toggles the mobile nav open state', () => {
