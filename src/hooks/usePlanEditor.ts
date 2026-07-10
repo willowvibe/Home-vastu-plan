@@ -908,7 +908,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
   const vastuScore = calculateOverallVastuScore(plan);
   const analyzeBtn = getAnalyzeButtonState({
     isAnalyzing,
-    hasApiKey: Boolean(import.meta.env.VITE_GEMINI_API_KEY),
+    hasApiUrl: Boolean(import.meta.env.VITE_API_URL),
     hasRoomsOnCurrentFloor: plan.rooms.filter((r) => r.floor === currentFloor).length > 0,
   });
 

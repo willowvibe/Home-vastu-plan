@@ -1,82 +1,68 @@
-import { GoogleGenAI } from '@google/genai';
 import { FloorPlan } from '../types';
+import { supabase } from '../lib/supabase';
 
-let ai: GoogleGenAI | null = null;
+const API_URL = import.meta.env.VITE_API_URL || '';
 
-function getAI(): GoogleGenAI {
-  if (!ai) {
-    // Q-25: Vite's standard client-side env var is the only supported source.
-    const key = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!key) {
-      throw new Error(
-        'VITE_GEMINI_API_KEY not configured. Set it in your .env file (see .env.example).'
-      );
-    }
-    ai = new GoogleGenAI({ apiKey: key });
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. AI features require authentication.');
   }
-  return ai;
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) {
+    throw new Error('Authentication required for AI features');
+  }
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
 }
 
-export async function analyzeFloorPlan(plan: FloorPlan, currentFloor: number) {
-  const prompt = `
-You are an expert Indian Architect and Vastu Shastra consultant.
-Analyze the following floor plan (Floor ${currentFloor}) for a house in India.
-Plot Size: ${plan.plotWidth} ft x ${plan.plotHeight} ft.
-North is UP (Y=0 is North, Y=${plan.plotHeight} is South, X=0 is West, X=${plan.plotWidth} is East).
-
-Rooms on this floor:
-${plan.rooms
-  .filter((r) => r.floor === currentFloor)
-  .map((r) => `- ${r.type}: ${r.w}x${r.h} ft at (X:${r.x}, Y:${r.y})`)
-  .join('\n')}
-
-Provide a detailed analysis covering:
-1. Vastu Compliance (Score out of 100, what's good, what's bad, and remedies).
-2. Construction & Structural Guidance (tips on beams, columns, plumbing for bathrooms/kitchens, ventilation).
-3. Room-level Intelligence (suggestions for ideal dimensions, orientations, and placements).
-
-Format your response in clean Markdown with clear headings and bullet points.
-`;
-
-  const response = await getAI().models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
+export async function analyzeFloorPlan(plan: FloorPlan, currentFloor: number): Promise<string> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/api/ai/analyze`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ plan, currentFloor }),
   });
 
-  return response.text || '';
-}
-
-export async function editFloorPlanImage(imageFile: File, promptText: string) {
-  const base64Data = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve((reader.result as string).split(',')[1]);
-    reader.onerror = () => reject(new Error('Failed to read image file'));
-    reader.readAsDataURL(imageFile);
-  });
-
-  const response = await getAI().models.generateContent({
-    model: 'gemini-2.0-flash',
-    contents: {
-      parts: [
-        {
-          inlineData: {
-            data: base64Data,
-            mimeType: imageFile.type,
-          },
-        },
-        {
-          text: promptText,
-        },
-      ],
-    },
-  });
-
-  for (const part of response.candidates?.[0]?.content?.parts || []) {
-    if (part.inlineData) {
-      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-    }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'AI analysis failed');
   }
 
-  // Fallback: if no image was generated, return null so the UI can show a message
-  return null;
+  const data = await res.json();
+  return data.text;
+}
+
+export async function editFloorPlanImage(
+  imageFile: File,
+  promptText: string
+): Promise<string | null> {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. AI features require authentication.');
+  }
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) {
+    throw new Error('Authentication required for AI features');
+  }
+
+  const form = new FormData();
+  form.append('image', imageFile);
+  form.append('prompt', promptText);
+
+  const res = await fetch(`${API_URL}/api/ai/edit-image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Image editing failed');
+  }
+
+  const data = await res.json();
+  return data.imageUrl || null;
 }

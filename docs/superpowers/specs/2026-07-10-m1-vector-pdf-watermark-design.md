@@ -21,6 +21,7 @@ A **watermark gate** is layered on top: free-tier users get a diagonal "VastuPla
 **Chosen: Approach A** — reconstruct the plan from `FloorPlan` primitives via jsPDF vector APIs. jsPDF 4.x is already a dependency; no new packages are needed.
 
 Rejected alternatives:
+
 - **B: `svg2pdf.js`** — would add a new dependency (~40 kB) and require an intermediate SVG string. The SVG→PDF fidelity path is less testable than an explicit op-list.
 - **C: Separate "Vector Export" button** — confusing UX. The Presentation Export modal is the natural home for this feature; free users see a subtle status line, not a different button.
 
@@ -37,11 +38,49 @@ renderOpsToPdf(ops, jsPDF instance)          → void
 
 ```ts
 type VectorPdfOp =
-  | { type: 'rect'; x: number; y: number; w: number; h: number; fill?: string; stroke?: string; strokeWidth?: number; rx?: number }
-  | { type: 'line'; x1: number; y1: number; x2: number; y2: number; stroke: string; strokeWidth: number }
-  | { type: 'text'; text: string; x: number; y: number; fontSize: number; font?: string; fontStyle?: string; align?: 'left' | 'center' | 'right'; color?: string }
+  | {
+      type: 'rect';
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      fill?: string;
+      stroke?: string;
+      strokeWidth?: number;
+      rx?: number;
+    }
+  | {
+      type: 'line';
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      stroke: string;
+      strokeWidth: number;
+    }
+  | {
+      type: 'text';
+      text: string;
+      x: number;
+      y: number;
+      fontSize: number;
+      font?: string;
+      fontStyle?: string;
+      align?: 'left' | 'center' | 'right';
+      color?: string;
+    }
   | { type: 'circle'; cx: number; cy: number; r: number; fill?: string; stroke?: string }
-  | { type: 'watermark'; text: string; x: number; y: number; w: number; h: number; angle: number; color: string; fontSize: number };
+  | {
+      type: 'watermark';
+      text: string;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      angle: number;
+      color: string;
+      fontSize: number;
+    };
 ```
 
 All coordinates are in **inches** (jsPDF's native unit for letter-format output). The conversion from feet to inches happens inside `buildVectorPdfOps` using a configurable `scale` (ft→in) parameter.
@@ -124,12 +163,12 @@ export function isWatermarkRequired(): boolean;
 
 Changes from current raster path:
 
-| Before (raster) | After (vector) |
-|---|---|
-| `toPng(canvasRef.current)` → `imgData` | `buildVectorPdfOps(plan, currentFloor, { watermark: isWatermarkRequired() })` → `ops` |
-| `pdf.addImage(imgData, 'PNG', x, y, w, h)` | `renderOpsToPdf(ops, pdf)` |
-| No entitlement awareness | Subtle status line: "Free plan · watermark included" or "Pro · watermark-free" |
-| `canvasRef` prop required | `canvasRef` prop **removed** (no longer needed — we draw from data, not DOM) |
+| Before (raster)                            | After (vector)                                                                        |
+| ------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `toPng(canvasRef.current)` → `imgData`     | `buildVectorPdfOps(plan, currentFloor, { watermark: isWatermarkRequired() })` → `ops` |
+| `pdf.addImage(imgData, 'PNG', x, y, w, h)` | `renderOpsToPdf(ops, pdf)`                                                            |
+| No entitlement awareness                   | Subtle status line: "Free plan · watermark included" or "Pro · watermark-free"        |
+| `canvasRef` prop required                  | `canvasRef` prop **removed** (no longer needed — we draw from data, not DOM)          |
 
 The modal shell, form fields (client/consultant/project), logo upload, and title-block rendering are **preserved as-is**. The only change is the floor-plan rendering path and the addition of the entitlement status line.
 
@@ -137,11 +176,7 @@ The modal shell, form fields (client/consultant/project), logo upload, and title
 
 ```tsx
 <div className="text-xs text-slate-400 text-center mt-2">
-  {isWatermarkRequired() ? (
-    <>Free plan · watermark included</>
-  ) : (
-    <>Pro · watermark-free</>
-  )}
+  {isWatermarkRequired() ? <>Free plan · watermark included</> : <>Pro · watermark-free</>}
 </div>
 ```
 
@@ -152,7 +187,7 @@ No heavy CTA, no upsell banner — just a subtle status indicator. The upsell ha
 The vector PDF uses a computed `scale` (feet → inches) so the plan fits the available drawing area (7″ × 7.7″ on letter-landscape) while preserving aspect ratio. This mirrors the existing `fitInside()` call but operates on plot dimensions rather than image pixels:
 
 ```ts
-const drawAreaW = 7;   // inches
+const drawAreaW = 7; // inches
 const drawAreaH = 7.7; // inches
 const scale = Math.min(drawAreaW / plan.plotWidth, drawAreaH / plan.plotHeight);
 ```

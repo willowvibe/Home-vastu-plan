@@ -11,6 +11,7 @@ import {
 } from './plans.js';
 import { queueChange, syncChanges, getSyncStatus } from './sync.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
+import aiRouter from '../ai/index.js';
 
 const router = Router();
 
@@ -36,6 +37,9 @@ router.get('/share/:uuid', getPlanByShare);
 router.post('/sync/queue', authenticate, queueChange);
 router.post('/sync/batch', authenticate, syncChanges);
 router.get('/sync/status', authenticate, getSyncStatus);
+
+// AI routes (authenticated)
+router.use('/ai', aiRouter);
 
 // Health check
 router.get('/health', (req: Request, res: Response) => {
