@@ -159,18 +159,11 @@ describe('buildVectorPdfOps', () => {
     const opsCustom = buildVectorPdfOps(plan, 0, { scale: 0.5 });
     // At scale 0.5, a 10ft room = 5 inches. At default scale (~0.1925 for
     // 30×40 plot), it's ~1.925 inches. The rect width should differ.
-    const roomDefault = opsDefault.find(
-      (o) => o.type === 'rect' && o.fill === '#f0fdf4'
-    );
-    const roomCustom = opsCustom.find(
-      (o) => o.type === 'rect' && o.fill === '#f0fdf4'
-    );
+    const roomDefault = opsDefault.find((o) => o.type === 'rect' && o.fill === '#f0fdf4');
+    const roomCustom = opsCustom.find((o) => o.type === 'rect' && o.fill === '#f0fdf4');
     expect(roomDefault).toBeDefined();
     expect(roomCustom).toBeDefined();
-    if (
-      roomDefault?.type === 'rect' &&
-      roomCustom?.type === 'rect'
-    ) {
+    if (roomDefault?.type === 'rect' && roomCustom?.type === 'rect') {
       expect(roomCustom.w).not.toBe(roomDefault.w);
     }
   });
@@ -182,9 +175,7 @@ describe('buildVectorPdfOps', () => {
     };
     const ops = buildVectorPdfOps(plan, 0);
     // Setback lines are dashed. Find line ops that are dashed.
-    const dashedLines = ops.filter(
-      (o) => o.type === 'line'
-    );
+    const dashedLines = ops.filter((o) => o.type === 'line');
     // We should have at least 4 setback boundary lines.
     expect(dashedLines.length).toBeGreaterThanOrEqual(4);
   });
@@ -218,9 +209,7 @@ describe('buildVectorPdfOps', () => {
     };
     const ops = buildVectorPdfOps(plan, 0);
     // Element rects use a different fill color than room rects.
-    const elementRects = ops.filter(
-      (o) => o.type === 'rect' && o.fill === '#e2e8f0'
-    );
+    const elementRects = ops.filter((o) => o.type === 'rect' && o.fill === '#e2e8f0');
     expect(elementRects.length).toBe(1);
   });
 
@@ -251,9 +240,7 @@ describe('buildVectorPdfOps', () => {
     // For a 30x40 ft plot, scale = min(7/30, 7.7/40) = min(0.2333, 0.1925) = 0.1925.
     const ops = buildVectorPdfOps(BASE_PLAN, 0);
     // The plot boundary rect should span the full drawing area.
-    const boundary = ops.find(
-      (o) => o.type === 'rect' && o.fill === '#ffffff'
-    );
+    const boundary = ops.find((o) => o.type === 'rect' && o.fill === '#ffffff');
     expect(boundary).toBeDefined();
     if (boundary && boundary.type === 'rect') {
       // Width should be ~30 * 0.1925 = 5.775 inches (within 7).

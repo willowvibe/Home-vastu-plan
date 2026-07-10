@@ -33,11 +33,7 @@ async function isPngOrJpeg(file: File): Promise<boolean> {
   }
 }
 
-export function PresentationExport({
-  plan,
-  currentFloor,
-  onClose,
-}: PresentationExportProps) {
+export function PresentationExport({ plan, currentFloor, onClose }: PresentationExportProps) {
   const [clientName, setClientName] = useState('');
   const [projectName, setProjectName] = useState('');
   const [consultantName, setConsultantName] = useState('');
@@ -213,9 +209,7 @@ export function PresentationExport({
 
           {/* Entitlement status line (M-1) */}
           <div className="text-xs text-slate-400 text-center">
-            {isWatermarkRequired()
-              ? 'Free plan · watermark included'
-              : 'Pro · watermark-free'}
+            {isWatermarkRequired() ? 'Free plan · watermark included' : 'Pro · watermark-free'}
           </div>
         </div>
 

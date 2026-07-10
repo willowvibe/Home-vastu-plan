@@ -289,14 +289,8 @@ export function buildVectorPdfOps(
   if (showVastuGrid) {
     const buildableLeft = ftToIn(plan.setbacks.left, scale);
     const buildableTop = ftToIn(plan.setbacks.top, scale);
-    const buildableW = ftToIn(
-      plan.plotWidth - plan.setbacks.left - plan.setbacks.right,
-      scale
-    );
-    const buildableH = ftToIn(
-      plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom,
-      scale
-    );
+    const buildableW = ftToIn(plan.plotWidth - plan.setbacks.left - plan.setbacks.right, scale);
+    const buildableH = ftToIn(plan.plotHeight - plan.setbacks.top - plan.setbacks.bottom, scale);
     const cellW = buildableW / 3;
     const cellH = buildableH / 3;
 

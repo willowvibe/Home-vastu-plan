@@ -73,9 +73,7 @@ const makeFile = (bytes: number[], type = 'image/png', name = 'logo.png') => {
 describe('PresentationExport (S-15: logo MIME validation)', () => {
   it('accepts a valid PNG (no toast is shown)', async () => {
     showToast.mockClear();
-    render(
-      <PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />
-    );
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />);
     const file = makeFile([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], 'image/png');
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: [file] } });
@@ -86,9 +84,7 @@ describe('PresentationExport (S-15: logo MIME validation)', () => {
 
   it('rejects a non-image (PDF magic) — toast is shown', async () => {
     showToast.mockClear();
-    render(
-      <PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />
-    );
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />);
     const file = makeFile(
       [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34],
       'application/pdf',
@@ -104,9 +100,7 @@ describe('PresentationExport (S-15: logo MIME validation)', () => {
 
   it('rejects files larger than 5 MB — toast is shown', async () => {
     showToast.mockClear();
-    render(
-      <PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />
-    );
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />);
     // 6 MB of zeros with PNG magic prefix.
     const big = new Uint8Array(6 * 1024 * 1024);
     big[0] = 0x89;
