@@ -10,7 +10,7 @@ async function skipOnboarding(page: import('@playwright/test').Page) {
       // Ignore errors (e.g., in private mode)
     }
   });
-  await page.goto('/');
+  await page.goto('/app');
   // If onboarding still appears, skip it by clicking through
   try {
     await page.waitForSelector('div.fixed.inset-0.bg-slate-900\\/60.backdrop-blur-sm.z-\\[60\\]', {
@@ -179,19 +179,22 @@ test('shared link URL is stripped after first load (B-10)', async ({ page }) => 
   const json = JSON.stringify(plan);
   const encoded = LZString.compressToEncodedURIComponent(json);
 
-  await page.goto(`/?plan=${encoded}&mode=view`);
+  await page.goto(`/app?plan=${encoded}&mode=view`);
 
   // After the app loads the shared plan, the URL should have been
-  // stripped to just "/" by history.replaceState in the shared-link loader.
+  // stripped to just "/app" (the planner route, search removed) by
+  // history.replaceState(null, '', window.location.pathname) in the
+  // shared-link loader. Assert the share params are gone and we're on
+  // the bare planner route (no trailing slash in dev).
   await page.waitForFunction(() => window.location.search === '', null, { timeout: 5000 });
-  expect(page.url()).toMatch(/\/$|\/\?$/);
+  expect(page.url()).toMatch(/\/app\/?$/);
 
   // Now navigate to a state with no shared plan and add a room. The shared
   // plan was persisted to localStorage by resetPlan(), so clear it and reload
   // so the in-memory plan starts empty. Otherwise the previously-loaded 10'x10'
   // room would still be present when we add the bedroom, making the built-up
   // area non-deterministic.
-  await page.goto('/');
+  await page.goto('/app');
   await page.waitForSelector('button:has-text("Ground Floor")', { timeout: 10000 });
   await page.evaluate(() => localStorage.removeItem('vastuplan_autosave'));
   await page.reload();
