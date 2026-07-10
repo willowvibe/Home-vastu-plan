@@ -29,10 +29,10 @@ server/src/ai/
 
 Both behind `authenticate` middleware (Supabase JWT).
 
-| Endpoint | Method | Backends | Notes |
-|---|---|---|---|
-| `/api/ai/analyze` | POST | Gemini or Ollama | Text-in/text-out Vastu analysis. Provider chosen by `AI_PROVIDER` env var. |
-| `/api/ai/edit-image` | POST | Gemini only | Multipart form data (image + prompt). Returns 501 if Ollama is configured. |
+| Endpoint             | Method | Backends         | Notes                                                                      |
+| -------------------- | ------ | ---------------- | -------------------------------------------------------------------------- |
+| `/api/ai/analyze`    | POST   | Gemini or Ollama | Text-in/text-out Vastu analysis. Provider chosen by `AI_PROVIDER` env var. |
+| `/api/ai/edit-image` | POST   | Gemini only      | Multipart form data (image + prompt). Returns 501 if Ollama is configured. |
 
 ### Provider configuration
 
@@ -51,17 +51,18 @@ OLLAMA_MODEL=deepseek-v4-pro           # or glm-5.2, minimax-m3, kimi-k2.7, etc.
 
 ### Error handling
 
-| Scenario | Status | Response |
-|---|---|---|
-| Ollama unreachable | 502 | `{"error":"AI service unavailable","provider":"ollama"}` |
-| Gemini quota exceeded | 429 | `{"error":"AI service quota exceeded","provider":"gemini"}` |
-| Image edit on Ollama | 501 | `{"error":"Image editing requires Gemini","configured_provider":"ollama"}` |
-| Missing auth | 401 | `{"error":"Unauthorized"}` |
-| Invalid request body | 400 | `{"error":"..."}` |
+| Scenario              | Status | Response                                                                   |
+| --------------------- | ------ | -------------------------------------------------------------------------- |
+| Ollama unreachable    | 502    | `{"error":"AI service unavailable","provider":"ollama"}`                   |
+| Gemini quota exceeded | 429    | `{"error":"AI service quota exceeded","provider":"gemini"}`                |
+| Image edit on Ollama  | 501    | `{"error":"Image editing requires Gemini","configured_provider":"ollama"}` |
+| Missing auth          | 401    | `{"error":"Unauthorized"}`                                                 |
+| Invalid request body  | 400    | `{"error":"..."}`                                                          |
 
 ### Request/Response shapes
 
 **`POST /api/ai/analyze`**
+
 ```json
 // Request
 { "plan": <FloorPlan>, "currentFloor": 0 }
@@ -71,6 +72,7 @@ OLLAMA_MODEL=deepseek-v4-pro           # or glm-5.2, minimax-m3, kimi-k2.7, etc.
 ```
 
 **`POST /api/ai/edit-image`**
+
 ```
 // Request: multipart/form-data
 //   image: <File>
@@ -241,19 +243,19 @@ export async function editFloorPlanImage(imageFile: File, promptText: string) {
 
 ### Files changed
 
-| File | Change |
-|---|---|
-| `src/services/gemini.ts` | Replace GoogleGenAI SDK with fetch |
-| `src/vite-env.d.ts` | Remove `VITE_GEMINI_API_KEY`, add `VITE_API_URL` |
-| `.env.example` | Remove `VITE_GEMINI_API_KEY`, add `VITE_API_URL` |
-| `server/src/ai/index.ts` | New — Express router |
-| `server/src/ai/gemini.ts` | New — Gemini provider |
-| `server/src/ai/ollama.ts` | New — Ollama provider |
-| `server/src/ai/types.ts` | New — shared types |
-| `server/src/api/index.ts` | Mount `/api/ai` router with `authenticate` |
-| `server/.env.example` | Add AI provider config vars |
-| `server/package.json` | Add `@google/genai` dependency |
-| `server/db/001_public_schema.sql` | New — migration file |
+| File                              | Change                                           |
+| --------------------------------- | ------------------------------------------------ |
+| `src/services/gemini.ts`          | Replace GoogleGenAI SDK with fetch               |
+| `src/vite-env.d.ts`               | Remove `VITE_GEMINI_API_KEY`, add `VITE_API_URL` |
+| `.env.example`                    | Remove `VITE_GEMINI_API_KEY`, add `VITE_API_URL` |
+| `server/src/ai/index.ts`          | New — Express router                             |
+| `server/src/ai/gemini.ts`         | New — Gemini provider                            |
+| `server/src/ai/ollama.ts`         | New — Ollama provider                            |
+| `server/src/ai/types.ts`          | New — shared types                               |
+| `server/src/api/index.ts`         | Mount `/api/ai` router with `authenticate`       |
+| `server/.env.example`             | Add AI provider config vars                      |
+| `server/package.json`             | Add `@google/genai` dependency                   |
+| `server/db/001_public_schema.sql` | New — migration file                             |
 
 ### No changes to call sites
 

@@ -18,10 +18,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   };
 }
 
-export async function analyzeFloorPlan(
-  plan: FloorPlan,
-  currentFloor: number
-): Promise<string> {
+export async function analyzeFloorPlan(plan: FloorPlan, currentFloor: number): Promise<string> {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_URL}/api/ai/analyze`, {
     method: 'POST',
