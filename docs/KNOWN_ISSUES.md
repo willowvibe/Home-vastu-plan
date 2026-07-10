@@ -436,8 +436,8 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 | ID           | Title                     | PR / commit        | Notes                                                                                                                                                                                                           |
 | ------------ | ------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | M-10 Phase 1 | Supabase Auth integration | PR #89 (`ba149ef`) | Email/password sign-up/sign-in, password reset, sign-out, `AuthContext`, theme-aware accessible auth modal, Sentry/Plausible identity hooks. Optional auth: falls back to anonymous-only when env vars missing. |
-| M-3          | QR-code share export      | PR #93 (`1d06b50`) | New `QrShareModal` renders the current share URL as an SVG QR code with Copy Link + Download QR SVG actions. Wired into `Toolbar` and `usePlanEditor`; tracked under `SHARE_QR_OPENED`.                         |
-| M-8          | Vastu methodology page    | PR #93 (`1d06b50`) | New `/methodology` route renders the live `IDEAL_ZONES` matrix and `getVastuZoneInfo` with source citations and a direction-by-room table. Footer link added on `Landing`.                                      |
+| M-3          | QR-code share export      | PR #95 (`1d06b50`) | New `QrShareModal` renders the current share URL as an SVG QR code with Copy Link + Download QR SVG actions. Wired into `Toolbar` and `usePlanEditor`; tracked under `SHARE_QR_OPENED`.                         |
+| M-8          | Vastu methodology page    | PR #95 (`1d06b50`) | New `/methodology` route renders the live `IDEAL_ZONES` matrix and `getVastuZoneInfo` with source citations and a direction-by-room table. Footer link added on `Landing`.                                      |
 
 ---
 
