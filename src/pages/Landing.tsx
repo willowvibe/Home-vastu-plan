@@ -1,19 +1,18 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { trackEvent, EVENTS } from '../services/analytics';
 import './landing.css';
 
 export function Landing() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, sendMagicLink, signInWithGoogle } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
   const [activeId, setActiveId] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
   const [invalid, setInvalid] = useState(false);
-
-  // Signed-in users skip the marketing page.
-  if (isAuthenticated) return <Navigate to="/app" replace />;
+  const [isSending, setIsSending] = useState(false);
 
   // Smooth-scroll for in-page anchor links, scoped to the landing's lifetime.
   useEffect(() => {
@@ -48,7 +47,11 @@ export function Landing() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const handleSubmit = (e: FormEvent) => {
+  // Signed-in users skip the marketing page. Kept AFTER the useEffects above so
+  // the hook order stays stable regardless of the auth flag (Rules-of-Hooks).
+  if (isAuthenticated) return <Navigate to="/app" replace />;
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const value = email.trim();
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -67,8 +70,24 @@ export function Landing() {
       setMessage('Please enter a valid email address.');
       return;
     }
-    // Task 5 wires this to sendMagicLink + Google. For now, just clear.
+    trackEvent(EVENTS.LANDING_SIGNUP_SUBMIT);
+    setIsSending(true);
+    const { error } = await sendMagicLink(value);
+    setIsSending(false);
+    if (error) {
+      setMessageType('error');
+      setMessage(error.message || 'Could not send magic link. Please try again.');
+      return;
+    }
+    trackEvent(EVENTS.LANDING_MAGIC_LINK_SENT);
+    setMessageType('success');
+    setMessage('Check your inbox for a magic link to sign in.');
     setEmail('');
+  };
+
+  const handleGoogle = () => {
+    trackEvent(EVENTS.LANDING_GOOGLE_CLICK);
+    void signInWithGoogle();
   };
 
   return (
@@ -346,13 +365,21 @@ export function Landing() {
                   placeholder="you@example.com"
                   aria-label="Email address"
                 />
-                <button className="btn btn-accent" type="submit">
-                  Sign up free
+                <button className="btn btn-accent" type="submit" disabled={isSending}>
+                  {isSending ? 'Sending…' : 'Sign up free'}
                 </button>
               </form>
               <p className={`form-message ${messageType}`} aria-live="polite">
                 {message}
               </p>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleGoogle}
+                style={{ width: '100%', marginTop: '8px' }}
+              >
+                Continue with Google
+              </button>
               <p className="meta" style={{ marginTop: '18px' }}>
                 Already have an account?{' '}
                 <a href="#signup" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
