@@ -1,6 +1,6 @@
 # VastuPlan 2D
 
-> **0.1.1 (alpha)** — see [`CHANGELOG.md`](./CHANGELOG.md), [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md), and [`docs/vastuplan-market-dig.md`](./docs/vastuplan-market-dig.md) for the current state and the v0.2/v0.3 roadmap. Latest: Supabase Auth Phase 1 merged (PR #89). The next milestone is the **v0.2 monetization wedge** (vector PDF + watermark gate + Razorpay + QR share + SEO).
+> **0.2.0 (alpha)** — see [`CHANGELOG.md`](./CHANGELOG.md), [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md), and [`docs/vastuplan-market-dig.md`](./docs/vastuplan-market-dig.md) for the current state and the v0.2/v0.3 roadmap. Latest: M-1 vector PDF + watermark gate (PR #90) and C1 AI proxy + DB architecture (PR #91). The v0.2 monetization wedge is underway — next is M-2 Razorpay.
 
 VastuPlan 2D is a modern, interactive web application designed to help users create, visualize, and analyze floor plans based on traditional Indian Vastu Shastra principles. Built with React 19 and Tailwind CSS v4, it offers a seamless drag-and-drop interface combined with intelligent AI-driven analysis. The app is free to use; optional paid exports power the roadmap.
 

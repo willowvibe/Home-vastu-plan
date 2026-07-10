@@ -400,7 +400,8 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 
 | ID  | Title                                             | Effort | Status         | Notes                                                                     |
 | --- | ------------------------------------------------- | ------ | -------------- | ------------------------------------------------------------------------- |
-| M-1 | Vector PDF export + watermark gate                | M      | 🟡 in progress | Branch `feat/m-1-vector-pdf-watermark`. Core ₹499 Pro Export deliverable. |
+| M-1 | Vector PDF export + watermark gate                | M      | ✅ resolved | PR #90. Core ₹499 Pro Export deliverable.                              |
+| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI calls proxied through server/ on Railway. Zero keys in client. |
 | M-2 | Razorpay / Instamojo payment integration          | S      | 🔲 pending     | Monetization hypothesis is blocked without this.                          |
 | M-3 | QR-code share export                              | XS     | 🔲 pending     | WhatsApp/contractor/family on-ramp.                                       |
 | M-4 | Wire up `?mode=comment` annotation UI             | S      | 🔲 pending     | Unique viral loop; backend link already supports comment mode.            |
