@@ -573,6 +573,6 @@ describe('usePlanEditor derived metrics', () => {
     const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
 
     expect(result.current.analyzeBtn.disabled).toBe(true);
-    expect(result.current.analyzeBtn.title).toMatch(/VITE_GEMINI_API_KEY/);
+    expect(result.current.analyzeBtn.title).toMatch(/VITE_API_URL/);
   });
 });

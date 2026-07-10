@@ -128,21 +128,21 @@ describe('computeInitialRoomPosition (U-1: no more stacked rooms)', () => {
   });
 });
 
-describe('getAnalyzeButtonState (U-9: helpful disabled state when API key is missing)', () => {
-  it('disables with a specific tooltip when the API key is missing', () => {
+describe('getAnalyzeButtonState (C1: helpful disabled state when API URL is missing)', () => {
+  it('disables with a specific tooltip when the API URL is missing', () => {
     const state = getAnalyzeButtonState({
       isAnalyzing: false,
-      hasApiKey: false,
+      hasApiUrl: false,
       hasRoomsOnCurrentFloor: true,
     });
     expect(state.disabled).toBe(true);
-    expect(state.title).toMatch(/VITE_GEMINI_API_KEY/);
+    expect(state.title).toMatch(/VITE_API_URL/);
   });
 
   it('disables with a "no rooms" tooltip when there are no rooms on the current floor', () => {
     const state = getAnalyzeButtonState({
       isAnalyzing: false,
-      hasApiKey: true,
+      hasApiUrl: true,
       hasRoomsOnCurrentFloor: false,
     });
     expect(state.disabled).toBe(true);
@@ -152,32 +152,32 @@ describe('getAnalyzeButtonState (U-9: helpful disabled state when API key is mis
   it('disables while analyzing', () => {
     const state = getAnalyzeButtonState({
       isAnalyzing: true,
-      hasApiKey: true,
+      hasApiUrl: true,
       hasRoomsOnCurrentFloor: true,
     });
     expect(state.disabled).toBe(true);
     expect(state.title).toMatch(/Analyzing/);
   });
 
-  it('enables when API key is set + rooms exist + not analyzing', () => {
+  it('enables when API URL is set + rooms exist + not analyzing', () => {
     const state = getAnalyzeButtonState({
       isAnalyzing: false,
-      hasApiKey: true,
+      hasApiUrl: true,
       hasRoomsOnCurrentFloor: true,
     });
     expect(state.disabled).toBe(false);
     expect(state.title).toMatch(/Analyze/);
   });
 
-  it('prefers the API-key-missing message over the no-rooms message when both are wrong', () => {
-    // The most common scenario in a fresh checkout: no API key + no
-    // rooms. The API-key message is more actionable, so it wins.
+  it('prefers the API-URL-missing message over the no-rooms message when both are wrong', () => {
+    // The most common scenario in a fresh checkout: no API URL + no
+    // rooms. The API-URL message is more actionable, so it wins.
     const state = getAnalyzeButtonState({
       isAnalyzing: false,
-      hasApiKey: false,
+      hasApiUrl: false,
       hasRoomsOnCurrentFloor: false,
     });
-    expect(state.title).toMatch(/VITE_GEMINI_API_KEY/);
+    expect(state.title).toMatch(/VITE_API_URL/);
   });
 });
 

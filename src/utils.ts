@@ -109,7 +109,7 @@ export function computeInitialRoomPosition<T extends RoomPositionRoom>(
 
 export interface AnalyzeButtonStateInput {
   isAnalyzing: boolean;
-  hasApiKey: boolean;
+  hasApiUrl: boolean;
   hasRoomsOnCurrentFloor: boolean;
 }
 
@@ -124,18 +124,15 @@ export interface AnalyzeButtonState {
  * tooltip to show. Extracted from App.tsx so the contract is unit-testable
  * without mounting the full App.
  *
- * U-9 fix: the previous behaviour was: button enabled when rooms exist
- * on the current floor, click fires, gemini.ts throws
- * 'VITE_GEMINI_API_KEY not configured', catch shows a generic
- * 'Failed to analyze floor plan.' alert. Cleaner UX: disable the
- * button at the source with a specific tooltip that names the missing
- * config.
+ * C1 fix: was checking VITE_GEMINI_API_KEY; now checks VITE_API_URL
+ * (the Railway server that proxies AI calls). The actual auth check
+ * happens at fetch time in gemini.ts.
  */
 export function getAnalyzeButtonState(input: AnalyzeButtonStateInput): AnalyzeButtonState {
-  if (!input.hasApiKey) {
+  if (!input.hasApiUrl) {
     return {
       disabled: true,
-      title: 'Set VITE_GEMINI_API_KEY in .env to enable AI analysis (see .env.example)',
+      title: 'Set VITE_API_URL in .env to enable AI analysis (see .env.example)',
     };
   }
   if (!input.hasRoomsOnCurrentFloor) {
