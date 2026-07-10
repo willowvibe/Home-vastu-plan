@@ -14,6 +14,7 @@ import {
   Ruler,
   Loader2,
   Compass,
+  QrCode,
 } from 'lucide-react';
 
 export interface ToolbarProps {
@@ -28,6 +29,7 @@ export interface ToolbarProps {
   onToggleGrid: () => void;
   onToggleTour: () => void;
   onShare: (mode: 'view' | 'comment', password?: string) => void;
+  onShareQR: () => void;
   onExport: () => void;
   isExporting: boolean;
   onPrint: () => void;
@@ -50,6 +52,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onToggleGrid,
   onToggleTour,
   onShare,
+  onShareQR,
   onExport,
   isExporting,
   onPrint,
@@ -146,6 +149,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             title="Password-Protected Share Link (view-only)"
           >
             <Lock className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onShareQR}
+            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
+            title="Show QR Code for this plan"
+            data-testid="share-qr-button"
+          >
+            <QrCode className="w-4 h-4" />
           </button>
         </div>
         <button

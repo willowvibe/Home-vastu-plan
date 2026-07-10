@@ -132,6 +132,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
   const [showProjectManager, setShowProjectManager] = useState(false);
   const [showPresentationExport, setShowPresentationExport] = useState(false);
   const [showComplianceExport, setShowComplianceExport] = useState(false);
+  const [qrShareUrl, setQrShareUrl] = useState<string | null>(null);
   const [showShortcutHelp, setShowShortcutHelp] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     try {
@@ -592,6 +593,21 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     [plan, analysis, currentFloor]
   );
 
+  const handleShareQR = useCallback(() => {
+    try {
+      const url = generateShareLink(plan, analysis, 'view');
+      setQrShareUrl(url);
+      trackEvent(EVENTS.SHARE_QR_OPENED, { props: { floor: currentFloor } });
+    } catch (error) {
+      console.error('Failed to generate QR share link', error);
+      alert(getErrorMessage(error) || 'Failed to generate share link. Plan might be too large.');
+    }
+  }, [plan, analysis, currentFloor]);
+
+  const closeQrShare = useCallback(() => {
+    setQrShareUrl(null);
+  }, []);
+
   const handleExportJSON = useCallback(() => {
     try {
       exportToJSON(plan, `VastuPlan_Floor_${currentFloor}.json`, analysis);
@@ -1022,6 +1038,9 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     setShowPresentationExport,
     showComplianceExport,
     setShowComplianceExport,
+    qrShareUrl,
+    setQrShareUrl,
+    closeQrShare,
     showShortcutHelp,
     setShowShortcutHelp,
     showOnboarding,
@@ -1050,6 +1069,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     handleAnalyze,
     handleExport,
     handleShare,
+    handleShareQR,
     handleExportJSON,
     handleImportJSON,
     handlePrint,

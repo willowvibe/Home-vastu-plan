@@ -9,6 +9,7 @@ import { ImageEditor } from './components/ImageEditor';
 import { ProjectManager } from './components/ProjectManager';
 import { PresentationExport } from './components/PresentationExport';
 import { ComplianceReportExport } from './components/ComplianceReportExport';
+import { QrShareModal } from './components/QrShareModal';
 import { ShortcutHelp } from './components/ShortcutHelp';
 import { Onboarding } from './components/Onboarding';
 import { OfflineIndicator } from './components/OfflineIndicator';
@@ -111,6 +112,7 @@ export default function App() {
                 onToggleGrid={editor.handleToggleGrid}
                 onToggleTour={editor.handleToggleTour}
                 onShare={editor.handleShare}
+                onShareQR={editor.handleShareQR}
                 onExport={editor.handleExport}
                 isExporting={editor.isExporting}
                 onPrint={editor.handlePrint}
@@ -204,6 +206,10 @@ export default function App() {
           analysis={editor.analysis}
           onClose={() => editor.setShowComplianceExport(false)}
         />
+      )}
+
+      {editor.qrShareUrl && (
+        <QrShareModal url={editor.qrShareUrl} onClose={() => editor.closeQrShare?.()} />
       )}
 
       {editor.showShortcutHelp && (

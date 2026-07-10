@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { trackEvent, EVENTS } from '../services/analytics';
 import './landing.css';
@@ -597,7 +597,12 @@ export function Landing() {
       <footer className="pagefoot" data-od-id="footer">
         <div className="container row-between">
           <span>© 2026 VastuPlan · Built for Indian homes</span>
-          <span className="meta">contact@vastuplan.app</span>
+          <div className="flex items-center gap-6">
+            <Link className="meta hover:text-fg-2 transition-colors" to="/methodology">
+              Methodology
+            </Link>
+            <span className="meta">contact@vastuplan.app</span>
+          </div>
         </div>
       </footer>
     </div>
