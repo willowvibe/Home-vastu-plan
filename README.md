@@ -1,8 +1,8 @@
 # VastuPlan 2D
 
-> **0.1.1 (alpha)** — see [`CHANGELOG.md`](./CHANGELOG.md) and [`docs/CODE_REVIEW.md`](./docs/CODE_REVIEW.md) for the current state and the active backlog. Latest release: the P2/P3 UX sweep (5 PRs since `0.1.0`, 8 UX-walkthrough findings resolved).
+> **0.1.1 (alpha)** — see [`CHANGELOG.md`](./CHANGELOG.md), [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md), and [`docs/vastuplan-market-dig.md`](./docs/vastuplan-market-dig.md) for the current state and the v0.2/v0.3 roadmap. Latest: Supabase Auth Phase 1 merged (PR #89). The next milestone is the **v0.2 monetization wedge** (vector PDF + watermark gate + Razorpay + QR share + SEO).
 
-VastuPlan 2D is a modern, interactive web application designed to help users create, visualize, and analyze floor plans based on traditional Indian Vastu Shastra principles. Built with React 19 and Tailwind CSS v4, it offers a seamless drag-and-drop interface combined with intelligent AI-driven analysis. This release includes bug fixes and usability improvements including keyboard navigation, multi-floor management, and enhanced export options.
+VastuPlan 2D is a modern, interactive web application designed to help users create, visualize, and analyze floor plans based on traditional Indian Vastu Shastra principles. Built with React 19 and Tailwind CSS v4, it offers a seamless drag-and-drop interface combined with intelligent AI-driven analysis. The app is free to use; optional paid exports power the roadmap.
 
 ## 🌟 Key Features
 
@@ -62,9 +62,12 @@ VastuPlan 2D is a modern, interactive web application designed to help users cre
 - **Icons**: Lucide React
 - **AI Integration**: `@google/genai` (Gemini 2.5 Flash for text analysis, Imagen for image generation)
 - **Utilities**: `html-to-image` for PNG/SVG export, `jsPDF` for PDF export, `lz-string` for URL-compressed plan sharing, `uuid` for unique identification.
+- **Auth (optional)**: Supabase Auth — email/password sign-up, sign-in, password reset, sign-out. Falls back to anonymous-only when `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are not configured.
 - **Backend (optional)**: Node + Express + Socket.io collaboration server in [`server/`](./server/README.md)
 - **Tooling**: Vitest + React Testing Library for unit/integration, Playwright for E2E, ESLint + Prettier, Sentry (prod), Plausible (analytics)
 - **Runtime requirement**: Node.js >= 22 (see [`.nvmrc`](./.nvmrc))
+
+> **Note on pricing:** VastuPlan 2D is free to use. A **₹499 Pro Export Pack** (vector PDF, watermark-free PNG, compliance report PDF, presentation export) and a **₹999/year Consultant tier** are planned for v0.2. See [`docs/vastuplan-market-dig.md`](./docs/vastuplan-market-dig.md) for the go-to-market rationale.
 
 ## 🚀 How to Use
 

@@ -570,16 +570,58 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 
 ## 6. Triage recommendations
 
-> **State as of 2026-06-26 (post `fix/g3-g4-g5-construction-overlays`):** All 9 P0s, all P1s, all P2 items, all P3/Q items, and all G nice-to-haves are resolved. G-1/G-13/G-14, G-2/G-7/G-12, G-6/G-8/G-11, G-9/G-10/G-15, and G-3/G-4/G-5 are resolved. Q-19, Q-20, Q-21, Q-22, Q-23, Q-24, and Q-25 are resolved. No open items remain on the §1–§5 lists.
+> **State as of 2026-07-10:** The historical bug/refactor backlog (§1–§5) is fully resolved. Supabase Auth Phase 1 merged via PR #89. The active roadmap is now the **v0.2 / v0.3 market-driven feature backlog** sourced from [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md). CODE_REVIEW.md keeps the historical §1–§5 entries for traceability; the living "what's next" list is below.
 
-| Bucket                   | Items                                   | Suggested owner track | Effort |
-| ------------------------ | --------------------------------------- | --------------------- | ------ |
-| **P0 — Fix now**         | _none — all 9 P0s resolved in PR #28_   | —                     | —      |
-| **P1 — Fix this sprint** | _none — all P1s resolved (B-8 shipped)_ | —                     | —      |
-| **P2 — Refactor**        | _none — S-1 and S-4 both shipped_       | health                | —      |
-| **P3 — Polish**          | _none — all G items resolved_           | features              | —      |
+### 6.1 v0.2 — SHIP next 60–90 days (gates the 90-day hypothesis test)
 
-**Where to start next:** The §1–§5 backlog is empty. Any new work should be tracked as a fresh entry.
+| ID  | Title                                             | Effort | Status     | Owner |
+| --- | ------------------------------------------------- | ------ | ---------- | ----- |
+| M-1 | Vector PDF export + watermark gate                | M      | 🔲 pending | —     |
+| M-2 | Razorpay / Instamojo payment integration          | S      | 🔲 pending | —     |
+| M-3 | QR-code share export                              | XS     | 🔲 pending | —     |
+| M-4 | Wire up `?mode=comment` annotation UI             | S      | 🔲 pending | —     |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S      | 🔲 pending | —     |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L      | 🔲 pending | —     |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S      | 🔲 pending | —     |
+| M-8 | Vastu matrix source citation + methodology page   | S      | 🔲 pending | —     |
+
+### 6.2 v0.3 — SHIP 90–180 days
+
+| ID   | Title                                      | Effort | Status            | Owner |
+| ---- | ------------------------------------------ | ------ | ----------------- | ----- |
+| M-9  | Hindi i18n                                 | L      | 🔲 pending        | —     |
+| M-10 | Auth + cross-device sync                   | L      | 🟡 partially done | —     |
+| M-11 | Consultant tier landing + referral program | S      | 🔲 pending        | —     |
+| M-12 | Custom Vastu matrix override               | M      | 🔲 pending        | —     |
+| M-13 | Sketch/PDF upload → auto-room detection    | L      | 🔲 pending        | —     |
+| M-14 | Side-by-side property compare              | M      | 🔲 pending        | —     |
+
+### 6.3 Enhance / Optimize
+
+| ID  | Title                                     | Effort | Status     |
+| --- | ----------------------------------------- | ------ | ---------- |
+| E-1 | Brahmasthan / CENTER scoring clarity      | S      | 🔲 pending |
+| E-2 | Multi-user undo in collab                 | M      | 🔲 pending |
+| E-3 | Per-room rotation + multi-room transforms | S      | 🔲 pending |
+| O-1 | Bundle size / FCP / canvas virtualization | S      | 🔲 pending |
+| O-2 | Test coverage ≥80% on critical paths      | M      | 🔲 pending |
+| O-3 | Accessibility (WCAG 2.1 AA)               | S      | 🔲 pending |
+| O-4 | Sentry + Plausible event tracking         | S      | 🔲 pending |
+
+### 6.4 Rejected / deferred
+
+See [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md) §5.5 for the full reject list (3D/VR, native Android/iOS in v0.2, per-month SaaS > ₹1,500, consultant marketplace, in-app ads, AI auto-Vastu generator in v0.2, AR/LiDAR, generic interior catalogs, fundraising before 90-day test, competing on AI report price).
+
+### 6.5 Historical buckets (all resolved)
+
+| Bucket                   | Items                      | Status |
+| ------------------------ | -------------------------- | ------ |
+| **P0 — Fix now**         | all 9 resolved in PR #28   | ✅     |
+| **P1 — Fix this sprint** | all resolved (B-8 shipped) | ✅     |
+| **P2 — Refactor**        | S-1 and S-4 shipped        | ✅     |
+| **P3 — Polish**          | all G / Q items resolved   | ✅     |
+
+**Where to start next:** The §1–§5 bug backlog is empty. Begin with **M-1** (vector PDF + watermark gate) and **M-2** (payments) — they unblock the ₹499 Pro Export hypothesis. See [`tasks.md`](../../tasks.md) for the day-to-day tracker.
 
 ---
 

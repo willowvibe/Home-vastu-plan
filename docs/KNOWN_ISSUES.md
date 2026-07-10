@@ -1,8 +1,8 @@
 # Known Issues & Improvements
 
-> **Status:** Living tracker for the highest-priority items from `docs/CODE_REVIEW.md`.
-> **Source of truth for "what's next":** the triage table at the bottom of `CODE_REVIEW.md` §6.
-> **Last updated:** 2026-06-21 (Q-20/Q-21/Q-25 env/docs batch in progress on `fix/q-20-q21-q25-batch`; Q-19/Q-22/Q-23/Q-24 docs batch merged via PR #73; G-1/G-13/G-14 batch resolved via PR #72; G-6/G-8/G-11 batch resolved via PR #70; G-2/G-7/G-12 batch resolved via PR #68; S-1 `App.tsx` split resolved via PR #67; B-8 marquee drag-select resolved on `fix/b-8-marquee-select`.)
+> **Status:** Living tracker. The historical bug backlog (P0/P1/P2/P3/G/Q) from `docs/CODE_REVIEW.md` §1–§5 is fully resolved. The **active backlog** is now the v0.2/v0.3 market-driven feature list at the bottom of this file, sourced from [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md).
+> **Source of truth for "what's next":** the v0.2/v0.3 tables below and [`docs/CODE_REVIEW.md`](./CODE_REVIEW.md) §6.
+> **Last updated:** 2026-07-10 (Supabase Auth Phase 1 merged via PR #89; v0.2 backlog added).
 
 ## Quick links
 
@@ -388,9 +388,61 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 
 **No regressions** in `npm run lint` (0 errors; 72 pre-existing warnings unchanged), `npm test -- --run` (366 tests), or `npm run build`.
 
+---
+
+## 🆕 New backlog — v0.2 / v0.3 market-driven features
+
+> Source of truth: [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md). The CODE_REVIEW.md §1–§5 bug backlog is empty; new work is now feature delivery for the 90-day hypothesis test.
+>
+> Last updated: 2026-07-10.
+
+### SHIP — v0.2 (next 60–90 days)
+
+| ID  | Title                                             | Effort | Status     | Notes                                                                  |
+| --- | ------------------------------------------------- | ------ | ---------- | ---------------------------------------------------------------------- |
+| M-1 | Vector PDF export + watermark gate                | M      | 🔲 pending | Core ₹499 Pro Export deliverable.                                      |
+| M-2 | Razorpay / Instamojo payment integration          | S      | 🔲 pending | Monetization hypothesis is blocked without this.                       |
+| M-3 | QR-code share export                              | XS     | 🔲 pending | WhatsApp/contractor/family on-ramp.                                    |
+| M-4 | Wire up `?mode=comment` annotation UI             | S      | 🔲 pending | Unique viral loop; backend link already supports comment mode.         |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S      | 🔲 pending | Offline use at construction sites; SW exists, extend plan persistence. |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L      | 🔲 pending | Primary acquisition; urgent before AI tools own SERP.                  |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S      | 🔲 pending | Persona A is mobile-web-first.                                         |
+| M-8 | Vastu matrix source citation + methodology page   | S      | 🔲 pending | Trust-builder vs. AI black-box competitors.                            |
+
+### SHIP — v0.3 (90–180 days)
+
+| ID   | Title                                      | Effort | Status            | Notes                                                       |
+| ---- | ------------------------------------------ | ------ | ----------------- | ----------------------------------------------------------- |
+| M-9  | Hindi i18n                                 | L      | 🔲 pending        | Tier-2/3 expansion; gated on v0.2 English metrics.          |
+| M-10 | Auth + cross-device sync                   | L      | 🟡 partially done | Supabase Auth Phase 1 merged (PR #89); cloud sync deferred. |
+| M-11 | Consultant tier landing + referral program | S      | 🔲 pending        | Operationalize ₹999/yr channel.                             |
+| M-12 | Custom Vastu matrix override               | M      | 🔲 pending        | Key differentiator vs. VastuAnalyzer.                       |
+| M-13 | Sketch/PDF upload → auto-room detection    | L      | 🔲 pending        | Closes gap with VastuIQ/VastuAnalyzer.                      |
+| M-14 | Side-by-side property compare              | M      | 🔲 pending        | Targets flat buyers (71% apartment preference).             |
+
+### ENHANCE / OPTIMIZE
+
+| ID  | Title                                     | Effort | Status     |
+| --- | ----------------------------------------- | ------ | ---------- |
+| E-1 | Brahmasthan / CENTER scoring clarity      | S      | 🔲 pending |
+| E-2 | Multi-user undo in collab                 | M      | 🔲 pending |
+| E-3 | Per-room rotation + multi-room transforms | S      | 🔲 pending |
+| O-1 | Bundle size / FCP / canvas virtualization | S      | 🔲 pending |
+| O-2 | Test coverage ≥80% on critical paths      | M      | 🔲 pending |
+| O-3 | Accessibility (WCAG 2.1 AA)               | S      | 🔲 pending |
+| O-4 | Sentry + Plausible event tracking         | S      | 🔲 pending |
+
+### ✅ Recently resolved (market-driven backlog)
+
+| ID           | Title                     | PR / commit        | Notes                                                                                                                                                                                                           |
+| ------------ | ------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M-10 Phase 1 | Supabase Auth integration | PR #89 (`ba149ef`) | Email/password sign-up/sign-in, password reset, sign-out, `AuthContext`, theme-aware accessible auth modal, Sentry/Plausible identity hooks. Optional auth: falls back to anonymous-only when env vars missing. |
+
+---
+
 ## How to use this document
 
 1. Pick an item from the table.
-2. Create a branch: `git checkout -b fix/b-1-collab-socket-reconnect`.
+2. Create a branch: `git checkout -b feat/m-1-vector-pdf-watermark`.
 3. Update the `Status` column to `🟡 In progress` and add your name/date.
-4. When merged, move the row to a `## ✅ Resolved` section at the bottom of this file with the PR link.
+4. When merged, move the row to the `## ✅ Resolved` section at the bottom of this file with the PR link.
