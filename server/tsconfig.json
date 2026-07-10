@@ -19,6 +19,6 @@
     "sourceMap": true,
     "types": ["node"]
   },
-  "include": ["src/**/*", "db/**/*", "../src/types/shared.ts"],
+  "include": ["src/**/*", "db/**/*", "../src/types/shared.ts", "../src/types.ts"],
   "exclude": ["node_modules", "dist"]
 }
