@@ -12,14 +12,16 @@ vi.mock('./Toast', () => ({
 // Mock the vector PDF export pipeline (M-1: replaced toPng with
 // buildVectorPdfOps + renderOpsToPdf). Use vi.hoisted so the mock
 // functions are available inside the hoisted vi.mock factory.
-const { buildVectorPdfOps, renderOpsToPdf } = vi.hoisted(() => ({
+const { buildVectorPdfOps, renderOpsToPdf, computePdfScale } = vi.hoisted(() => ({
   buildVectorPdfOps: vi.fn<() => unknown[]>(() => []),
   renderOpsToPdf: vi.fn(),
+  computePdfScale: vi.fn(() => 0.2),
 }));
 
 vi.mock('../lib/exportVectorPdf', () => ({
   buildVectorPdfOps,
   renderOpsToPdf,
+  computePdfScale,
 }));
 
 // Mock entitlements — default to watermark required (free plan).
@@ -32,7 +34,6 @@ vi.mock('../services/entitlements', () => ({
 }));
 
 const pdfSave = vi.fn();
-const pdfAddImage = vi.fn();
 // jsPDF is `new`-constructed by PresentationExport. The mock below
 // must be a constructor (function) — a plain vi.fn() returning an
 // object throws `is not a constructor`. We use a real function that
@@ -45,9 +46,15 @@ function MockJsPDF() {
     setFontSize: vi.fn(),
     setFont: vi.fn(),
     text: vi.fn(),
-    addImage: (...args: unknown[]) => pdfAddImage(...args),
-    getImageProperties: vi.fn(() => ({ width: 100, height: 100 })),
+    addImage: vi.fn(), // still needed for logo upload
     save: (...args: unknown[]) => pdfSave(...args),
+    setFillColor: vi.fn(),
+    setTextColor: vi.fn(),
+    setLineDashPattern: vi.fn(),
+    line: vi.fn(),
+    circle: vi.fn(),
+    GState: vi.fn(() => ({})),
+    setGState: vi.fn(),
   };
 }
 vi.mock('jspdf', () => ({
@@ -121,7 +128,6 @@ describe('PresentationExport (M-1: vector PDF generation via buildVectorPdfOps +
     buildVectorPdfOps.mockClear();
     renderOpsToPdf.mockClear();
     pdfSave.mockClear();
-    pdfAddImage.mockClear();
     showToast.mockClear();
     isWatermarkRequired.mockReturnValue(true);
   });
@@ -151,10 +157,13 @@ describe('PresentationExport (M-1: vector PDF generation via buildVectorPdfOps +
     fireEvent.click(gen!);
     await waitFor(() => {
       expect(renderOpsToPdf).toHaveBeenCalled();
-      // First arg is the ops array (mocked to []), second is a jsPDF instance.
+      // First arg is the ops array (mocked to []), second is a jsPDF instance,
+      // third and fourth are originX/originY centering offsets.
       const args = renderOpsToPdf.mock.calls[0] as unknown[];
       expect(args[0]).toEqual([]);
       expect(args[1]).toBeDefined();
+      expect(typeof args[2]).toBe('number');
+      expect(typeof args[3]).toBe('number');
     });
   });
 

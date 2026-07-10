@@ -4,9 +4,8 @@ import { jsPDF } from 'jspdf';
 import { FileText, X, Upload, Loader2, Download } from 'lucide-react';
 import { addBreadcrumb } from '../services/sentry';
 import { useToast } from './Toast';
-import { fitInside } from '../lib/pdfFit';
 import { formatFloorLabel } from '../constants/floorPlanConstants';
-import { buildVectorPdfOps, renderOpsToPdf } from '../lib/exportVectorPdf';
+import { buildVectorPdfOps, renderOpsToPdf, computePdfScale } from '../lib/exportVectorPdf';
 import { isWatermarkRequired } from '../services/entitlements';
 
 interface PresentationExportProps {
@@ -104,7 +103,12 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
 
       // Render the vector floor plan into the drawing area.
       // The ops are already scaled to fit 7×7.7 inches; center them.
-      renderOpsToPdf(ops, pdf);
+      const scale = computePdfScale(plan);
+      const plotW = plan.plotWidth * scale;
+      const plotH = plan.plotHeight * scale;
+      const xOffset = 0.4 + (7 - plotW) / 2;
+      const yOffset = 0.4 + (7.7 - plotH) / 2;
+      renderOpsToPdf(ops, pdf, xOffset, yOffset);
 
       // Save PDF
       pdf.save(`${clientName || 'Project'}_VastuPlan.pdf`);

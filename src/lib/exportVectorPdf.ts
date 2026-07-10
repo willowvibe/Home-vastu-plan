@@ -94,7 +94,7 @@ const DEFAULT_WATERMARK_TEXT = 'VastuPlan 2D — Free Plan';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function defaultScale(plan: FloorPlan): number {
+export function computePdfScale(plan: FloorPlan): number {
   return Math.min(DRAW_AREA_W / plan.plotWidth, DRAW_AREA_H / plan.plotHeight);
 }
 
@@ -119,7 +119,7 @@ export function buildVectorPdfOps(
   currentFloor: number,
   opts?: VectorPdfExportOptions
 ): VectorPdfOp[] {
-  const scale = opts?.scale ?? defaultScale(plan);
+  const scale = opts?.scale ?? computePdfScale(plan);
   const showVastuGrid = opts?.showVastuGrid ?? true;
   const showCompass = opts?.showCompass ?? true;
   const watermark = opts?.watermark ?? true;
@@ -381,13 +381,18 @@ export function buildVectorPdfOps(
  * Replay a list of VectorPdfOp commands onto a jsPDF instance.
  * Thin imperative shell — the logic lives in buildVectorPdfOps.
  */
-export function renderOpsToPdf(ops: VectorPdfOp[], pdf: import('jspdf').jsPDF): void {
+export function renderOpsToPdf(
+  ops: VectorPdfOp[],
+  pdf: import('jspdf').jsPDF,
+  originX = 0,
+  originY = 0
+): void {
   for (const op of ops) {
     switch (op.type) {
       case 'rect': {
         if (op.fill) {
           pdf.setFillColor(op.fill);
-          pdf.rect(op.x, op.y, op.w, op.h, 'F');
+          pdf.rect(op.x + originX, op.y + originY, op.w, op.h, 'F');
         }
         if (op.stroke) {
           pdf.setDrawColor(op.stroke);
@@ -396,7 +401,7 @@ export function renderOpsToPdf(ops: VectorPdfOp[], pdf: import('jspdf').jsPDF): 
             // jsPDF 4.x supports dashed lines via setLineDashPattern
             pdf.setLineDashPattern(op.dashPattern, 0);
           }
-          pdf.rect(op.x, op.y, op.w, op.h, 'S');
+          pdf.rect(op.x + originX, op.y + originY, op.w, op.h, 'S');
           if (op.dashPattern) {
             pdf.setLineDashPattern([], 0); // reset
           }
@@ -409,7 +414,7 @@ export function renderOpsToPdf(ops: VectorPdfOp[], pdf: import('jspdf').jsPDF): 
         if (op.dashPattern) {
           pdf.setLineDashPattern(op.dashPattern, 0);
         }
-        pdf.line(op.x1, op.y1, op.x2, op.y2);
+        pdf.line(op.x1 + originX, op.y1 + originY, op.x2 + originX, op.y2 + originY);
         if (op.dashPattern) {
           pdf.setLineDashPattern([], 0);
         }
@@ -421,7 +426,7 @@ export function renderOpsToPdf(ops: VectorPdfOp[], pdf: import('jspdf').jsPDF): 
         const font = op.font ?? 'helvetica';
         const style = op.fontStyle ?? 'normal';
         pdf.setFont(font, style);
-        pdf.text(op.text, op.x, op.y, {
+        pdf.text(op.text, op.x + originX, op.y + originY, {
           align: op.align ?? 'left',
           angle: op.angle,
         });
@@ -430,12 +435,12 @@ export function renderOpsToPdf(ops: VectorPdfOp[], pdf: import('jspdf').jsPDF): 
       case 'circle': {
         if (op.fill) {
           pdf.setFillColor(op.fill);
-          pdf.circle(op.cx, op.cy, op.r, 'F');
+          pdf.circle(op.cx + originX, op.cy + originY, op.r, 'F');
         }
         if (op.stroke) {
           pdf.setDrawColor(op.stroke);
           pdf.setLineWidth(op.strokeWidth ?? 0.005);
-          pdf.circle(op.cx, op.cy, op.r, 'S');
+          pdf.circle(op.cx + originX, op.cy + originY, op.r, 'S');
         }
         break;
       }
@@ -450,8 +455,8 @@ export function renderOpsToPdf(ops: VectorPdfOp[], pdf: import('jspdf').jsPDF): 
         pdf.setGState(gs);
 
         // Center the watermark text diagonally.
-        const cx = op.x + op.w / 2;
-        const cy = op.y + op.h / 2;
+        const cx = op.x + op.w / 2 + originX;
+        const cy = op.y + op.h / 2 + originY;
         pdf.text(op.text, cx, cy, {
           align: 'center',
           angle: op.angle,
