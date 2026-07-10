@@ -124,8 +124,8 @@ describe('editImageWithGemini', () => {
       candidates: [{ content: { parts: [{ text: 'no image' }] } }],
     });
 
-    await expect(
-      editImageWithGemini('base64data', 'image/png', 'Add window')
-    ).rejects.toThrow('Gemini did not return an edited image');
+    await expect(editImageWithGemini('base64data', 'image/png', 'Add window')).rejects.toThrow(
+      'Gemini did not return an edited image'
+    );
   });
 });

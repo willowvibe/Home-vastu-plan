@@ -4,9 +4,7 @@ import { AnalyzeRequest, AnalyzeResponse } from './types.js';
 const BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const MODEL = process.env.OLLAMA_MODEL || 'deepseek-v4-pro';
 
-export async function analyzeWithOllama(
-  request: AnalyzeRequest
-): Promise<AnalyzeResponse> {
+export async function analyzeWithOllama(request: AnalyzeRequest): Promise<AnalyzeResponse> {
   const { plan, currentFloor } = request;
 
   const prompt = `

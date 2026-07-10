@@ -58,7 +58,15 @@ router.post('/analyze', async (req: Request, res: Response) => {
     query(
       `INSERT INTO public.ai_usage (user_id, plan_id, endpoint, provider, model, status, input_tokens, output_tokens, duration_ms)
        VALUES ($1, $2, 'analyze', $3, $4, 'success', $5, $6, $7)`,
-      [userId, (plan as any).id || null, PROVIDER, model, inputTokens, outputTokens, Date.now() - start]
+      [
+        userId,
+        (plan as any).id || null,
+        PROVIDER,
+        model,
+        inputTokens,
+        outputTokens,
+        Date.now() - start,
+      ]
     ).catch((err) => console.error('Failed to log AI usage:', err));
 
     res.json({ text: result.text });
@@ -75,14 +83,19 @@ router.post('/analyze', async (req: Request, res: Response) => {
 
     console.error('AI analyze error:', err);
     const statusCode =
-      err.message?.includes('unavailable') || err.message?.includes('503') ? 502
-      : err.message?.includes('quota') ? 429
-      : 500;
+      err.message?.includes('unavailable') || err.message?.includes('503')
+        ? 502
+        : err.message?.includes('quota')
+          ? 429
+          : 500;
 
     res.status(statusCode).json({
-      error: statusCode === 502 ? 'AI service unavailable'
-        : statusCode === 429 ? 'AI service quota exceeded'
-        : 'AI analysis failed',
+      error:
+        statusCode === 502
+          ? 'AI service unavailable'
+          : statusCode === 429
+            ? 'AI service quota exceeded'
+            : 'AI analysis failed',
       provider: PROVIDER,
     });
   }

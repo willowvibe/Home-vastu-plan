@@ -13,9 +13,7 @@ function getClient(): GoogleGenAI {
   return new GoogleGenAI({ apiKey: API_KEY });
 }
 
-export async function analyzeWithGemini(
-  request: AnalyzeRequest
-): Promise<AnalyzeResponse> {
+export async function analyzeWithGemini(request: AnalyzeRequest): Promise<AnalyzeResponse> {
   const { plan, currentFloor } = request;
   const ai = getClient();
 
@@ -69,10 +67,7 @@ export async function editImageWithGemini(
   const response = await ai.models.generateContent({
     model: IMAGE_MODEL,
     contents: {
-      parts: [
-        { inlineData: { data: imageBase64, mimeType } },
-        { text: promptText },
-      ],
+      parts: [{ inlineData: { data: imageBase64, mimeType } }, { text: promptText }],
     },
   });
 
