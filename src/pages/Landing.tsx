@@ -306,7 +306,7 @@ export function Landing() {
                   <td className="num-col">Unlimited</td>
                 </tr>
                 <tr>
-                  <td>AI design reviews</td>
+                  <td>AI design review</td>
                   <td className="num-col">3/month</td>
                   <td className="num-col">Unlimited</td>
                 </tr>

@@ -33,7 +33,7 @@ describe('Landing', () => {
     renderLanding();
     expect(screen.getByText('Live Vastu score')).toBeInTheDocument();
     expect(screen.getByText('Smart floor plans')).toBeInTheDocument();
-    expect(screen.getByText('AI design review')).toBeInTheDocument();
+    expect(screen.getAllByText('AI design review')).toHaveLength(2);
   });
 
   it('toggles the mobile nav open state', () => {
