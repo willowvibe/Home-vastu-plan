@@ -112,6 +112,11 @@ export const EVENTS = {
   USER_SIGNED_IN: 'user_signed_in',
   USER_SIGNED_UP: 'user_signed_up',
 
+  // Landing page events
+  LANDING_SIGNUP_SUBMIT: 'landing_signup_submit',
+  LANDING_MAGIC_LINK_SENT: 'landing_magic_link_sent',
+  LANDING_GOOGLE_CLICK: 'landing_google_click',
+
   // UI events
   MODAL_OPENED: 'modal_opened',
   MODAL_CLOSED: 'modal_closed',
