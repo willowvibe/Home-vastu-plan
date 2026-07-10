@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Header } from './components/layout/Header';
 import { MobileTabs } from './components/layout/MobileTabs';
 import { Sidebar } from './components/layout/Sidebar';
@@ -13,7 +13,10 @@ import { ShortcutHelp } from './components/ShortcutHelp';
 import { Onboarding } from './components/Onboarding';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { CollaborationPanel } from './components/CollaborationPanel';
+import { AuthModal } from './components/AuthModal';
+import { useAuth } from './contexts/AuthContext';
 import { trackEvent, EVENTS } from './services/analytics';
+import { setUser as setSentryUser, clearUser as clearSentryUser } from './services/sentry';
 import { usePlanEditor } from './hooks/usePlanEditor';
 import { formatFloorLabel } from './constants/floorPlanConstants';
 import { Canvas } from './components/Canvas';
@@ -21,6 +24,16 @@ import { Canvas } from './components/Canvas';
 export default function App() {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const editor = usePlanEditor({ canvasContainerRef });
+  const { isEnabled: isAuthEnabled, user } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  useEffect(() => {
+    if (user?.id) {
+      setSentryUser(user.id);
+    } else {
+      clearSentryUser();
+    }
+  }, [user]);
 
   return (
     <div className="h-screen flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
@@ -33,6 +46,7 @@ export default function App() {
         setShowProjectManager={editor.setShowProjectManager}
         vastuScore={editor.vastuScore}
         setShowShortcutHelp={editor.handleShowShortcuts}
+        onOpenAuth={isAuthEnabled ? () => setShowAuthModal(true) : undefined}
       />
 
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
@@ -215,6 +229,8 @@ export default function App() {
           }}
         />
       )}
+
+      {isAuthEnabled && <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} />}
 
       <OfflineIndicator />
 

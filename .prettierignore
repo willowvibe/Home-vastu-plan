@@ -1,0 +1,23 @@
+# Generated / deps
+node_modules/
+build/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Local env
+.env*
+
+# Cache & logs
+*.log
+.DS_Store
+
+# Tooling & session dirs
+.claude/
+.playwright-mcp/
+.remember/
+market_research/
+
+# Ignore self to avoid parser-inference error
+.prettierignore

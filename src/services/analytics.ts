@@ -108,6 +108,10 @@ export const EVENTS = {
   EXPORT_PDF: 'export_pdf',
   EXPORT_JSON: 'export_json',
 
+  // Auth events
+  USER_SIGNED_IN: 'user_signed_in',
+  USER_SIGNED_UP: 'user_signed_up',
+
   // UI events
   MODAL_OPENED: 'modal_opened',
   MODAL_CLOSED: 'modal_closed',
