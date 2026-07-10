@@ -398,15 +398,15 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 
 ### SHIP — v0.2 (next 60–90 days)
 
-| ID  | Title                                             | Effort | Status         | Notes                                                                     |
-| --- | ------------------------------------------------- | ------ | -------------- | ------------------------------------------------------------------------- |
-| M-1 | Vector PDF export + watermark gate                | M      | ✅ resolved | PR #90. Core ₹499 Pro Export deliverable.                              |
+| ID  | Title                                             | Effort   | Status      | Notes                                                                     |
+| --- | ------------------------------------------------- | -------- | ----------- | ------------------------------------------------------------------------- |
+| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90. Core ₹499 Pro Export deliverable.                                 |
 | C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI calls proxied through server/ on Railway. Zero keys in client. |
-| M-2 | Razorpay / Instamojo payment integration          | S      | 🔲 pending     | Monetization hypothesis is blocked without this.                          |
-| M-4 | Wire up `?mode=comment` annotation UI             | S      | 🔲 pending     | Unique viral loop; backend link already supports comment mode.            |
-| M-5 | PWA basics: manifest + service worker + IndexedDB | S      | 🔲 pending     | Offline use at construction sites; SW exists, extend plan persistence.    |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L      | 🔲 pending     | Primary acquisition; urgent before AI tools own SERP.                     |
-| M-7 | Mobile UX polish (touch targets, property panel)  | S      | 🔲 pending     | Persona A is mobile-web-first.                                            |
+| M-2 | Razorpay / Instamojo payment integration          | S        | 🔲 pending  | Monetization hypothesis is blocked without this.                          |
+| M-4 | Wire up `?mode=comment` annotation UI             | S        | 🔲 pending  | Unique viral loop; backend link already supports comment mode.            |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | 🔲 pending  | Offline use at construction sites; SW exists, extend plan persistence.    |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | 🔲 pending  | Primary acquisition; urgent before AI tools own SERP.                     |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | Persona A is mobile-web-first.                                            |
 
 ### SHIP — v0.3 (90–180 days)
 

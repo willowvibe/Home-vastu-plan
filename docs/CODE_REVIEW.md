@@ -574,17 +574,17 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 
 ### 6.1 v0.2 — SHIP next 60–90 days (gates the 90-day hypothesis test)
 
-| ID  | Title                                             | Effort | Status         | Owner |
-| --- | ------------------------------------------------- | ------ | -------------- | ----- |
-| M-1 | Vector PDF export + watermark gate                | M      | ✅ resolved | PR #90. |
+| ID  | Title                                             | Effort   | Status      | Owner                        |
+| --- | ------------------------------------------------- | -------- | ----------- | ---------------------------- |
+| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90.                      |
 | C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI proxy on Railway. |
-| M-2 | Razorpay / Instamojo payment integration          | S      | 🔲 pending     | —     |
-| M-3 | QR-code share export                              | XS     | 🔲 pending     | —     |
-| M-4 | Wire up `?mode=comment` annotation UI             | S      | 🔲 pending     | —     |
-| M-5 | PWA basics: manifest + service worker + IndexedDB | S      | 🔲 pending     | —     |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L      | 🔲 pending     | —     |
-| M-7 | Mobile UX polish (touch targets, property panel)  | S      | 🔲 pending     | —     |
-| M-8 | Vastu matrix source citation + methodology page   | S      | 🔲 pending     | —     |
+| M-2 | Razorpay / Instamojo payment integration          | S        | 🔲 pending  | —                            |
+| M-3 | QR-code share export                              | XS       | 🔲 pending  | —                            |
+| M-4 | Wire up `?mode=comment` annotation UI             | S        | 🔲 pending  | —                            |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | 🔲 pending  | —                            |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | 🔲 pending  | —                            |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | —                            |
+| M-8 | Vastu matrix source citation + methodology page   | S        | 🔲 pending  | —                            |
 
 ### 6.2 v0.3 — SHIP 90–180 days
 
