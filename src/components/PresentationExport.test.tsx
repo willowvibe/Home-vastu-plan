@@ -9,17 +9,31 @@ vi.mock('./Toast', () => ({
   useToast: () => ({ showToast, removeToast: vi.fn() }),
 }));
 
-// Mock the heavy export libraries so the test runs in jsdom. We capture
-// the toPng() result and the jsPDF.save() call.
-const toPng = vi.fn(
-  async (_node: HTMLElement) =>
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
-);
-const pdfSave = vi.fn();
-const pdfAddImage = vi.fn();
-vi.mock('html-to-image', () => ({
-  toPng: (node: HTMLElement) => toPng(node),
+// Mock the vector PDF export pipeline (M-1: replaced toPng with
+// buildVectorPdfOps + renderOpsToPdf). Use vi.hoisted so the mock
+// functions are available inside the hoisted vi.mock factory.
+const { buildVectorPdfOps, renderOpsToPdf, computePdfScale } = vi.hoisted(() => ({
+  buildVectorPdfOps: vi.fn<() => unknown[]>(() => []),
+  renderOpsToPdf: vi.fn(),
+  computePdfScale: vi.fn(() => 0.2),
 }));
+
+vi.mock('../lib/exportVectorPdf', () => ({
+  buildVectorPdfOps,
+  renderOpsToPdf,
+  computePdfScale,
+}));
+
+// Mock entitlements — default to watermark required (free plan).
+const { isWatermarkRequired } = vi.hoisted(() => ({
+  isWatermarkRequired: vi.fn(() => true),
+}));
+
+vi.mock('../services/entitlements', () => ({
+  isWatermarkRequired,
+}));
+
+const pdfSave = vi.fn();
 // jsPDF is `new`-constructed by PresentationExport. The mock below
 // must be a constructor (function) — a plain vi.fn() returning an
 // object throws `is not a constructor`. We use a real function that
@@ -32,16 +46,21 @@ function MockJsPDF() {
     setFontSize: vi.fn(),
     setFont: vi.fn(),
     text: vi.fn(),
-    addImage: (...args: unknown[]) => pdfAddImage(...args),
-    getImageProperties: vi.fn(() => ({ width: 100, height: 100 })),
+    addImage: vi.fn(), // still needed for logo upload
     save: (...args: unknown[]) => pdfSave(...args),
+    setFillColor: vi.fn(),
+    setTextColor: vi.fn(),
+    setLineDashPattern: vi.fn(),
+    line: vi.fn(),
+    circle: vi.fn(),
+    GState: vi.fn(() => ({})),
+    setGState: vi.fn(),
   };
 }
 vi.mock('jspdf', () => ({
   jsPDF: MockJsPDF,
 }));
 
-const noopRef = { current: null as HTMLDivElement | null };
 const PLAN = {
   rooms: [],
   plotWidth: 30,
@@ -58,21 +77,10 @@ const makeFile = (bytes: number[], type = 'image/png', name = 'logo.png') => {
   return new File([new Uint8Array(bytes)], name, { type });
 };
 
-// U-6: the canvasRef passed in is what toPng() receives. The audit
-// surfaced that App.tsx used to mount TWO <div ref={canvasContainerRef}>
-// elements, and React's ref collision meant toPng() was called on a
-// hidden print-only div (0×0), producing an empty image and crashing
-// jsPDF.addImage. The App.tsx fix removed the duplicate ref so the
-// ref always points to the visible canvas. This test pins the
-// component-side contract: whatever element the caller hands us is
-// what gets captured.
-
 describe('PresentationExport (S-15: logo MIME validation)', () => {
   it('accepts a valid PNG (no toast is shown)', async () => {
     showToast.mockClear();
-    render(
-      <PresentationExport canvasRef={noopRef} plan={PLAN} currentFloor={0} onClose={vi.fn()} />
-    );
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />);
     const file = makeFile([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], 'image/png');
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: [file] } });
@@ -83,9 +91,7 @@ describe('PresentationExport (S-15: logo MIME validation)', () => {
 
   it('rejects a non-image (PDF magic) — toast is shown', async () => {
     showToast.mockClear();
-    render(
-      <PresentationExport canvasRef={noopRef} plan={PLAN} currentFloor={0} onClose={vi.fn()} />
-    );
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />);
     const file = makeFile(
       [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34],
       'application/pdf',
@@ -101,9 +107,7 @@ describe('PresentationExport (S-15: logo MIME validation)', () => {
 
   it('rejects files larger than 5 MB — toast is shown', async () => {
     showToast.mockClear();
-    render(
-      <PresentationExport canvasRef={noopRef} plan={PLAN} currentFloor={0} onClose={vi.fn()} />
-    );
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />);
     // 6 MB of zeros with PNG magic prefix.
     const big = new Uint8Array(6 * 1024 * 1024);
     big[0] = 0x89;
@@ -119,24 +123,18 @@ describe('PresentationExport (S-15: logo MIME validation)', () => {
   });
 });
 
-describe('PresentationExport (U-6: PDF generation uses the ref element)', () => {
+describe('PresentationExport (M-1: vector PDF generation via buildVectorPdfOps + renderOpsToPdf)', () => {
   beforeEach(() => {
-    toPng.mockClear();
+    buildVectorPdfOps.mockClear();
+    renderOpsToPdf.mockClear();
     pdfSave.mockClear();
-    pdfAddImage.mockClear();
     showToast.mockClear();
+    isWatermarkRequired.mockReturnValue(true);
   });
 
-  it('passes canvasRef.current to toPng (not some other element)', async () => {
-    // The whole PDF path runs on the element the caller hands us.
-    // U-6 was that App.tsx was passing a 0×0 print-only div because
-    // of a React ref collision. This test pins: whatever element the
-    // caller attaches to canvasRef, that's what toPng receives.
-    const div = document.createElement('div');
-    document.body.appendChild(div);
-    const ref = { current: div };
+  it('calls buildVectorPdfOps with plan, floor, and watermark flag', async () => {
     const onClose = vi.fn();
-    render(<PresentationExport canvasRef={ref} plan={PLAN} currentFloor={0} onClose={onClose} />);
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={onClose} />);
     const buttons = Array.from(document.querySelectorAll('button'));
     const gen = buttons.find((b) => b.textContent?.includes('Generate PDF')) as
       | HTMLButtonElement
@@ -144,19 +142,57 @@ describe('PresentationExport (U-6: PDF generation uses the ref element)', () => 
     expect(gen).toBeDefined();
     fireEvent.click(gen!);
     await waitFor(() => {
-      // toPng is called with the caller's element.
-      expect(toPng).toHaveBeenCalled();
-      const calledWith = (toPng.mock.calls[0] as unknown[] | undefined)?.[0];
-      expect(calledWith).toBe(div);
-      // jsPDF.addImage received the (mocked) dataURL, not 'UNKNOWN'.
-      expect(pdfAddImage).toHaveBeenCalled();
-      const imgData = pdfAddImage.mock.calls[0]?.[0] as string;
-      expect(imgData).toMatch(/^data:image\/png;base64,/);
-      // Save was invoked with the user-supplied client name (or fallback).
+      expect(buildVectorPdfOps).toHaveBeenCalledWith(PLAN, 0, { watermark: true });
+    });
+  });
+
+  it('calls renderOpsToPdf with ops and pdf instance', async () => {
+    const onClose = vi.fn();
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={onClose} />);
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const gen = buttons.find((b) => b.textContent?.includes('Generate PDF')) as
+      | HTMLButtonElement
+      | undefined;
+    expect(gen).toBeDefined();
+    fireEvent.click(gen!);
+    await waitFor(() => {
+      expect(renderOpsToPdf).toHaveBeenCalled();
+      // First arg is the ops array (mocked to []), second is a jsPDF instance,
+      // third and fourth are originX/originY centering offsets.
+      const args = renderOpsToPdf.mock.calls[0] as unknown[];
+      expect(args[0]).toEqual([]);
+      expect(args[1]).toBeDefined();
+      expect(typeof args[2]).toBe('number');
+      expect(typeof args[3]).toBe('number');
+    });
+  });
+
+  it('saves PDF and closes modal on success', async () => {
+    const onClose = vi.fn();
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={onClose} />);
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const gen = buttons.find((b) => b.textContent?.includes('Generate PDF')) as
+      | HTMLButtonElement
+      | undefined;
+    expect(gen).toBeDefined();
+    fireEvent.click(gen!);
+    await waitFor(() => {
       expect(pdfSave).toHaveBeenCalled();
-      // Modal closes on success (line 127 of PresentationExport.tsx).
       expect(onClose).toHaveBeenCalled();
     });
-    document.body.removeChild(div);
+  });
+
+  it('shows watermark-free status when Pro is entitled', () => {
+    isWatermarkRequired.mockReturnValue(false);
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />);
+    expect(document.body.textContent).toContain('Pro');
+    expect(document.body.textContent).toContain('watermark-free');
+  });
+
+  it('shows watermark-included status on free plan', () => {
+    isWatermarkRequired.mockReturnValue(true);
+    render(<PresentationExport plan={PLAN} currentFloor={0} onClose={vi.fn()} />);
+    expect(document.body.textContent).toContain('Free plan');
+    expect(document.body.textContent).toContain('watermark included');
   });
 });

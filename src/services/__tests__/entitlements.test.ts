@@ -1,0 +1,82 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+
+// Install a real in-memory localStorage shim (pattern from useDarkMode.test.ts).
+const memStore: Record<string, string> = {};
+const localStorageImpl = {
+  getItem: (k: string) => (k in memStore ? memStore[k] : null),
+  setItem: (k: string, v: string) => {
+    memStore[k] = String(v);
+  },
+  removeItem: (k: string) => {
+    delete memStore[k];
+  },
+  clear: () => {
+    for (const k of Object.keys(memStore)) delete memStore[k];
+  },
+  length: 0,
+  key: () => null,
+};
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageImpl,
+  writable: true,
+  configurable: true,
+});
+
+// Import AFTER installing the shim so the module reads our store.
+import {
+  getProExportEntitlement,
+  setLocalProExportOverride,
+  isWatermarkRequired,
+} from '../entitlements';
+
+describe('entitlements', () => {
+  beforeEach(() => {
+    // Clear the in-memory store between tests.
+    for (const k of Object.keys(memStore)) delete memStore[k];
+  });
+
+  describe('getProExportEntitlement', () => {
+    it('returns false when localStorage key is absent', () => {
+      expect(getProExportEntitlement()).toBe(false);
+    });
+
+    it('returns true when localStorage key is "1"', () => {
+      memStore['vp_pro_export'] = '1';
+      expect(getProExportEntitlement()).toBe(true);
+    });
+
+    it('returns false when localStorage key is "0"', () => {
+      memStore['vp_pro_export'] = '0';
+      expect(getProExportEntitlement()).toBe(false);
+    });
+
+    it('returns false when localStorage key is some other value', () => {
+      memStore['vp_pro_export'] = 'garbage';
+      expect(getProExportEntitlement()).toBe(false);
+    });
+  });
+
+  describe('setLocalProExportOverride', () => {
+    it('sets key to "1" when enabled is true', () => {
+      setLocalProExportOverride(true);
+      expect(memStore['vp_pro_export']).toBe('1');
+    });
+
+    it('removes key when enabled is false', () => {
+      memStore['vp_pro_export'] = '1';
+      setLocalProExportOverride(false);
+      expect('vp_pro_export' in memStore).toBe(false);
+    });
+  });
+
+  describe('isWatermarkRequired', () => {
+    it('returns true when not Pro (no key)', () => {
+      expect(isWatermarkRequired()).toBe(true);
+    });
+
+    it('returns false when Pro (key is "1")', () => {
+      memStore['vp_pro_export'] = '1';
+      expect(isWatermarkRequired()).toBe(false);
+    });
+  });
+});
