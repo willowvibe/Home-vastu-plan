@@ -126,6 +126,7 @@ export const EVENTS = {
   SHARE_LINK_CREATED: 'share_link_created',
   SHARE_VIEW_MODE: 'share_view_mode',
   SHARE_COMMENT_MODE: 'share_comment_mode',
+  SHARE_QR_OPENED: 'share_qr_opened',
 
   // Comment events
   COMMENT_ADDED: 'comment_added',

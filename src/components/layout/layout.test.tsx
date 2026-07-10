@@ -256,6 +256,7 @@ describe('Toolbar', () => {
         onToggleGrid={onToggleGrid}
         onToggleTour={onToggleTour}
         onShare={vi.fn()}
+        onShareQR={vi.fn()}
         onExport={onExport}
         isExporting={false}
         onPrint={vi.fn()}

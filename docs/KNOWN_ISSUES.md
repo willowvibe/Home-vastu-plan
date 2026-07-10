@@ -402,12 +402,12 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 | --- | ------------------------------------------------- | ------ | -------------- | ------------------------------------------------------------------------- |
 | M-1 | Vector PDF export + watermark gate                | M      | 🟡 in progress | Branch `feat/m-1-vector-pdf-watermark`. Core ₹499 Pro Export deliverable. |
 | M-2 | Razorpay / Instamojo payment integration          | S      | 🔲 pending     | Monetization hypothesis is blocked without this.                          |
-| M-3 | QR-code share export                              | XS     | 🔲 pending     | WhatsApp/contractor/family on-ramp.                                       |
+| M-3 | QR-code share export                              | XS     | 🟡 in progress | Branch `feat/m-3-qr-share-m-8-methodology`.                               |
 | M-4 | Wire up `?mode=comment` annotation UI             | S      | 🔲 pending     | Unique viral loop; backend link already supports comment mode.            |
 | M-5 | PWA basics: manifest + service worker + IndexedDB | S      | 🔲 pending     | Offline use at construction sites; SW exists, extend plan persistence.    |
 | M-6 | SEO content: 16 zone pages + pillar + landing     | L      | 🔲 pending     | Primary acquisition; urgent before AI tools own SERP.                     |
 | M-7 | Mobile UX polish (touch targets, property panel)  | S      | 🔲 pending     | Persona A is mobile-web-first.                                            |
-| M-8 | Vastu matrix source citation + methodology page   | S      | 🔲 pending     | Trust-builder vs. AI black-box competitors.                               |
+| M-8 | Vastu matrix source citation + methodology page   | S      | 🟡 in progress | Branch `feat/m-3-qr-share-m-8-methodology`.                               |
 
 ### SHIP — v0.3 (90–180 days)
 
