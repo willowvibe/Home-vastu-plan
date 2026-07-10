@@ -28,7 +28,11 @@ describe('AuthCallback', () => {
   });
 
   it('redirects to / with an error toast when the URL has an error param', () => {
-    window.history.replaceState({}, '', '/auth/callback?error=access_denied&error_description=User+cancelled');
+    window.history.replaceState(
+      {},
+      '',
+      '/auth/callback?error=access_denied&error_description=User+cancelled'
+    );
     render(<AuthCallback />);
     expect(showToast).toHaveBeenCalledWith(expect.stringContaining('cancelled'), 'error');
     expect(navigate).toHaveBeenCalledWith('/', { replace: true });

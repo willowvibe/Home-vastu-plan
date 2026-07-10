@@ -19,10 +19,16 @@ interface MockSupabaseClient {
       (email: string, options: { redirectTo: string }) => Promise<{ error: Error | null }>
     >;
     signInWithOtp: Mock<
-      (args: { email: string; options: { emailRedirectTo: string } }) => Promise<{ error: Error | null }>
+      (args: {
+        email: string;
+        options: { emailRedirectTo: string };
+      }) => Promise<{ error: Error | null }>
     >;
     signInWithOAuth: Mock<
-      (args: { provider: string; options: { redirectTo: string } }) => Promise<{ error: Error | null }>
+      (args: {
+        provider: string;
+        options: { redirectTo: string };
+      }) => Promise<{ error: Error | null }>
     >;
     onAuthStateChange: Mock<
       (cb: AuthListener) => { data: { subscription: { unsubscribe: () => void } } }

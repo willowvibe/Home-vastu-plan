@@ -129,7 +129,11 @@ export function Landing() {
             >
               Pricing
             </a>
-            <a className="btn btn-accent btn-mobile" href="#signup" onClick={() => setNavOpen(false)}>
+            <a
+              className="btn btn-accent btn-mobile"
+              href="#signup"
+              onClick={() => setNavOpen(false)}
+            >
               Sign up
             </a>
           </nav>
@@ -232,9 +236,27 @@ export function Landing() {
                 <div className="energy-ring" aria-hidden="true">
                   <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                     <g fill="none" stroke="var(--accent)" strokeWidth={0.6}>
-                      <circle cx="100" cy="100" r="78" className="pulse pulse-delay-1" opacity={0.35} />
-                      <circle cx="100" cy="100" r="64" className="pulse pulse-delay-2" opacity={0.45} />
-                      <circle cx="100" cy="100" r="50" className="pulse pulse-delay-3" opacity={0.55} />
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="78"
+                        className="pulse pulse-delay-1"
+                        opacity={0.35}
+                      />
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="64"
+                        className="pulse pulse-delay-2"
+                        opacity={0.45}
+                      />
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="50"
+                        className="pulse pulse-delay-3"
+                        opacity={0.55}
+                      />
                     </g>
                     <g fill="none" stroke="var(--accent)" strokeWidth={0.4} opacity={0.25}>
                       <line x1="100" y1="14" x2="100" y2="186" />
@@ -245,26 +267,121 @@ export function Landing() {
                   </svg>
                 </div>
                 <svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="20" y="20" width="600" height="360" fill="var(--bg)" stroke="var(--border)" strokeWidth={2} rx="12" />
+                  <rect
+                    x="20"
+                    y="20"
+                    width="600"
+                    height="360"
+                    fill="var(--bg)"
+                    stroke="var(--border)"
+                    strokeWidth={2}
+                    rx="12"
+                  />
                   <g opacity={0.12}>
-                    <line x1="220" y1="20" x2="220" y2="380" stroke="var(--accent)" strokeWidth={2} />
-                    <line x1="420" y1="20" x2="420" y2="380" stroke="var(--accent)" strokeWidth={2} />
-                    <line x1="20" y1="146" x2="620" y2="146" stroke="var(--accent)" strokeWidth={2} />
-                    <line x1="20" y1="272" x2="620" y2="272" stroke="var(--accent)" strokeWidth={2} />
+                    <line
+                      x1="220"
+                      y1="20"
+                      x2="220"
+                      y2="380"
+                      stroke="var(--accent)"
+                      strokeWidth={2}
+                    />
+                    <line
+                      x1="420"
+                      y1="20"
+                      x2="420"
+                      y2="380"
+                      stroke="var(--accent)"
+                      strokeWidth={2}
+                    />
+                    <line
+                      x1="20"
+                      y1="146"
+                      x2="620"
+                      y2="146"
+                      stroke="var(--accent)"
+                      strokeWidth={2}
+                    />
+                    <line
+                      x1="20"
+                      y1="272"
+                      x2="620"
+                      y2="272"
+                      stroke="var(--accent)"
+                      strokeWidth={2}
+                    />
                   </g>
-                  <rect x="60" y="180" width="120" height="140" fill="var(--surface-400)" stroke="var(--fg)" strokeWidth={2} rx="4" className="energy-zone pulse-delay-1" />
-                  <rect x="240" y="60" width="140" height="100" fill="var(--surface-400)" stroke="var(--fg)" strokeWidth={2} rx="4" className="energy-zone pulse-delay-2" />
-                  <rect x="460" y="180" width="120" height="140" fill="var(--surface-400)" stroke="var(--fg)" strokeWidth={2} rx="4" className="energy-zone pulse-delay-3" />
-                  <text x="120" y="255" textAnchor="middle" fontFamily="var(--font-body)" fontSize={13} fill="var(--muted)">
+                  <rect
+                    x="60"
+                    y="180"
+                    width="120"
+                    height="140"
+                    fill="var(--surface-400)"
+                    stroke="var(--fg)"
+                    strokeWidth={2}
+                    rx="4"
+                    className="energy-zone pulse-delay-1"
+                  />
+                  <rect
+                    x="240"
+                    y="60"
+                    width="140"
+                    height="100"
+                    fill="var(--surface-400)"
+                    stroke="var(--fg)"
+                    strokeWidth={2}
+                    rx="4"
+                    className="energy-zone pulse-delay-2"
+                  />
+                  <rect
+                    x="460"
+                    y="180"
+                    width="120"
+                    height="140"
+                    fill="var(--surface-400)"
+                    stroke="var(--fg)"
+                    strokeWidth={2}
+                    rx="4"
+                    className="energy-zone pulse-delay-3"
+                  />
+                  <text
+                    x="120"
+                    y="255"
+                    textAnchor="middle"
+                    fontFamily="var(--font-body)"
+                    fontSize={13}
+                    fill="var(--muted)"
+                  >
                     Bedroom
                   </text>
-                  <text x="310" y="115" textAnchor="middle" fontFamily="var(--font-body)" fontSize={13} fill="var(--muted)">
+                  <text
+                    x="310"
+                    y="115"
+                    textAnchor="middle"
+                    fontFamily="var(--font-body)"
+                    fontSize={13}
+                    fill="var(--muted)"
+                  >
                     Kitchen
                   </text>
-                  <text x="520" y="255" textAnchor="middle" fontFamily="var(--font-body)" fontSize={13} fill="var(--muted)">
+                  <text
+                    x="520"
+                    y="255"
+                    textAnchor="middle"
+                    fontFamily="var(--font-body)"
+                    fontSize={13}
+                    fill="var(--muted)"
+                  >
                     Pooja
                   </text>
-                  <circle cx="320" cy="310" r="18" fill="none" stroke="var(--accent)" strokeWidth={2} />
+                  <circle
+                    cx="320"
+                    cy="310"
+                    r="18"
+                    fill="none"
+                    stroke="var(--accent)"
+                    strokeWidth={2}
+                  />
                   <path d="M320 298 l6 12 h-12 z" fill="var(--accent)" />
                 </svg>
                 <span className="mock-label n">North</span>
@@ -355,7 +472,10 @@ export function Landing() {
                 needed.
               </p>
             </div>
-            <div className="signup-form-wrapper" style={{ maxWidth: '520px', marginInline: 'auto' }}>
+            <div
+              className="signup-form-wrapper"
+              style={{ maxWidth: '520px', marginInline: 'auto' }}
+            >
               <form className="signup-form" onSubmit={handleSubmit} noValidate>
                 <input
                   className={`input ${invalid ? 'is-invalid' : ''}`}

@@ -24,9 +24,11 @@
 ### Task 1: Database migration (controller applies via MCP)
 
 **Files:**
+
 - Create: `server/db/001_public_schema.sql`
 
 **Interfaces:**
+
 - Produces: 6 tables (`users`, `plans`, `plan_shares`, `sync_queue`, `ai_usage`, `user_entitlements`), 1 trigger (`on_auth_user_created`), RLS policies, indexes
 
 - [ ] **Step 1: Create the migration SQL file**
@@ -202,6 +204,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ### Task 2: Server AI providers (types + Gemini + Ollama)
 
 **Files:**
+
 - Create: `server/src/ai/types.ts`
 - Create: `server/src/ai/gemini.ts`
 - Create: `server/src/ai/ollama.ts`
@@ -209,6 +212,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - Create: `server/src/ai/__tests__/ollama.test.ts`
 
 **Interfaces:**
+
 - Produces: `AiProvider` interface, `AnalyzeRequest`, `AnalyzeResponse`, `ImageEditResponse`, `analyzeWithGemini(plan, currentFloor)`, `editImageWithGemini(imageBase64, mimeType, prompt)`, `analyzeWithOllama(plan, currentFloor)`
 
 - [ ] **Step 1: Create the types file**
@@ -262,9 +266,7 @@ function getClient(): GoogleGenAI {
   return new GoogleGenAI({ apiKey: API_KEY });
 }
 
-export async function analyzeWithGemini(
-  request: AnalyzeRequest
-): Promise<AnalyzeResponse> {
+export async function analyzeWithGemini(request: AnalyzeRequest): Promise<AnalyzeResponse> {
   const { plan, currentFloor } = request;
   const ai = getClient();
 
@@ -318,10 +320,7 @@ export async function editImageWithGemini(
   const response = await ai.models.generateContent({
     model: IMAGE_MODEL,
     contents: {
-      parts: [
-        { inlineData: { data: imageBase64, mimeType } },
-        { text: promptText },
-      ],
+      parts: [{ inlineData: { data: imageBase64, mimeType } }, { text: promptText }],
     },
   });
 
@@ -348,9 +347,7 @@ import { AnalyzeRequest, AnalyzeResponse } from './types.js';
 const BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const MODEL = process.env.OLLAMA_MODEL || 'deepseek-v4-pro';
 
-export async function analyzeWithOllama(
-  request: AnalyzeRequest
-): Promise<AnalyzeResponse> {
+export async function analyzeWithOllama(request: AnalyzeRequest): Promise<AnalyzeResponse> {
   const { plan, currentFloor } = request;
 
   const prompt = `
@@ -532,9 +529,9 @@ describe('editImageWithGemini', () => {
       candidates: [{ content: { parts: [{ text: 'no image' }] } }],
     });
 
-    await expect(
-      editImageWithGemini('base64data', 'image/png', 'Add window')
-    ).rejects.toThrow('Gemini did not return an edited image');
+    await expect(editImageWithGemini('base64data', 'image/png', 'Add window')).rejects.toThrow(
+      'Gemini did not return an edited image'
+    );
   });
 });
 ```
@@ -655,12 +652,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ### Task 3: Server AI router + wiring
 
 **Files:**
+
 - Create: `server/src/ai/index.ts`
 - Modify: `server/src/api/index.ts` (mount `/api/ai` router)
 - Modify: `server/package.json` (add `@google/genai`)
 - Modify: `server/.env.example` (add AI config vars)
 
 **Interfaces:**
+
 - Consumes: `analyzeWithGemini`, `editImageWithGemini` from `./gemini.js`; `analyzeWithOllama` from `./ollama.js`; `authenticate` from `../middleware/auth.js`; `query` from `../db/connection.js`
 - Produces: Express router with `POST /analyze` and `POST /edit-image` (mounted at `/api/ai`)
 
@@ -728,7 +727,15 @@ router.post('/analyze', async (req: Request, res: Response) => {
     query(
       `INSERT INTO public.ai_usage (user_id, plan_id, endpoint, provider, model, status, input_tokens, output_tokens, duration_ms)
        VALUES ($1, $2, 'analyze', $3, $4, 'success', $5, $6, $7)`,
-      [userId, (plan as any).id || null, PROVIDER, model, inputTokens, outputTokens, Date.now() - start]
+      [
+        userId,
+        (plan as any).id || null,
+        PROVIDER,
+        model,
+        inputTokens,
+        outputTokens,
+        Date.now() - start,
+      ]
     ).catch((err) => console.error('Failed to log AI usage:', err));
 
     res.json({ text: result.text });
@@ -745,14 +752,19 @@ router.post('/analyze', async (req: Request, res: Response) => {
 
     console.error('AI analyze error:', err);
     const statusCode =
-      err.message?.includes('unavailable') || err.message?.includes('503') ? 502
-      : err.message?.includes('quota') ? 429
-      : 500;
+      err.message?.includes('unavailable') || err.message?.includes('503')
+        ? 502
+        : err.message?.includes('quota')
+          ? 429
+          : 500;
 
     res.status(statusCode).json({
-      error: statusCode === 502 ? 'AI service unavailable'
-        : statusCode === 429 ? 'AI service quota exceeded'
-        : 'AI analysis failed',
+      error:
+        statusCode === 502
+          ? 'AI service unavailable'
+          : statusCode === 429
+            ? 'AI service quota exceeded'
+            : 'AI analysis failed',
       provider: PROVIDER,
     });
   }
@@ -884,11 +896,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ### Task 4: Client gemini.ts → fetch wrapper
 
 **Files:**
+
 - Modify: `src/services/gemini.ts` (replace GoogleGenAI with fetch)
 - Modify: `src/vite-env.d.ts` (remove VITE_GEMINI_API_KEY, add VITE_API_URL)
 - Modify: `.env.example` (remove VITE_GEMINI_API_KEY, add VITE_API_URL)
 
 **Interfaces:**
+
 - Consumes: `supabase` from `./supabase` (for auth token); `FloorPlan` from `../types`
 - Produces: `analyzeFloorPlan(plan, currentFloor): Promise<string>`, `editFloorPlanImage(imageFile, promptText): Promise<string | null>` — same signatures as before
 
@@ -913,10 +927,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   };
 }
 
-export async function analyzeFloorPlan(
-  plan: FloorPlan,
-  currentFloor: number
-): Promise<string> {
+export async function analyzeFloorPlan(plan: FloorPlan, currentFloor: number): Promise<string> {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_URL}/api/ai/analyze`, {
     method: 'POST',
@@ -1010,6 +1021,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ### Task 5: Integration verification + docs update
 
 **Files:**
+
 - Modify: `docs/KNOWN_ISSUES.md` (C1 status update)
 - Modify: `docs/CODE_REVIEW.md` (C1 status update)
 
@@ -1024,6 +1036,7 @@ Expected: All green.
 - [ ] **Step 2: Update C1 status in tracking docs**
 
 In `docs/KNOWN_ISSUES.md`, change the C1 row from `🔴 Critical` to `✅ resolved`:
+
 ```
 | C-1 | Gemini API key exposed to browser bundle | Critical | ✅ resolved | Moved behind server/ AI proxy on Railway. |
 ```

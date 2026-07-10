@@ -18,6 +18,7 @@ test-results/
 .playwright-mcp/
 .remember/
 market_research/
+.superpowers/
 
 # Ignore self to avoid parser-inference error
 .prettierignore

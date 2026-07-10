@@ -86,7 +86,9 @@ describe('Landing', () => {
     fireEvent.change(screen.getByLabelText('Email address'), { target: { value: 'a@b.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Sign up free' }));
     expect(authState.sendMagicLink).toHaveBeenCalledWith('a@b.com');
-    expect(await screen.findByText('Check your inbox for a magic link to sign in.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Check your inbox for a magic link to sign in.')
+    ).toBeInTheDocument();
     expect(analytics.trackEvent).toHaveBeenCalledWith('landing_signup_submit');
     expect(analytics.trackEvent).toHaveBeenCalledWith('landing_magic_link_sent');
   });

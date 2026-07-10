@@ -34,12 +34,12 @@ the user is redirected to the actual webapp (the planner) at `/app`.
 
 Replace the direct `<App />` mount with a `<BrowserRouter>` + `<Routes>`:
 
-| Path             | Component        | Notes                                                         |
-| ---------------- | ---------------- | ------------------------------------------------------------- |
-| `/`              | `<Landing />`     | Marketing page. Redirects to `/app` if already authenticated. |
-| `/app`           | `<App />`        | The existing planner, unchanged. Anonymous use allowed.       |
-| `/auth/callback` | `<AuthCallback>` | Handles magic-link / OAuth / password-reset redirects.       |
-| `*`              | `<Navigate to="/">` | Unknown paths fall back to the landing.                    |
+| Path             | Component           | Notes                                                         |
+| ---------------- | ------------------- | ------------------------------------------------------------- |
+| `/`              | `<Landing />`       | Marketing page. Redirects to `/app` if already authenticated. |
+| `/app`           | `<App />`           | The existing planner, unchanged. Anonymous use allowed.       |
+| `/auth/callback` | `<AuthCallback>`    | Handles magic-link / OAuth / password-reset redirects.        |
+| `*`              | `<Navigate to="/">` | Unknown paths fall back to the landing.                       |
 
 - `AuthProvider` stays outside the router (in `main.tsx`), so it wraps all routes.
 - The Vite `index.html` stays the single build entry; the service-worker
@@ -125,6 +125,7 @@ the index.html script):
 ## Files
 
 **New:**
+
 - `src/pages/Landing.tsx`
 - `src/pages/landing.css`
 - `src/pages/AuthCallback.tsx`
@@ -132,6 +133,7 @@ the index.html script):
 - `src/pages/__tests__/AuthCallback.test.tsx`
 
 **Modified:**
+
 - `src/main.tsx` — `BrowserRouter` + `<Routes>`; `AuthProvider` wraps the router.
 - `src/contexts/AuthContext.tsx` — `sendMagicLink`, `signInWithGoogle`, interface.
 - `src/contexts/AuthContext.test.tsx` — new methods + disabled fallbacks.

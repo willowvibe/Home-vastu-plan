@@ -133,15 +133,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 
   const signInWithGoogle = useMemo(
-    () =>
-      async (): Promise<AuthResult> => {
-        if (!supabase) return { error: new Error('Supabase Auth is not configured') };
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo: `${window.location.origin}/auth/callback` },
-        });
-        return { error: error ?? null };
-      },
+    () => async (): Promise<AuthResult> => {
+      if (!supabase) return { error: new Error('Supabase Auth is not configured') };
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      return { error: error ?? null };
+    },
     []
   );
 
@@ -168,7 +167,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       signInWithGoogle,
       signOut,
     }),
-    [isLoading, user, session, signIn, signUp, resetPassword, sendMagicLink, signInWithGoogle, signOut]
+    [
+      isLoading,
+      user,
+      session,
+      signIn,
+      signUp,
+      resetPassword,
+      sendMagicLink,
+      signInWithGoogle,
+      signOut,
+    ]
   );
 
   if (!supabase) {
