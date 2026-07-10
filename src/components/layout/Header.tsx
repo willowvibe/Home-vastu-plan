@@ -1,7 +1,8 @@
-import React from 'react';
-import { Layers, FolderOpen, Sun, Moon, HelpCircle } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Layers, FolderOpen, Sun, Moon, HelpCircle, User, LogOut } from 'lucide-react';
 import { FloorPlan, AppMode } from '../../types';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface HeaderProps {
   plan: FloorPlan;
@@ -12,6 +13,7 @@ interface HeaderProps {
   setShowProjectManager: (show: boolean) => void;
   vastuScore: number;
   setShowShortcutHelp?: () => void;
+  onOpenAuth?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,8 +25,28 @@ export const Header: React.FC<HeaderProps> = ({
   setShowProjectManager,
   vastuScore,
   setShowShortcutHelp,
+  onOpenAuth,
 }) => {
   const { darkMode, toggle: toggleDarkMode } = useTheme();
+  const { isEnabled, isAuthenticated, user, signOut } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showUserMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showUserMenu]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    setShowUserMenu(false);
+  };
 
   const getVastuColor = (score: number) => {
     if (score >= 80) return 'text-emerald-600';
@@ -137,6 +159,50 @@ export const Header: React.FC<HeaderProps> = ({
             AI Image Editor
           </button>
         </div>
+
+        {isEnabled && (
+          <div className="relative" ref={userMenuRef}>
+            {isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => setShowUserMenu((v) => !v)}
+                  className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  aria-label="User menu"
+                  aria-haspopup="true"
+                  aria-expanded={showUserMenu}
+                >
+                  <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                    {(user?.email?.[0] ?? 'U').toUpperCase()}
+                  </div>
+                  <span className="hidden md:inline text-sm font-medium max-w-[8rem] truncate">
+                    {user?.email}
+                  </span>
+                </button>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50">
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                aria-label="Sign in"
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden md:inline text-sm font-medium">Sign in</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
