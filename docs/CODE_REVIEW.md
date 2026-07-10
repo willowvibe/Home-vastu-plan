@@ -576,7 +576,8 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 
 | ID  | Title                                             | Effort | Status         | Owner |
 | --- | ------------------------------------------------- | ------ | -------------- | ----- |
-| M-1 | Vector PDF export + watermark gate                | M      | 🟡 in progress | —     |
+| M-1 | Vector PDF export + watermark gate                | M      | ✅ resolved | PR #90. |
+| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI proxy on Railway. |
 | M-2 | Razorpay / Instamojo payment integration          | S      | 🔲 pending     | —     |
 | M-3 | QR-code share export                              | XS     | 🔲 pending     | —     |
 | M-4 | Wire up `?mode=comment` annotation UI             | S      | 🔲 pending     | —     |
