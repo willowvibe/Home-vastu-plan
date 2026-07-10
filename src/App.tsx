@@ -190,7 +190,6 @@ export default function App() {
 
       {editor.showPresentationExport && (
         <PresentationExport
-          canvasRef={canvasContainerRef}
           plan={editor.plan}
           currentFloor={editor.currentFloor}
           onClose={() => editor.setShowPresentationExport(false)}

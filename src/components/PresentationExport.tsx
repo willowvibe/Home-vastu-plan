@@ -1,15 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { FloorPlan } from '../types';
 import { jsPDF } from 'jspdf';
-import { toPng } from 'html-to-image';
 import { FileText, X, Upload, Loader2, Download } from 'lucide-react';
 import { addBreadcrumb } from '../services/sentry';
 import { useToast } from './Toast';
 import { fitInside } from '../lib/pdfFit';
 import { formatFloorLabel } from '../constants/floorPlanConstants';
+import { buildVectorPdfOps, renderOpsToPdf } from '../lib/exportVectorPdf';
+import { isWatermarkRequired } from '../services/entitlements';
 
 interface PresentationExportProps {
-  canvasRef: React.RefObject<HTMLDivElement>;
   plan: FloorPlan;
   currentFloor: number;
   onClose: () => void;
@@ -34,7 +34,6 @@ async function isPngOrJpeg(file: File): Promise<boolean> {
 }
 
 export function PresentationExport({
-  canvasRef,
   plan,
   currentFloor,
   onClose,
@@ -64,15 +63,12 @@ export function PresentationExport({
   };
 
   const handleExportPDF = async () => {
-    if (!canvasRef.current) return;
     setIsExporting(true);
 
     try {
-      // Capture canvas
-      const imgData = await toPng(canvasRef.current, {
-        backgroundColor: '#ffffff',
-        pixelRatio: 2,
-      });
+      // Build vector ops from plan data (no DOM capture needed).
+      const watermark = isWatermarkRequired();
+      const ops = buildVectorPdfOps(plan, currentFloor, { watermark });
 
       // Create PDF (Landscape, Letter size: 11 x 8.5 inches)
       const pdf = new jsPDF({
@@ -110,24 +106,15 @@ export function PresentationExport({
       pdf.text(`Scale: 1" = ${plan.unit === 'ft' ? '10 ft' : '3 m'} (Approx)`, 9.2, 8.1);
       pdf.text(`Floor: ${formatFloorLabel(currentFloor, plan.floorNames)}`, 7.6, 7.3);
 
-      // Add the Floor Plan Image
-      // Scale it to fit the available 7 in × 7.7 in drawing area while
-      // preserving aspect ratio. B-9: previously only width was clamped,
-      // so tall plot images overflowed the page.
-      const imgProps = pdf.getImageProperties(imgData);
-      const { w: pdfWidth, h: pdfHeight } = fitInside(imgProps.width, imgProps.height, 7, 7.7);
-
-      // Center the image in the left area
-      const xOffset = 0.4 + (7 - pdfWidth) / 2;
-      const yOffset = 0.4 + (7.7 - pdfHeight) / 2;
-
-      pdf.addImage(imgData, 'PNG', xOffset, yOffset, pdfWidth, pdfHeight);
+      // Render the vector floor plan into the drawing area.
+      // The ops are already scaled to fit 7×7.7 inches; center them.
+      renderOpsToPdf(ops, pdf);
 
       // Save PDF
       pdf.save(`${clientName || 'Project'}_VastuPlan.pdf`);
       onClose();
       // Sentry breadcrumb for PDF export
-      addBreadcrumb('PDF Exported', 'export', { floor: currentFloor });
+      addBreadcrumb('PDF Exported', 'export', { floor: currentFloor, vector: true, watermark });
     } catch (error) {
       console.error('PDF Export failed:', error);
       alert('Failed to export PDF.');
@@ -222,6 +209,13 @@ export function PresentationExport({
                 Recommended: PNG with transparent background.
               </span>
             </div>
+          </div>
+
+          {/* Entitlement status line (M-1) */}
+          <div className="text-xs text-slate-400 text-center">
+            {isWatermarkRequired()
+              ? 'Free plan · watermark included'
+              : 'Pro · watermark-free'}
           </div>
         </div>
 
