@@ -18,6 +18,12 @@ interface MockSupabaseClient {
     resetPasswordForEmail: Mock<
       (email: string, options: { redirectTo: string }) => Promise<{ error: Error | null }>
     >;
+    signInWithOtp: Mock<
+      (args: { email: string; options: { emailRedirectTo: string } }) => Promise<{ error: Error | null }>
+    >;
+    signInWithOAuth: Mock<
+      (args: { provider: string; options: { redirectTo: string } }) => Promise<{ error: Error | null }>
+    >;
     onAuthStateChange: Mock<
       (cb: AuthListener) => { data: { subscription: { unsubscribe: () => void } } }
     >;
@@ -36,6 +42,8 @@ vi.mock('../lib/supabase', () => ({
       signUp: vi.fn(),
       signOut: vi.fn(),
       resetPasswordForEmail: vi.fn(),
+      signInWithOtp: vi.fn(),
+      signInWithOAuth: vi.fn(),
       onAuthStateChange: vi.fn((cb?: AuthListener) => {
         if (cb) cb('INITIAL', null);
         return { data: { subscription: { unsubscribe: vi.fn() } } };
@@ -55,6 +63,8 @@ describe('AuthContext', () => {
     mockAuth().signUp.mockReset();
     mockAuth().signOut.mockReset();
     mockAuth().resetPasswordForEmail.mockReset();
+    mockAuth().signInWithOtp.mockReset();
+    mockAuth().signInWithOAuth.mockReset();
     mockAuth().onAuthStateChange.mockReset();
     mockAuth().getSession.mockResolvedValue({ data: { session: null }, error: null });
   });
@@ -173,5 +183,37 @@ describe('AuthContext', () => {
     expect(() => renderHook(() => useAuth())).toThrow(
       'useAuth must be used within an AuthProvider'
     );
+  });
+
+  it('sendMagicLink calls signInWithOtp with the email and /auth/callback redirect', async () => {
+    mockAuth().signInWithOtp.mockResolvedValue({ error: null });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isEnabled).toBe(true));
+    const res = await result.current.sendMagicLink('a@b.com');
+    expect(res.error).toBeNull();
+    expect(mockAuth().signInWithOtp).toHaveBeenCalledWith({
+      email: 'a@b.com',
+      options: { emailRedirectTo: expect.stringContaining('/auth/callback') },
+    });
+  });
+
+  it('signInWithGoogle calls signInWithOAuth with provider google and /auth/callback redirect', async () => {
+    mockAuth().signInWithOAuth.mockResolvedValue({ error: null });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isEnabled).toBe(true));
+    const res = await result.current.signInWithGoogle();
+    expect(res.error).toBeNull();
+    expect(mockAuth().signInWithOAuth).toHaveBeenCalledWith({
+      provider: 'google',
+      options: { redirectTo: expect.stringContaining('/auth/callback') },
+    });
+  });
+
+  it('sendMagicLink surfaces supabase errors', async () => {
+    mockAuth().signInWithOtp.mockResolvedValue({ error: new Error('nope') });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isEnabled).toBe(true));
+    const res = await result.current.sendMagicLink('a@b.com');
+    expect(res.error?.message).toBe('nope');
   });
 });

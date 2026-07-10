@@ -29,6 +29,10 @@ interface AuthContextValue {
   signUp: (credentials: AuthCredentials) => Promise<AuthResult>;
   /** Send a password reset email. */
   resetPassword: (email: string) => Promise<AuthResult>;
+  /** Send a magic-link sign-in email (works for new and existing users). */
+  sendMagicLink: (email: string) => Promise<AuthResult>;
+  /** Start Google OAuth sign-in. */
+  signInWithGoogle: () => Promise<AuthResult>;
   /** Sign the current user out. */
   signOut: () => Promise<AuthResult>;
 }
@@ -44,6 +48,8 @@ const disabledValue: AuthContextValue = {
   signIn: async () => ({ error: new Error('Supabase Auth is not configured') }),
   signUp: async () => ({ error: new Error('Supabase Auth is not configured') }),
   resetPassword: async () => ({ error: new Error('Supabase Auth is not configured') }),
+  sendMagicLink: async () => ({ error: new Error('Supabase Auth is not configured') }),
+  signInWithGoogle: async () => ({ error: new Error('Supabase Auth is not configured') }),
   signOut: async () => ({ error: null }),
 };
 
@@ -113,6 +119,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     []
   );
 
+  const sendMagicLink = useMemo(
+    () =>
+      async (email: string): Promise<AuthResult> => {
+        if (!supabase) return { error: new Error('Supabase Auth is not configured') };
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        });
+        return { error: error ?? null };
+      },
+    []
+  );
+
+  const signInWithGoogle = useMemo(
+    () =>
+      async (): Promise<AuthResult> => {
+        if (!supabase) return { error: new Error('Supabase Auth is not configured') };
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: `${window.location.origin}/auth/callback` },
+        });
+        return { error: error ?? null };
+      },
+    []
+  );
+
   const signOut = useMemo(
     () => async (): Promise<AuthResult> => {
       if (!supabase) return { error: null };
@@ -132,9 +164,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       signIn,
       signUp,
       resetPassword,
+      sendMagicLink,
+      signInWithGoogle,
       signOut,
     }),
-    [isLoading, user, session, signIn, signUp, resetPassword, signOut]
+    [isLoading, user, session, signIn, signUp, resetPassword, sendMagicLink, signInWithGoogle, signOut]
   );
 
   if (!supabase) {
