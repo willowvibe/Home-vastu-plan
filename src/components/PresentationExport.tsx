@@ -124,16 +124,16 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-indigo-600" />
+    <div className="fixed inset-0 bg-fg/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-bg rounded-2xl shadow-elev-raised w-full max-w-md overflow-hidden">
+        <div className="px-6 py-4 border-b border-border-soft flex items-center justify-between bg-bg">
+          <h2 className="text-lg font-bold text-fg-2 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-accent" />
             Presentation Export
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+            className="p-2 text-meta hover:text-muted hover:bg-surface rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -141,29 +141,29 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Project Name</label>
+            <label className="block text-sm font-medium text-fg-2 mb-1">Project Name</label>
             <input
               type="text"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
               placeholder="e.g., Villa 104 Design"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Client Name</label>
+            <label className="block text-sm font-medium text-fg-2 mb-1">Client Name</label>
             <input
               type="text"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               placeholder="e.g., Mr. Sharma"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-fg-2 mb-1">
               Consultant / Architect Name
             </label>
             <input
@@ -171,21 +171,21 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
               value={consultantName}
               onChange={(e) => setConsultantName(e.target.value)}
               placeholder="e.g., Vastu Experts Inc."
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-fg-2 mb-1">
               Company Logo (Optional)
             </label>
             <div className="flex items-center gap-4">
               {logoUrl ? (
-                <div className="relative w-16 h-16 border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                <div className="relative w-16 h-16 border border-border rounded-lg overflow-hidden bg-bg">
                   <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
                   <button
                     onClick={() => setLogoUrl(null)}
-                    className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-bl-lg hover:bg-red-600"
+                    className="absolute top-0 right-0 p-1 bg-danger text-accent-on rounded-bl-lg hover:bg-danger"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -193,7 +193,7 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
               ) : (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center justify-center w-16 h-16 border-2 border-dashed border-slate-300 rounded-lg text-slate-400 hover:text-indigo-600 hover:border-indigo-300 transition-colors"
+                  className="flex items-center justify-center w-16 h-16 border-2 border-dashed border-border rounded-lg text-meta hover:text-accent hover:border-accent transition-colors"
                 >
                   <Upload className="w-6 h-6" />
                 </button>
@@ -205,29 +205,29 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
                 accept="image/png, image/jpeg"
                 className="hidden"
               />
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted">
                 Recommended: PNG with transparent background.
               </span>
             </div>
           </div>
 
           {/* Entitlement status line (M-1) */}
-          <div className="text-xs text-slate-400 text-center">
+          <div className="text-xs text-meta text-center">
             {isWatermarkRequired() ? 'Free plan · watermark included' : 'Pro · watermark-free'}
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+        <div className="px-6 py-4 bg-bg border-t border-border-soft flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted hover:bg-surface rounded-lg transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleExportPDF}
             disabled={isExporting}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-on text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
           >
             {isExporting ? (
               <Loader2 className="w-4 h-4 animate-spin" />

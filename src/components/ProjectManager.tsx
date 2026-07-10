@@ -130,16 +130,16 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <Folder className="w-5 h-5 text-indigo-600" />
+    <div className="fixed inset-0 bg-fg/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-bg rounded-2xl shadow-elev-raised w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+        <div className="px-6 py-4 border-b border-border-soft flex items-center justify-between bg-bg">
+          <h2 className="text-lg font-bold text-fg-2 flex items-center gap-2">
+            <Folder className="w-5 h-5 text-accent" />
             Project Manager
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+            className="p-2 text-meta hover:text-muted hover:bg-surface rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -147,21 +147,21 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
 
         <div className="flex flex-1 overflow-hidden">
           {/* Left Sidebar - Projects List */}
-          <div className="w-1/3 border-r border-slate-100 bg-slate-50/50 flex flex-col">
-            <div className="p-4 border-b border-slate-100">
+          <div className="w-1/3 border-r border-border-soft bg-surface-warm/50 flex flex-col">
+            <div className="p-4 border-b border-border-soft">
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="New Project Name..."
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
-                  className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                   onKeyDown={(e) => e.key === 'Enter' && handleCreateProject()}
                 />
                 <button
                   onClick={handleCreateProject}
                   disabled={!newProjectName.trim()}
-                  className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  className="p-2 bg-accent text-accent-on rounded-lg hover:bg-accent-hover disabled:opacity-50 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -170,7 +170,7 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
 
             <div className="flex-1 overflow-y-auto p-2">
               {projects.length === 0 ? (
-                <div className="text-center py-8 text-slate-400 text-sm">
+                <div className="text-center py-8 text-meta text-sm">
                   No projects yet. Create one above!
                 </div>
               ) : (
@@ -178,19 +178,19 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
                   <div
                     key={project.id}
                     onClick={() => setActiveProjectId(project.id)}
-                    className={`p-3 rounded-lg cursor-pointer mb-1 flex items-center justify-between group transition-colors ${activeProjectId === project.id ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-slate-100 border border-transparent'}`}
+                    className={`p-3 rounded-lg cursor-pointer mb-1 flex items-center justify-between group transition-colors ${activeProjectId === project.id ? 'bg-accent/10 border border-accent/20' : 'hover:bg-surface-warm border border-transparent'}`}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
                       <Folder
-                        className={`w-4 h-4 shrink-0 ${activeProjectId === project.id ? 'text-indigo-600' : 'text-slate-400'}`}
+                        className={`w-4 h-4 shrink-0 ${activeProjectId === project.id ? 'text-accent' : 'text-meta'}`}
                       />
                       <div className="truncate">
                         <div
-                          className={`text-sm font-medium truncate ${activeProjectId === project.id ? 'text-indigo-900' : 'text-slate-700'}`}
+                          className={`text-sm font-medium truncate ${activeProjectId === project.id ? 'text-accent' : 'text-fg-2'}`}
                         >
                           {project.name}
                         </div>
-                        <div className="text-[10px] text-slate-500">
+                        <div className="text-[10px] text-muted">
                           {new Date(project.updatedAt).toLocaleDateString()}
                         </div>
                       </div>
@@ -200,7 +200,7 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
                         e.stopPropagation();
                         handleDeleteProject(project.id);
                       }}
-                      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1.5 text-meta hover:text-danger hover:bg-danger/10 rounded opacity-0 group-hover:opacity-100 transition-all"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -211,17 +211,17 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
           </div>
 
           {/* Right Area - Versions */}
-          <div className="flex-1 bg-white flex flex-col">
+          <div className="flex-1 bg-bg flex flex-col">
             {activeProjectId ? (
               <>
-                <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                    <History className="w-4 h-4 text-slate-400" />
+                <div className="p-4 border-b border-border-soft flex items-center justify-between">
+                  <h3 className="font-semibold text-fg-2 flex items-center gap-2">
+                    <History className="w-4 h-4 text-meta" />
                     Version History
                   </h3>
                   <button
                     onClick={() => handleSaveVersion(activeProjectId)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-sm font-medium transition-colors border border-emerald-200"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success hover:bg-success/15 rounded-lg text-sm font-medium transition-colors border border-success/30"
                   >
                     <Save className="w-4 h-4" />
                     Save Current as New Version
@@ -234,17 +234,17 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
                       ?.versions.map((version, idx) => (
                         <div
                           key={version.id}
-                          className="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-indigo-200 hover:shadow-sm transition-all bg-slate-50/50"
+                          className="flex items-center justify-between p-4 border border-border-soft rounded-xl hover:border-accent/20 hover:shadow-elev-ring transition-all bg-surface-warm/50"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
+                            <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center text-accent font-bold text-sm">
                               {version.name}
                             </div>
                             <div>
-                              <div className="font-medium text-slate-800">
+                              <div className="font-medium text-fg-2">
                                 {idx === 0 ? 'Latest Version' : `Version ${version.name}`}
                               </div>
-                              <div className="text-xs text-slate-500">
+                              <div className="text-xs text-muted">
                                 {new Date(version.timestamp).toLocaleString()}
                               </div>
                             </div>
@@ -265,8 +265,8 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
                               }}
                               className={`p-1.5 rounded-lg transition-colors ${
                                 selectedVersionIds.includes(version.id)
-                                  ? 'bg-indigo-100 text-indigo-700'
-                                  : 'text-slate-400 hover:bg-slate-100'
+                                  ? 'bg-accent/15 text-accent'
+                                  : 'text-meta hover:bg-surface-warm'
                               }`}
                               title={
                                 selectedVersionIds.includes(version.id)
@@ -278,13 +278,13 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
                             </button>
                             <button
                               onClick={() => handleLoadVersion(version)}
-                              className="px-4 py-2 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                              className="px-4 py-2 bg-bg border border-border hover:border-accent hover:text-accent rounded-lg text-sm font-medium transition-colors shadow-elev-ring"
                             >
                               Load Plan
                             </button>
                             <button
                               onClick={() => handleDeleteVersion(activeProjectId, version.id)}
-                              className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 border border-transparent hover:border-red-200 rounded-lg transition-colors"
+                              className="p-2 text-meta hover:bg-danger/10 hover:text-danger border border-transparent hover:border-danger/30 rounded-lg transition-colors"
                               title="Delete Version"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -295,14 +295,14 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
                   </div>
 
                   {selectedVersionIds.length >= 2 && (
-                    <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-                      <h4 className="text-xs font-bold text-indigo-800 mb-2">Version Comparison</h4>
+                    <div className="mt-4 p-3 bg-accent/10 border border-accent/20 rounded-lg">
+                      <h4 className="text-xs font-bold text-accent mb-2">Version Comparison</h4>
                       <div className="space-y-2">
                         {projects
                           .find((p) => p.id === activeProjectId)
                           ?.versions.filter((v) => selectedVersionIds.includes(v.id))
                           .map((v, i) => (
-                            <div key={v.id} className="text-xs text-slate-700">
+                            <div key={v.id} className="text-xs text-fg-2">
                               <span className="font-medium">
                                 {i === 0 ? 'Version A' : 'Version B'}:{' '}
                               </span>
@@ -317,9 +317,9 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
                         if (comparedVersions && comparedVersions.length >= 2) {
                           const diff = compareVersions(comparedVersions[0], comparedVersions[1]);
                           return (
-                            <div className="mt-2 pt-2 border-t border-indigo-200 text-xs">
-                              <p className="font-medium text-indigo-700 mb-1">Changes:</p>
-                              <p className="text-slate-600">
+                            <div className="mt-2 pt-2 border-t border-accent/20 text-xs">
+                              <p className="font-medium text-accent mb-1">Changes:</p>
+                              <p className="text-muted">
                                 {diff.rooms === 0
                                   ? 'No change in room count'
                                   : diff.rooms > 0
@@ -336,7 +336,7 @@ export function ProjectManager({ currentPlan, onLoadPlan, onClose }: ProjectMana
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-meta">
                 <Folder className="w-12 h-12 mb-3 opacity-20" />
                 <p className="text-sm">Select a project to view versions</p>
               </div>

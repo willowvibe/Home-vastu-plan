@@ -65,10 +65,10 @@ export const Room: React.FC<RoomProps> = React.memo(
     );
     const vastuColor =
       vastu.status === 'good'
-        ? 'bg-emerald-100/80 border-emerald-400'
+        ? 'bg-success/20 border-success'
         : vastu.status === 'average'
-          ? 'bg-amber-100/80 border-amber-400'
-          : 'bg-red-100/80 border-red-400';
+          ? 'bg-warn/20 border-warn'
+          : 'bg-danger/20 border-danger';
 
     const wallFt = (room.wallThickness || DEFAULT_WALL_THICKNESS_IN) / INCHES_PER_FOOT;
 
@@ -122,7 +122,7 @@ export const Room: React.FC<RoomProps> = React.memo(
         className={cn(
           'absolute flex items-center justify-center select-none transition-colors',
           isInteractive ? 'cursor-move' : 'cursor-default pointer-events-none',
-          isSelected && isInteractive ? 'ring-2 ring-blue-500 z-10' : 'z-0',
+          isSelected && isInteractive ? 'ring-2 ring-accent z-10' : 'z-0',
           vastuColor
         )}
         style={{
@@ -152,15 +152,15 @@ export const Room: React.FC<RoomProps> = React.memo(
           }
         }}
       >
-        <span className="text-xs font-medium text-slate-800 pointer-events-none px-1 text-center leading-tight">
+        <span className="text-xs font-medium text-fg-2 pointer-events-none px-1 text-center leading-tight">
           {room.type}
           <br />
-          <span className="text-[10px] text-slate-600 block leading-tight mt-0.5">
+          <span className="text-[10px] text-muted block leading-tight mt-0.5">
             {plan.unit === 'ft'
               ? `${room.w}' x ${room.h}'`
               : `${(room.w * 0.3048).toFixed(1)}m x ${(room.h * 0.3048).toFixed(1)}m`}
           </span>
-          <span className="text-[9px] text-slate-500 block leading-tight">
+          <span className="text-[9px] text-meta block leading-tight">
             {plan.unit === 'ft'
               ? `In: ${innerW.toFixed(1)}' x ${innerH.toFixed(1)}'`
               : `In: ${(innerW * 0.3048).toFixed(1)}m x ${(innerH * 0.3048).toFixed(1)}m`}
@@ -190,28 +190,28 @@ export const Room: React.FC<RoomProps> = React.memo(
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'nw')}
               data-testid="resize-handle-nw"
             >
-              <div className="w-5 h-5 bg-blue-500 rounded-full pointer-events-none" />
+              <div className="w-5 h-5 bg-accent rounded-full pointer-events-none" />
             </div>
             <div
               className="absolute -top-1.5 -right-1.5 w-7 h-7 flex items-center justify-center cursor-ne-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'ne')}
               data-testid="resize-handle-ne"
             >
-              <div className="w-5 h-5 bg-blue-500 rounded-full pointer-events-none" />
+              <div className="w-5 h-5 bg-accent rounded-full pointer-events-none" />
             </div>
             <div
               className="absolute -bottom-1.5 -left-1.5 w-7 h-7 flex items-center justify-center cursor-sw-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'sw')}
               data-testid="resize-handle-sw"
             >
-              <div className="w-5 h-5 bg-blue-500 rounded-full pointer-events-none" />
+              <div className="w-5 h-5 bg-accent rounded-full pointer-events-none" />
             </div>
             <div
               className="absolute -bottom-1.5 -right-1.5 w-7 h-7 flex items-center justify-center cursor-se-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'se')}
               data-testid="resize-handle-se"
             >
-              <div className="w-5 h-5 bg-blue-500 rounded-full pointer-events-none" />
+              <div className="w-5 h-5 bg-accent rounded-full pointer-events-none" />
             </div>
             {/* Edges */}
             <div
@@ -219,28 +219,28 @@ export const Room: React.FC<RoomProps> = React.memo(
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'n')}
               data-testid="resize-handle-n"
             >
-              <div className="w-3 h-3 bg-blue-500 rounded-full pointer-events-none" />
+              <div className="w-3 h-3 bg-accent rounded-full pointer-events-none" />
             </div>
             <div
               className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center cursor-ns-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 's')}
               data-testid="resize-handle-s"
             >
-              <div className="w-3 h-3 bg-blue-500 rounded-full pointer-events-none" />
+              <div className="w-3 h-3 bg-accent rounded-full pointer-events-none" />
             </div>
             <div
               className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center cursor-ew-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'e')}
               data-testid="resize-handle-e"
             >
-              <div className="w-3 h-3 bg-blue-500 rounded-full pointer-events-none" />
+              <div className="w-3 h-3 bg-accent rounded-full pointer-events-none" />
             </div>
             <div
               className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center cursor-ew-resize"
               onPointerDown={(e) => onPointerDown(e, room, 'resize', 'w')}
               data-testid="resize-handle-w"
             >
-              <div className="w-3 h-3 bg-blue-500 rounded-full pointer-events-none" />
+              <div className="w-3 h-3 bg-accent rounded-full pointer-events-none" />
             </div>
           </>
         )}

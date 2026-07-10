@@ -179,12 +179,12 @@ export const Canvas: React.FC<CanvasProps> = ({
 
   return (
     <div
-      className="relative bg-white border-2 border-slate-300 shadow-inner overflow-visible mx-auto mt-8 ml-8"
+      className="relative bg-surface border-2 border-border shadow-inner overflow-visible mx-auto mt-8 ml-8"
       style={{
         width: plan.plotWidth * PIXELS_PER_FOOT,
         height: plan.plotHeight * PIXELS_PER_FOOT,
         backgroundImage:
-          'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)',
+          'linear-gradient(var(--border-strong) 1px, transparent 1px), linear-gradient(90deg, var(--border-strong) 1px, transparent 1px)',
         backgroundSize: `${gridSize * PIXELS_PER_FOOT}px ${gridSize * PIXELS_PER_FOOT}px`,
       }}
       data-testid="canvas"
@@ -242,10 +242,10 @@ export const Canvas: React.FC<CanvasProps> = ({
       />
 
       {/* Plot Dimensions */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 bg-slate-800 text-white text-xs px-2 py-1 rounded font-mono z-20 shadow-sm">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 bg-fg text-accent-on text-xs px-2 py-1 rounded font-mono z-20 shadow-sm">
         {plan.plotWidth}'
       </div>
-      <div className="absolute top-1/2 left-0 -translate-x-6 -translate-y-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded font-mono z-20 -rotate-90 shadow-sm">
+      <div className="absolute top-1/2 left-0 -translate-x-6 -translate-y-1/2 bg-fg text-accent-on text-xs px-2 py-1 rounded font-mono z-20 -rotate-90 shadow-sm">
         {plan.plotHeight}'
       </div>
 
@@ -295,7 +295,7 @@ export const Canvas: React.FC<CanvasProps> = ({
           data-testid="canvas-empty-state"
           className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
         >
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-muted dark:text-meta">
             No rooms on this floor yet. Add a room from the left panel, or switch back to{' '}
             {formatFloorLabel(
               plan.rooms.length > 0 ? Math.min(...plan.rooms.map((r) => r.floor)) : 0,
@@ -340,8 +340,8 @@ export const Canvas: React.FC<CanvasProps> = ({
               onClick={() => onSelectComment?.(comment.id)}
               className={`absolute flex items-center justify-center w-6 h-6 -ml-3 -mt-6 rounded-full shadow-sm border transition-colors z-20 ${
                 selectedCommentId === comment.id
-                  ? 'bg-amber-400 border-amber-600 text-amber-900 scale-110'
-                  : 'bg-amber-100 border-amber-400 text-amber-700 hover:bg-amber-200'
+                  ? 'bg-warn border-warn text-accent-on scale-110'
+                  : 'bg-warn/10 border-warn text-warn hover:bg-warn/20'
               }`}
               style={{
                 left: comment.x * PIXELS_PER_FOOT,
@@ -356,13 +356,13 @@ export const Canvas: React.FC<CanvasProps> = ({
       <Compass northAngle={plan.northAngle} />
 
       {appMode === 'comment' && (
-        <div className="absolute top-4 left-4 bg-amber-100 border border-amber-300 text-amber-800 text-[10px] px-2 py-1 rounded z-20 pointer-events-none">
+        <div className="absolute top-4 left-4 bg-warn/10 border border-warn/30 text-warn text-[10px] px-2 py-1 rounded z-20 pointer-events-none">
           Click anywhere on the canvas to add a comment.
         </div>
       )}
 
       {snapToGrid && (
-        <div className="absolute top-4 right-4 bg-slate-900/70 text-white text-[9px] px-2 py-1 rounded z-20 pointer-events-none">
+        <div className="absolute top-4 right-4 bg-fg/70 text-accent-on text-[9px] px-2 py-1 rounded z-20 pointer-events-none">
           GRID SNAP ON · {gridSize} ft
         </div>
       )}
@@ -374,7 +374,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       {marquee && (
         <div
           data-testid="canvas-marquee"
-          className="absolute border-2 border-blue-500 bg-blue-500/10 pointer-events-none z-30"
+          className="absolute border-2 border-accent bg-accent/10 pointer-events-none z-30"
           style={{
             left: Math.min(marquee.start.x, marquee.current.x) * PIXELS_PER_FOOT,
             top: Math.min(marquee.start.y, marquee.current.y) * PIXELS_PER_FOOT,

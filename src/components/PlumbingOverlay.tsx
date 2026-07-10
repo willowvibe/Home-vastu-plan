@@ -76,7 +76,7 @@ export const PlumbingOverlay: React.FC<PlumbingOverlayProps> = ({ plan, rooms, p
         y1: cy * pixelsPerFoot,
         x2: edge.x * pixelsPerFoot,
         y2: edge.y * pixelsPerFoot,
-        stroke: '#3b82f6',
+        stroke: 'var(--accent)',
         label: isBathroom ? 'Cold water + drainage' : 'Cold water',
       });
 
@@ -88,7 +88,7 @@ export const PlumbingOverlay: React.FC<PlumbingOverlayProps> = ({ plan, rooms, p
           y1: cy * pixelsPerFoot,
           x2: edge.x * pixelsPerFoot,
           y2: edge.y * pixelsPerFoot,
-          stroke: '#ef4444',
+          stroke: 'var(--danger)',
           dash: '4 4',
           label: 'Hot water',
         });
@@ -102,7 +102,7 @@ export const PlumbingOverlay: React.FC<PlumbingOverlayProps> = ({ plan, rooms, p
           y1: cy * pixelsPerFoot,
           x2: edge.x * pixelsPerFoot,
           y2: edge.y * pixelsPerFoot,
-          stroke: '#6b7280',
+          stroke: 'var(--muted)',
           dash: '2 3',
           label: 'Drainage',
         });
@@ -115,7 +115,7 @@ export const PlumbingOverlay: React.FC<PlumbingOverlayProps> = ({ plan, rooms, p
   if (lines.length === 0) {
     return (
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-        <p className="text-xs text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-900/80 px-2 py-1 rounded">
+        <p className="text-xs text-muted dark:text-meta bg-surface-100/80 dark:bg-fg/80 px-2 py-1 rounded">
           Add a Kitchen or Bathroom to see plumbing lines.
         </p>
       </div>

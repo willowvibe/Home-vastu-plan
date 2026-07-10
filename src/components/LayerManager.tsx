@@ -47,8 +47,8 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
   };
 
   return (
-    <div className="p-5 border-b border-slate-100 dark:border-slate-800">
-      <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-100">
+    <div className="p-5 border-b border-border-soft ">
+      <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 text-fg ">
         <Layers className="w-4 h-4" /> Layers
       </h3>
 
@@ -61,12 +61,12 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
             if (e.key === 'Enter') addLayer();
           }}
           placeholder="New layer name..."
-          className="flex-1 border rounded-md px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white"
+          className="flex-1 border rounded-md px-2 py-1.5 text-xs focus:ring-1 focus:ring-accent outline-none bg-bg border-border text-fg"
         />
         <button
           onClick={addLayer}
           disabled={!newLayerName.trim()}
-          className="p-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 bg-accent text-accent-on rounded-md hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           title="Add Layer"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -77,11 +77,11 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
         {layers.map((layer) => (
           <div
             key={layer.id}
-            className={`flex items-center gap-2 px-2 py-1.5 rounded-md border transition-colors border-slate-100 dark:border-slate-700 ${layer.visible ? '' : 'opacity-50'}`}
+            className={`flex items-center gap-2 px-2 py-1.5 rounded-md border transition-colors border-border-soft  ${layer.visible ? '' : 'opacity-50'}`}
           >
             <button
               onClick={() => toggleVisibility(layer.id)}
-              className="p-0.5 text-slate-400 hover:text-indigo-600 transition-colors"
+              className="p-0.5 text-meta hover:text-accent transition-colors"
               title={layer.visible ? 'Hide Layer' : 'Show Layer'}
             >
               {layer.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -90,15 +90,15 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
               className="w-3 h-3 rounded-full shrink-0"
               style={{ backgroundColor: layer.color }}
             />
-            <span className="flex-1 text-xs font-medium truncate text-slate-700 dark:text-slate-300">
+            <span className="flex-1 text-xs font-medium truncate text-fg-2 dark:text-meta">
               {layer.name}
             </span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">
+            <span className="text-[10px] text-meta dark:text-muted">
               {rooms.filter((r) => r.floor === currentFloor && r.category === layer.name).length}
             </span>
             <button
               onClick={() => removeLayer(layer.id)}
-              className="p-0.5 text-slate-400 hover:text-red-500 transition-colors"
+              className="p-0.5 text-meta hover:text-danger transition-colors"
               title="Remove Layer"
             >
               <Trash2 className="w-3 h-3" />
@@ -108,7 +108,7 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
       </div>
 
       {layers.length === 0 && (
-        <p className="text-[10px] text-center py-2 text-slate-400 dark:text-slate-500">
+        <p className="text-[10px] text-center py-2 text-meta dark:text-muted">
           No layers yet. Create one to organize rooms.
         </p>
       )}

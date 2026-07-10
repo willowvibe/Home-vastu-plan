@@ -32,16 +32,16 @@ export const RulerOverlay: React.FC<RulerOverlayProps> = React.memo(
     return (
       <>
         {measuring && (
-          <div className="absolute top-4 right-4 bg-slate-900/80 text-white text-[10px] px-3 py-2 rounded-lg z-20 pointer-events-none">
+          <div className="absolute top-4 right-4 bg-fg/80 text-accent-on text-[10px] px-3 py-2 rounded-lg z-20 pointer-events-none">
             Click two points to measure distance
           </div>
         )}
         {formatted && (
-          <div className="absolute top-12 right-4 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-2 shadow-sm max-w-[150px] z-30">
-            <div className="text-[9px] font-bold text-slate-600 mb-1 uppercase tracking-wider">
+          <div className="absolute top-12 right-4 bg-surface-100/90 dark:bg-surface/90 backdrop-blur-sm border border-border rounded-lg p-2 shadow-sm max-w-[150px] z-30">
+            <div className="text-[9px] font-bold text-muted mb-1 uppercase tracking-wider">
               Measurement
             </div>
-            <div className="text-[10px] text-slate-800">
+            <div className="text-[10px] text-fg-2">
               Distance: {formatted.value} {formatted.unit}
             </div>
           </div>

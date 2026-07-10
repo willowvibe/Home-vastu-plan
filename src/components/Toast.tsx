@@ -28,13 +28,13 @@ export const useToast = () => {
 function _getIcon(type: ToastType) {
   switch (type) {
     case 'success':
-      return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
+      return <CheckCircle2 className="w-5 h-5 text-success" />;
     case 'error':
-      return <AlertCircle className="w-5 h-5 text-rose-500" />;
+      return <AlertCircle className="w-5 h-5 text-danger" />;
     case 'warning':
-      return <AlertTriangle className="w-5 h-5 text-amber-500" />;
+      return <AlertTriangle className="w-5 h-5 text-warn" />;
     default:
-      return <Info className="w-5 h-5 text-indigo-500" />;
+      return <Info className="w-5 h-5 text-accent" />;
   }
 }
 
@@ -47,14 +47,14 @@ const _ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => 
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border shadow-lg max-w-sm transform transition-all duration-300 animate-in slide-in-from-right-10 fade-in ${
+          className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border shadow-elev-raised max-w-sm transform transition-all duration-300 animate-in slide-in-from-right-10 fade-in ${
             toast.type === 'success'
-              ? 'bg-white border-emerald-200'
+              ? 'bg-bg border-success/30'
               : toast.type === 'error'
-                ? 'bg-white border-rose-200'
+                ? 'bg-bg border-danger/30'
                 : toast.type === 'warning'
-                  ? 'bg-white border-amber-200'
-                  : 'bg-white border-indigo-200'
+                  ? 'bg-bg border-warn/30'
+                  : 'bg-bg border-accent/20'
           }`}
         >
           <div className="mt-0.5 shrink-0">{_getIcon(toast.type)}</div>
@@ -62,12 +62,12 @@ const _ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => 
             <p
               className={`text-sm font-medium ${
                 toast.type === 'success'
-                  ? 'text-emerald-700'
+                  ? 'text-success'
                   : toast.type === 'error'
-                    ? 'text-rose-700'
+                    ? 'text-danger'
                     : toast.type === 'warning'
-                      ? 'text-amber-700'
-                      : 'text-indigo-700'
+                      ? 'text-warn'
+                      : 'text-accent'
               }`}
             >
               {toast.message}
@@ -75,7 +75,7 @@ const _ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => 
           </div>
           <button
             onClick={() => removeToast(toast.id)}
-            className="shrink-0 text-slate-400 hover:text-slate-600 transition-colors"
+            className="shrink-0 text-meta hover:text-muted transition-colors"
             aria-label="Close notification"
           >
             <X className="w-4 h-4" />

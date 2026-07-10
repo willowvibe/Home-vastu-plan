@@ -62,18 +62,16 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
     // Stale id: render an explicit empty state (not a silent blank).
     return (
       <div
-        className="p-5 border-b border-slate-100 bg-blue-50/50 dark:border-slate-700 dark:bg-blue-900/20"
+        className="p-5 border-b border-border-soft bg-surface-warm"
         data-testid="room-properties-empty"
       >
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
-          Room not found
-        </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-fg">Room not found</h3>
+        <p className="text-xs text-muted dark:text-meta mt-2">
           The previously selected room no longer exists.
         </p>
         <button
           onClick={onClearSelection}
-          className="mt-3 px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 rounded-md"
+          className="mt-3 px-3 py-1.5 text-xs font-medium text-accent hover:bg-surface-warm rounded-md"
         >
           Clear selection
         </button>
@@ -91,12 +89,12 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
 
   return (
     <div
-      className="p-5 border-b border-slate-100 bg-blue-50/50 dark:border-slate-700 dark:bg-blue-900/20"
+      className="p-5 border-b border-border-soft bg-surface-warm"
       data-testid="room-properties-panel"
     >
       {isLocked && (
         <div
-          className="mb-4 px-3 py-2 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-200"
+          className="mb-4 px-3 py-2 rounded-md bg-warn/10 border border-warn/30 text-warn text-xs"
           role="status"
         >
           Properties are read-only in {appMode} mode. Switch to edit to make changes.
@@ -105,7 +103,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
 
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-fg">
             {selectedRoomIds.length === 1
               ? 'Room Properties'
               : `${selectedRoomIds.length} Rooms Selected`}
@@ -115,7 +113,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
           {selectedRoomIds.length > 1 && (
             <button
               onClick={onClearSelection}
-              className="p-1.5 rounded-md transition-colors border border-transparent text-slate-500 hover:bg-slate-100 hover:border-slate-300 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:border-slate-600"
+              className="p-1.5 rounded-md transition-colors border border-transparent text-muted hover:bg-surface-warm hover:border-border dark:text-meta  "
               title="Clear Selection"
             >
               <span className="text-[10px] font-medium">Clear</span>
@@ -123,7 +121,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
           )}
           <button
             onClick={onDuplicate}
-            className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-md transition-colors border border-transparent hover:border-slate-300 flex items-center gap-1.5"
+            className="p-1.5 text-muted hover:bg-surface-warm rounded-md transition-colors border border-transparent hover:border-border flex items-center gap-1.5"
             title="Duplicate Room"
             disabled={isLocked}
           >
@@ -134,7 +132,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
           </button>
           <button
             onClick={onRotate}
-            className="p-1.5 text-slate-600 hover:bg-white rounded-md transition-colors border border-transparent hover:border-slate-200 flex items-center gap-1.5"
+            className="p-1.5 text-muted hover:bg-surface rounded-md transition-colors border border-transparent hover:border-border flex items-center gap-1.5"
             title="Rotate 90°"
             disabled={isLocked}
           >
@@ -143,7 +141,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition-colors border border-transparent hover:border-red-200 flex items-center gap-1.5"
+            className="p-1.5 text-danger hover:bg-danger/10 rounded-md transition-colors border border-transparent hover:border-danger/30 flex items-center gap-1.5"
             title="Delete Room"
             disabled={isLocked}
           >
@@ -156,8 +154,8 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
       <div className="space-y-4">
         {/* Type */}
         <div>
-          <label className="text-xs text-slate-500 block mb-1">Type</label>
-          <div className="text-sm font-medium text-slate-900 bg-white border border-slate-200 rounded-md px-3 py-2 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100">
+          <label className="text-xs text-muted block mb-1">Type</label>
+          <div className="text-sm font-medium text-fg bg-surface border border-border rounded-md px-3 py-2">
             {room.type}
           </div>
         </div>
@@ -165,7 +163,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
         {/* Width / Length */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-slate-500 block mb-1">Width (ft)</label>
+            <label className="text-xs text-muted block mb-1">Width (ft)</label>
             <input
               type="number"
               min="2"
@@ -181,11 +179,11 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
               }}
               onBlur={onCommitHistory}
               disabled={isLocked}
-              className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+              className="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-500 block mb-1">Length (ft)</label>
+            <label className="text-xs text-muted block mb-1">Length (ft)</label>
             <input
               type="number"
               min="2"
@@ -201,14 +199,14 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
               }}
               onBlur={onCommitHistory}
               disabled={isLocked}
-              className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+              className="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
             />
           </div>
         </div>
 
         {/* Wall Thickness */}
         <div>
-          <label className="text-xs text-slate-500 mb-1 block">Wall Thickness</label>
+          <label className="text-xs text-muted mb-1 block">Wall Thickness</label>
           <select
             value={room.wallThickness || DEFAULT_WALL_THICKNESS_IN}
             onChange={(e) => {
@@ -216,7 +214,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
               onCommitHistory();
             }}
             disabled={isLocked}
-            className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+            className="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
           >
             <option value="4.5">4.5&quot; (Partition)</option>
             <option value="6">6&quot; (Internal)</option>
@@ -227,27 +225,23 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
         </div>
 
         {/* Cost Estimate */}
-        <div className="p-3 rounded-lg border bg-emerald-50/60 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800">
+        <div className="p-3 rounded-lg border bg-success/10 border-success/30">
           {selectedRoomIds.length === 1 ? (
             <>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
-                  Area
-                </span>
-                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                <span className="text-xs text-success font-medium">Area</span>
+                <span className="text-sm font-semibold text-success">
                   {Math.round(room.w * room.h)} sq ft
                 </span>
               </div>
               <div className="flex justify-between items-center mb-3">
-                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
-                  Est. Cost
-                </span>
-                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                <span className="text-xs text-success font-medium">Est. Cost</span>
+                <span className="text-sm font-semibold text-success">
                   {formatCurrency(getRoomCost(room))}
                 </span>
               </div>
               <div>
-                <label className="text-xs text-emerald-700 dark:text-emerald-300 block mb-1">
+                <label className="text-xs text-success block mb-1">
                   Cost / sq.ft ({DEFAULT_COST_PER_SQFT} default)
                 </label>
                 <input
@@ -262,25 +256,19 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
                   }}
                   onBlur={onCommitHistory}
                   disabled={isLocked}
-                  className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                  className="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
                 />
               </div>
             </>
           ) : (
             <>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
-                  Selected Rooms
-                </span>
-                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
-                  {selectedRoomIds.length}
-                </span>
+                <span className="text-xs text-success font-medium">Selected Rooms</span>
+                <span className="text-sm font-semibold text-success">{selectedRoomIds.length}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
-                  Combined Est. Cost
-                </span>
-                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                <span className="text-xs text-success font-medium">Combined Est. Cost</span>
+                <span className="text-sm font-semibold text-success">
                   {formatCurrency(
                     getTotalCost(plan.rooms.filter((r) => selectedRoomIds.includes(r.id)))
                   )}
@@ -291,19 +279,19 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
         </div>
 
         {/* Room Elements */}
-        <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+        <div className="pt-2 border-t border-border ">
           {room.elements && room.elements.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-slate-700 dark:text-slate-300">
+              <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-fg-2 dark:text-meta">
                 Current Elements
               </h4>
               <div className="space-y-1.5">
                 {room.elements.map((el: RoomElement, idx: number) => (
                   <div
                     key={el.id}
-                    className="flex items-center justify-between bg-slate-50 border border-slate-200 px-2 py-1.5 rounded-md dark:bg-slate-800 dark:border-slate-700"
+                    className="flex items-center justify-between bg-bg border border-border px-2 py-1.5 rounded-md  "
                   >
-                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <span className="text-xs font-medium text-fg-2 dark:text-meta">
                       {el.type} {idx + 1}
                     </span>
                     <div className="flex gap-1">
@@ -317,7 +305,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
                           });
                           onCommitHistory();
                         }}
-                        className="p-1 text-slate-400 hover:bg-white hover:text-indigo-600 rounded border border-transparent hover:border-slate-300 transition-colors"
+                        className="p-1 text-meta hover:bg-surface hover:text-accent rounded border border-transparent hover:border-border transition-colors"
                         title="Rotate 90°"
                         disabled={isLocked}
                       >
@@ -333,7 +321,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
                           });
                           onCommitHistory();
                         }}
-                        className="p-1 text-slate-400 hover:bg-white hover:text-indigo-600 rounded border border-transparent hover:border-slate-300 transition-colors"
+                        className="p-1 text-meta hover:bg-surface hover:text-accent rounded border border-transparent hover:border-border transition-colors"
                         title="Duplicate Element"
                         disabled={isLocked}
                       >
@@ -346,7 +334,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
                           });
                           onCommitHistory();
                         }}
-                        className="p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded border border-transparent hover:border-red-200 transition-colors"
+                        className="p-1 text-meta hover:bg-danger/10 hover:text-danger rounded border border-transparent hover:border-danger/30 transition-colors"
                         title="Delete"
                         disabled={isLocked}
                       >
@@ -359,7 +347,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
             </div>
           )}
 
-          <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-slate-700 dark:text-slate-300">
+          <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-fg-2 dark:text-meta">
             Add Openings
           </h4>
           <div className="grid grid-cols-2 gap-2 mb-3">
@@ -367,7 +355,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
               <button
                 key={el.type}
                 onClick={() => addRoomElement(room.id, el.type, el.w, el.h)}
-                className="text-xs py-1.5 px-2 bg-indigo-50 border border-indigo-200 rounded hover:border-indigo-400 hover:bg-indigo-100 transition-colors text-indigo-700 font-medium dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-200"
+                className="text-xs py-1.5 px-2 bg-surface-warm border border-border rounded hover:border-border-strong hover:bg-surface-warm transition-colors text-accent font-medium"
                 disabled={isLocked}
               >
                 + {el.type}
@@ -377,7 +365,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
 
           {ROOM_ELEMENTS[room.type] && ROOM_ELEMENTS[room.type].length > 0 && (
             <>
-              <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-slate-700 dark:text-slate-300">
+              <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-fg-2 dark:text-meta">
                 Add Furniture
               </h4>
               <div className="grid grid-cols-2 gap-2">
@@ -385,7 +373,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
                   <button
                     key={el.type}
                     onClick={() => addRoomElement(room.id, el.type, el.w, el.h)}
-                    className="text-xs py-1.5 px-2 bg-white border border-slate-200 rounded hover:border-indigo-300 hover:bg-indigo-50 transition-colors text-slate-600 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-300"
+                    className="text-xs py-1.5 px-2 bg-surface border border-border rounded hover:border-accent hover:bg-surface-warm transition-colors text-muted dark:text-meta"
                     disabled={isLocked}
                   >
                     + {el.type}
@@ -397,13 +385,13 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
         </div>
 
         {/* Room Organization (layer) */}
-        <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-          <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-slate-700 dark:text-slate-300">
+        <div className="pt-4 border-t border-border ">
+          <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-fg-2 dark:text-meta">
             Organization
           </h4>
           {(plan.layers || []).length > 0 && (
             <div className="mb-3">
-              <label className="text-xs mb-1 block text-slate-500 dark:text-slate-400">Layer</label>
+              <label className="text-xs mb-1 block text-muted dark:text-meta">Layer</label>
               <select
                 value={room.category || ''}
                 onChange={(e) => {
@@ -414,7 +402,7 @@ export const RoomPropertiesPanel: React.FC<RoomPropertiesPanelProps> = ({
                   onCommitHistory();
                 }}
                 disabled={isLocked}
-                className="w-full rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+                className="w-full rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg border-border text-fg"
               >
                 <option value="">No Layer</option>
                 {(plan.layers || []).map((layer) => (

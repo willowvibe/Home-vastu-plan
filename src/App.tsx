@@ -36,7 +36,7 @@ export default function App() {
   }, [user]);
 
   return (
-    <div className="h-screen flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+    <div className="h-screen flex flex-col font-sans bg-bg text-fg">
       <Header
         plan={editor.plan}
         appMode={editor.appMode}
@@ -97,7 +97,7 @@ export default function App() {
             <div
               className={`flex-1 overflow-auto p-4 md:p-8 flex-col items-start md:items-center relative ${
                 editor.mobileTab === 'canvas' ? 'flex' : 'hidden md:flex'
-              } bg-slate-100 dark:bg-slate-900`}
+              } bg-bg`}
             >
               <Toolbar
                 zoom={editor.zoom}
@@ -172,7 +172,7 @@ export default function App() {
             />
           </>
         ) : (
-          <div className="flex-1 p-6 bg-slate-100 dark:bg-slate-900 flex justify-center">
+          <div className="flex-1 p-6 bg-bg flex justify-center">
             <div className="w-full max-w-4xl">
               <ImageEditor />
             </div>
@@ -252,14 +252,14 @@ export default function App() {
       />
 
       {/* Print Modal - hidden on screen, visible when printing */}
-      <div className="hidden print:block fixed inset-0 bg-white p-8">
+      <div className="hidden print:block fixed inset-0 bg-surface-100 p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">VastuPlan Floor Plan</h1>
-          <p className="text-sm text-slate-600 mb-8">
+          <p className="text-sm text-muted mb-8">
             {formatFloorLabel(editor.currentFloor, editor.plan.floorNames)} |{' '}
             {new Date().toLocaleDateString()} | Generated on {new Date().toLocaleTimeString()}
           </p>
-          <div className="border border-slate-200 p-4">
+          <div className="border border-border p-4">
             <Canvas
               plan={editor.plan}
               currentFloor={editor.currentFloor}
@@ -276,7 +276,7 @@ export default function App() {
               layers={editor.plan.layers}
             />
           </div>
-          <div className="mt-8 text-center text-sm text-slate-500">
+          <div className="mt-8 text-center text-sm text-muted">
             <p>VastuScore: {editor.vastuScore}/100</p>
             <p>
               Total Area: {editor.totalArea} sq ft | Buildable: {editor.buildableArea} sq ft |

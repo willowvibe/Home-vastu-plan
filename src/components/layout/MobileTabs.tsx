@@ -13,7 +13,7 @@ export const MobileTabs: React.FC<MobileTabsProps> = ({ mobileTab, setMobileTab 
   ];
 
   return (
-    <div className="md:hidden flex border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
+    <div className="md:hidden flex border-b border-border  bg-surface shrink-0">
       {tabs.map((tab) => {
         const active = mobileTab === tab.key;
         return (
@@ -22,8 +22,8 @@ export const MobileTabs: React.FC<MobileTabsProps> = ({ mobileTab, setMobileTab 
             onClick={() => setMobileTab(tab.key)}
             className={`flex-1 py-3 text-sm font-medium ${
               active
-                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                ? 'text-accent border-b-2 border-accent'
+                : 'text-muted hover:text-fg-2 dark:text-meta '
             }`}
           >
             {tab.label}

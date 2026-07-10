@@ -38,7 +38,7 @@ export const VastuTour: React.FC<VastuTourProps> = ({ plan, pixelsPerFoot, onClo
       {/* Canvas-relative highlight: scrolls with the plan. */}
       {active && (
         <div
-          className="absolute border-2 border-emerald-400 bg-emerald-400/20 rounded transition-all duration-300 z-40 pointer-events-none"
+          className="absolute border-2 border-success bg-success/20 rounded transition-all duration-300 z-40 pointer-events-none"
           style={{
             left: active.left,
             top: active.top,
@@ -57,14 +57,12 @@ export const VastuTour: React.FC<VastuTourProps> = ({ plan, pixelsPerFoot, onClo
         aria-modal="true"
         role="dialog"
       >
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl p-6 max-w-md w-full pointer-events-auto">
+        <div className="bg-surface-100 dark:bg-surface border border-border rounded-xl shadow-xl p-6 max-w-md w-full pointer-events-auto">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {active?.name ?? ''}
-            </h3>
+            <h3 className="text-lg font-semibold text-fg">{active?.name ?? ''}</h3>
             <button
               onClick={onClose}
-              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400"
+              className="p-1 rounded hover:bg-surface text-muted"
               aria-label="Close tour"
               data-testid="vastu-tour-close"
             >
@@ -73,14 +71,14 @@ export const VastuTour: React.FC<VastuTourProps> = ({ plan, pixelsPerFoot, onClo
           </div>
 
           {active && (
-            <div className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+            <div className="space-y-2 text-sm text-fg-2">
               <p>
                 <span className="font-medium">Element:</span> {active.element}
               </p>
               <p>
                 <span className="font-medium">Ideal for:</span> {active.idealFor}
               </p>
-              <p className="italic text-slate-600 dark:text-slate-400">{active.tip}</p>
+              <p className="italic text-muted">{active.tip}</p>
             </div>
           )}
 
@@ -88,18 +86,18 @@ export const VastuTour: React.FC<VastuTourProps> = ({ plan, pixelsPerFoot, onClo
             <button
               onClick={() => setStep((s) => Math.max(0, s - 1))}
               disabled={step === 0}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 text-sm"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border hover:bg-surface disabled:opacity-50 text-sm"
               data-testid="vastu-tour-prev"
             >
               <ChevronLeft className="w-4 h-4" /> Prev
             </button>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
+            <span className="text-xs text-meta">
               {step + 1} / {cells.length}
             </span>
             {step < cells.length - 1 ? (
               <button
                 onClick={() => setStep((s) => s + 1)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-success hover:bg-success/90 text-accent-on text-sm"
                 data-testid="vastu-tour-next"
               >
                 Next <ChevronRight className="w-4 h-4" />
@@ -107,7 +105,7 @@ export const VastuTour: React.FC<VastuTourProps> = ({ plan, pixelsPerFoot, onClo
             ) : (
               <button
                 onClick={onClose}
-                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm"
+                className="px-3 py-1.5 rounded-lg bg-success hover:bg-success/90 text-accent-on text-sm"
                 data-testid="vastu-tour-finish"
               >
                 Finish

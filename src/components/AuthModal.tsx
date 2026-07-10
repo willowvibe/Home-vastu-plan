@@ -147,7 +147,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-fg/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
       <div
         ref={dialogRef}
         role="dialog"
@@ -155,15 +155,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
         aria-labelledby={titleId}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden outline-none transition-colors"
+        className="bg-bg dark:bg-surface rounded-2xl shadow-elev-raised w-full max-w-md overflow-hidden outline-none transition-colors"
       >
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h2 id={titleId} className="text-lg font-bold text-slate-900 dark:text-white">
+        <div className="px-6 py-4 border-b border-border-soft dark:border-border flex items-center justify-between">
+          <h2 id={titleId} className="text-lg font-bold text-fg dark:text-accent-on">
             {MODE_LABELS[mode]}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-1.5 text-meta hover:text-muted dark:hover:text-meta hover:bg-surface-warm dark:hover:bg-surface rounded-lg transition-colors"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -172,7 +172,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {mode !== 'reset' && (
-            <div className="flex p-1 bg-slate-100 dark:bg-slate-700 rounded-lg">
+            <div className="flex p-1 bg-surface-warm dark:bg-surface rounded-lg">
               {(['signin', 'signup'] as AuthMode[]).map((m) => (
                 <button
                   key={m}
@@ -181,8 +181,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
                   onClick={() => setModeAndClear(m)}
                   className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
                     mode === m
-                      ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-slate-100'
+                      ? 'bg-bg dark:bg-surface text-fg dark:text-accent-on shadow-elev-ring'
+                      : 'text-muted dark:text-meta hover:text-fg-2 dark:hover:text-fg-2'
                   }`}
                 >
                   {m === 'signin' ? 'Sign in' : 'Sign up'}
@@ -194,19 +194,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
           <div className="space-y-2">
             <label
               htmlFor="auth-email"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+              className="block text-sm font-medium text-fg-2 dark:text-meta"
             >
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-meta" />
               <input
                 id="auth-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
+                className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-bg dark:bg-surface text-fg dark:text-accent-on placeholder:text-meta focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-colors"
                 required
               />
             </div>
@@ -216,19 +216,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
             <div className="space-y-2">
               <label
                 htmlFor="auth-password"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+                className="block text-sm font-medium text-fg-2 dark:text-meta"
               >
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-meta" />
                 <input
                   id="auth-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-bg dark:bg-surface text-fg dark:text-accent-on placeholder:text-meta focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-colors"
                   required
                   minLength={6}
                 />
@@ -240,19 +240,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
             <div className="space-y-2">
               <label
                 htmlFor="auth-confirm-password"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+                className="block text-sm font-medium text-fg-2 dark:text-meta"
               >
                 Confirm password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-meta" />
                 <input
                   id="auth-confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-bg dark:bg-surface text-fg dark:text-accent-on placeholder:text-meta focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-colors"
                   required
                   minLength={6}
                 />
@@ -261,7 +261,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
           )}
 
           {fieldError && (
-            <div className="flex items-start gap-2 text-sm text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 p-3 rounded-lg">
+            <div className="flex items-start gap-2 text-sm text-danger bg-danger/10 dark:bg-danger/20 p-3 rounded-lg">
               <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
               {fieldError}
             </div>
@@ -271,7 +271,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
             type="submit"
             data-testid="auth-submit"
             disabled={isSubmitting || authLoading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg text-sm font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-accent hover:bg-accent-hover disabled:bg-accent text-accent-on rounded-lg text-sm font-medium transition-colors"
           >
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
             {mode === 'reset'
@@ -286,7 +286,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
               <button
                 type="button"
                 onClick={() => setModeAndClear('reset')}
-                className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="text-accent hover:underline"
               >
                 Forgot password?
               </button>
@@ -294,7 +294,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
               <button
                 type="button"
                 onClick={() => setModeAndClear('signin')}
-                className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="text-accent hover:underline"
               >
                 Back to sign in
               </button>
@@ -306,7 +306,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose, initialMode
               <button
                 type="button"
                 onClick={() => setModeAndClear('signin')}
-                className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                className="text-muted dark:text-meta hover:text-fg-2 dark:hover:text-meta"
               >
                 Already have an account? Sign in
               </button>
