@@ -56,4 +56,53 @@ In the Vercel project dashboard:
 
 ## Domain / DNS
 
+## Razorpay / Pro Export Pack configuration
+
+M-2 added server-side Razorpay payments. The UI will warn "Payments are not configured" until these steps are completed.
+
+### 1. Razorpay account keys
+
+1. In Razorpay Dashboard, copy the **Key ID** and **Key Secret** for the production mode (`rzp_live_...`).
+2. Add them to the Railway (or hosting) environment for the server:
+   - `RAZORPAY_KEY_ID`
+   - `RAZORPAY_KEY_SECRET`
+   - `RAZORPAY_WEBHOOK_SECRET` (generate a webhook secret in the Razorpay dashboard)
+3. Add `SUPABASE_JWT_SECRET` to the server environment (from **Supabase → Project Settings → API → JWT Settings**).
+
+### 2. Razorpay webhook
+
+1. In Razorpay Dashboard → Settings → Webhooks, add a webhook pointing to:
+   - `https://<your-api-domain>/api/payments/webhook`
+2. Enable these events:
+   - `payment.captured`
+   - `order.paid`
+3. Paste the same `RAZORPAY_WEBHOOK_SECRET` into the server environment.
+
+### 3. Pricing / duration
+
+The Pro Export Pack defaults to ₹499 for 365 days. Override in the server environment if needed:
+
+- `PRO_EXPORT_PRICE_PAISE=49900` (amount in paise; 49900 = ₹499)
+- `PRO_EXPORT_CURRENCY=INR`
+- `PRO_EXPORT_TIER=pro_export`
+- `PRO_EXPORT_DURATION_DAYS=365`
+
+### 4. Database schema
+
+Run the updated `server/db/001_public_schema.sql` in the Supabase SQL Editor. It creates:
+
+- `public.payments` — order/payment records.
+- `public.webhook_events` — Razorpay webhook idempotency log.
+- Updated `public.user_entitlements` policy to allow server upserts.
+
+### 5. Test the live flow
+
+1. Sign in on the deployed app.
+2. Open **Presentation Export** (`/app`).
+3. Click **Upgrade to Pro for ₹499**.
+4. Complete a Razorpay test-card payment.
+5. Verify the export no longer applies the watermark.
+
+## Domain / DNS
+
 If a custom domain is added later, update the Supabase **Site URL** and **Redirect URLs** to match the custom domain and redeploy.
