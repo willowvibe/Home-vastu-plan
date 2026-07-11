@@ -574,17 +574,17 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 
 ### 6.1 v0.2 — SHIP next 60–90 days (gates the 90-day hypothesis test)
 
-| ID  | Title                                             | Effort   | Status      | Owner                                                            |
-| --- | ------------------------------------------------- | -------- | ----------- | ---------------------------------------------------------------- |
-| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90.                                                          |
-| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI proxy on Railway.                                     |
-| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved | PR #97. One-time ₹499 Pro Export Pack.                           |
-| M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95.                                                          |
-| M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved | PR #98. Comment toolbar + author persistence.                    |
-| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved | PR #98. IndexedDB plan store + autosave/offline restore.         |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | ✅ resolved | PR #99. 16 `/zones/:slug` pages, `/zones` pillar, landing links. |
-| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | —                                                                |
-| M-8 | Vastu matrix source citation + methodology page   | S        | ✅ resolved | PR #95.                                                          |
+| ID  | Title                                             | Effort   | Status       | Owner                                                            |
+| --- | ------------------------------------------------- | -------- | ------------ | ---------------------------------------------------------------- |
+| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved  | PR #90.                                                          |
+| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved  | PR #91. AI proxy on Railway.                                     |
+| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved  | PR #97. One-time ₹499 Pro Export Pack.                           |
+| M-3 | QR-code share export                              | XS       | ✅ resolved  | PR #95.                                                          |
+| M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved  | PR #98. Comment toolbar + author persistence.                    |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved  | PR #98. IndexedDB plan store + autosave/offline restore.         |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | ✅ resolved  | PR #99. 16 `/zones/:slug` pages, `/zones` pillar, landing links. |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🟡 In review | Branch `feat/m-7-mobile-ux-polish` pushed; manual PR pending.    |
+| M-8 | Vastu matrix source citation + methodology page   | S        | ✅ resolved  | PR #95.                                                          |
 
 ### 6.2 v0.3 — SHIP 90–180 days
 
@@ -622,7 +622,7 @@ See [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md) §5.5 for the fu
 | **P2 — Refactor**        | S-1 and S-4 shipped        | ✅     |
 | **P3 — Polish**          | all G / Q items resolved   | ✅     |
 
-**Where to start next:** The §1–§5 bug backlog is empty. M-1 through M-6 and M-8 are resolved. Begin with **M-7** (mobile UX polish: touch targets, property panel). See [`tasks.md`](../../tasks.md) for the day-to-day tracker.
+**Where to start next:** The §1–§5 bug backlog is empty. M-1 through M-8 are in review or resolved. **M-7** is awaiting manual PR/merge; after it lands the v0.2 SHIP backlog is complete. See [`tasks.md`](../../tasks.md) for the day-to-day tracker.
 
 ---
 

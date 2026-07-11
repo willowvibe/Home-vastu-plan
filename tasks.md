@@ -23,16 +23,16 @@
 
 These gate the 90-day hypothesis test. Source: [`docs/vastuplan-market-dig.md`](./docs/vastuplan-market-dig.md) §5.1.
 
-| ID  | Feature                                               | Owner | Effort | Status      | Notes / files                                                                                      |
-| --- | ----------------------------------------------------- | ----- | ------ | ----------- | -------------------------------------------------------------------------------------------------- |
-| M-1 | **Vector PDF export + watermark gate**                | —     | M      | ✅ resolved | Core ₹499 deliverable; replaces free screenshots. Reuse `jsPDF` + `html-to-image`.                 |
-| M-2 | **Razorpay / Instamojo payment integration**          | —     | S      | ✅ resolved | Blocks monetization hypothesis. One-time ₹499 Pro Export Pack.                                     |
-| M-3 | **QR-code share export**                              | —     | XS     | ✅ resolved | WhatsApp/contractor on-ramp. Pure front-end QR generation.                                         |
-| M-4 | **Wire up `?mode=comment` annotation UI**             | —     | S      | ✅ resolved | Unique viral loop. The back-end link already supports `comment` mode; polish the drop-pin UX.      |
-| M-5 | **PWA basics: manifest + service worker + IndexedDB** | —     | S      | ✅ resolved | Offline use at construction sites. Service worker exists; extend to plan persistence in IndexedDB. |
-| M-6 | **SEO content: 16 zone pages + pillar + landing**     | —     | L      | ✅ resolved | 16 `/zones/:slug` pages + `/zones` pillar + landing links. Primary acquisition channel.            |
-| M-7 | **Mobile UX polish (touch targets, property panel)**  | —     | S      | 🔲 pending  | Persona A is mobile-web-first.                                                                     |
-| M-8 | **Vastu matrix source citation + methodology page**   | —     | S      | ✅ resolved | Trust-builder vs. AI black-box competitors.                                                        |
+| ID  | Feature                                               | Owner | Effort | Status       | Notes / files                                                                                       |
+| --- | ----------------------------------------------------- | ----- | ------ | ------------ | --------------------------------------------------------------------------------------------------- |
+| M-1 | **Vector PDF export + watermark gate**                | —     | M      | ✅ resolved  | Core ₹499 deliverable; replaces free screenshots. Reuse `jsPDF` + `html-to-image`.                  |
+| M-2 | **Razorpay / Instamojo payment integration**          | —     | S      | ✅ resolved  | Blocks monetization hypothesis. One-time ₹499 Pro Export Pack.                                      |
+| M-3 | **QR-code share export**                              | —     | XS     | ✅ resolved  | WhatsApp/contractor on-ramp. Pure front-end QR generation.                                          |
+| M-4 | **Wire up `?mode=comment` annotation UI**             | —     | S      | ✅ resolved  | Unique viral loop. The back-end link already supports `comment` mode; polish the drop-pin UX.       |
+| M-5 | **PWA basics: manifest + service worker + IndexedDB** | —     | S      | ✅ resolved  | Offline use at construction sites. Service worker exists; extend to plan persistence in IndexedDB.  |
+| M-6 | **SEO content: 16 zone pages + pillar + landing**     | —     | L      | ✅ resolved  | 16 `/zones/:slug` pages + `/zones` pillar + landing links. Primary acquisition channel.             |
+| M-7 | **Mobile UX polish (touch targets, property panel)**  | —     | S      | 🟡 In review | Branch `feat/m-7-mobile-ux-polish` pushed; manual PR pending (PAT cannot open PRs in `willowvibe`). |
+| M-8 | **Vastu matrix source citation + methodology page**   | —     | S      | ✅ resolved  | Trust-builder vs. AI black-box competitors.                                                         |
 
 ---
 

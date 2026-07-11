@@ -394,20 +394,20 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 
 > Source of truth: [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md). The CODE_REVIEW.md §1–§5 bug backlog is empty; new work is now feature delivery for the 90-day hypothesis test.
 >
-> Last updated: 2026-07-10.
+> Last updated: 2026-07-11 (M-7 in review).
 
 ### SHIP — v0.2 (next 60–90 days)
 
-| ID  | Title                                             | Effort   | Status      | Notes                                                                     |
-| --- | ------------------------------------------------- | -------- | ----------- | ------------------------------------------------------------------------- |
-| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90. Core ₹499 Pro Export deliverable.                                 |
-| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI calls proxied through server/ on Railway. Zero keys in client. |
-| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved | PR #97. One-time ₹499 Pro Export Pack.                                    |
-| M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95. WhatsApp/contractor on-ramp.                                      |
-| M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved | PR #98. `CommentModeToolbar`, reviewer name persistence, add-pin UX.      |
-| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved | PR #98. IndexedDB plan store in SW, client API, autosave/offline restore. |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | ✅ resolved | PR #99. 16 `/zones/:slug` pages + `/zones` pillar + landing links.        |
-| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | Persona A is mobile-web-first.                                            |
+| ID  | Title                                             | Effort   | Status       | Notes                                                                     |
+| --- | ------------------------------------------------- | -------- | ------------ | ------------------------------------------------------------------------- |
+| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved  | PR #90. Core ₹499 Pro Export deliverable.                                 |
+| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved  | PR #91. AI calls proxied through server/ on Railway. Zero keys in client. |
+| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved  | PR #97. One-time ₹499 Pro Export Pack.                                    |
+| M-3 | QR-code share export                              | XS       | ✅ resolved  | PR #95. WhatsApp/contractor on-ramp.                                      |
+| M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved  | PR #98. `CommentModeToolbar`, reviewer name persistence, add-pin UX.      |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved  | PR #98. IndexedDB plan store in SW, client API, autosave/offline restore. |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | ✅ resolved  | PR #99. 16 `/zones/:slug` pages + `/zones` pillar + landing links.        |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🟡 In review | Branch `feat/m-7-mobile-ux-polish` pushed; manual PR pending.             |
 
 ### SHIP — v0.3 (90–180 days)
 
