@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { trackEvent, EVENTS } from '../services/analytics';
+import { getAllZonePages } from '../constants/zonePages';
 import './landing.css';
 
 export function Landing() {
@@ -545,6 +546,54 @@ export function Landing() {
           </div>
         </section>
 
+        <section className="section" id="zones" data-od-id="zones">
+          <div className="container">
+            <div className="section-header center">
+              <p className="eyebrow">Learn Vastu</p>
+              <h2>Explore Vastu zone guides.</h2>
+              <p className="lead" style={{ margin: '16px auto 32px' }}>
+                See which directions are ideal for kitchen, master bedroom, pooja room, and more.
+              </p>
+            </div>
+            <div className="grid-3">
+              {[
+                'north-east-kitchen',
+                'south-west-master-bedroom',
+                'south-east-kitchen',
+                'north-west-bathroom',
+                'north-east-pooja-room',
+                'east-pooja-room',
+              ]
+                .map((slug) => getAllZonePages().find((p) => p.slug === slug))
+                .filter(Boolean)
+                .map((page) => (
+                  <Link
+                    key={page!.slug}
+                    to={`/zones/${page!.slug}`}
+                    className="card zone-guide-card"
+                    onClick={() =>
+                      trackEvent(EVENTS.ZONE_PILLAR_CLICK, { props: { slug: page!.slug } })
+                    }
+                  >
+                    <h3>
+                      {page!.roomType} in the {page!.zoneName}
+                    </h3>
+                    <p>{page!.description}</p>
+                  </Link>
+                ))}
+            </div>
+            <div className="section-header center" style={{ marginTop: '32px' }}>
+              <Link
+                to="/zones"
+                className="btn btn-secondary"
+                onClick={() => trackEvent(EVENTS.ZONE_PILLAR_CLICK, { props: { location: 'cta' } })}
+              >
+                View all Vastu zones →
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <section className="section" id="signup" data-od-id="signup">
           <div className="container">
             <div className="section-header center">
@@ -598,6 +647,9 @@ export function Landing() {
         <div className="container row-between">
           <span>© 2026 VastuPlan · Built for Indian homes</span>
           <div className="flex items-center gap-6">
+            <Link className="meta hover:text-fg-2 transition-colors" to="/zones">
+              Vastu zones
+            </Link>
             <Link className="meta hover:text-fg-2 transition-colors" to="/methodology">
               Methodology
             </Link>

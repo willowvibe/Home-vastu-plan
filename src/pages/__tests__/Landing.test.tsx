@@ -19,6 +19,7 @@ vi.mock('../../services/analytics', () => ({
     LANDING_SIGNUP_SUBMIT: 'landing_signup_submit',
     LANDING_MAGIC_LINK_SENT: 'landing_magic_link_sent',
     LANDING_GOOGLE_CLICK: 'landing_google_click',
+    ZONE_PILLAR_CLICK: 'zone_pillar_click',
   },
 }));
 
@@ -110,5 +111,14 @@ describe('Landing', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
     expect(authState.signInWithGoogle).toHaveBeenCalled();
     expect(analytics.trackEvent).toHaveBeenCalledWith('landing_google_click');
+  });
+
+  it('links to the Vastu zones pillar and featured zone pages', () => {
+    renderLanding();
+    expect(screen.getByRole('link', { name: /View all Vastu zones/i })).toHaveAttribute(
+      'href',
+      '/zones'
+    );
+    expect(screen.getByRole('link', { name: /Kitchen in the North-East/i })).toBeInTheDocument();
   });
 });
