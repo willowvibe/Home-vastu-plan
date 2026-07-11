@@ -31,6 +31,16 @@ const { isWatermarkRequired } = vi.hoisted(() => ({
 
 vi.mock('../services/entitlements', () => ({
   isWatermarkRequired,
+  refreshProExportEntitlement: vi.fn(),
+}));
+
+vi.mock('../contexts/AuthContext', () => ({
+  useAuth: () => ({ session: null, isAuthenticated: false, user: null }),
+}));
+
+vi.mock('../services/razorpayCheckout', () => ({
+  loadRazorpayScript: vi.fn(),
+  openRazorpayCheckout: vi.fn(),
 }));
 
 const pdfSave = vi.fn();

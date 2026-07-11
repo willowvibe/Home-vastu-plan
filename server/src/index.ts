@@ -24,6 +24,11 @@ const io = new Server(httpServer, {
 });
 
 app.use(cors());
+
+// Razorpay webhooks need the raw request body for signature verification.
+// Mount this before the global JSON parser so /api/payments/webhook receives a Buffer.
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 
 // API routes

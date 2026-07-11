@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
-import { authenticate, AuthRequest } from '../middleware/auth.js';
+import { requireSupabaseAuth, SupabaseAuthRequest } from '../middleware/supabaseAuth.js';
 import { query } from '../db/connection.js';
 import { analyzeWithGemini, editImageWithGemini } from './gemini.js';
 import { analyzeWithOllama } from './ollama.js';
@@ -11,8 +11,8 @@ const router = Router();
 // Multer for multipart image uploads (edit-image endpoint).
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
-// All AI routes require authentication.
-router.use(authenticate as any);
+// All AI routes require a valid Supabase access token.
+router.use(requireSupabaseAuth as any);
 
 const PROVIDER = (process.env.AI_PROVIDER || 'gemini').toLowerCase();
 
@@ -22,7 +22,7 @@ const PROVIDER = (process.env.AI_PROVIDER || 'gemini').toLowerCase();
  * Returns: { text: string }
  */
 router.post('/analyze', async (req: Request, res: Response) => {
-  const userId = (req as AuthRequest).user?.id;
+  const userId = (req as SupabaseAuthRequest).user?.id;
   if (!userId) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
@@ -107,7 +107,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
  * Returns: { imageUrl: string }
  */
 router.post('/edit-image', upload.single('image'), async (req: Request, res: Response) => {
-  const userId = (req as AuthRequest).user?.id;
+  const userId = (req as SupabaseAuthRequest).user?.id;
   if (!userId) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
