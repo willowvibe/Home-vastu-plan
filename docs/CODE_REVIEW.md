@@ -582,7 +582,7 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 | M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95.                                                  |
 | M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved | PR #98. Comment toolbar + author persistence.            |
 | M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved | PR #98. IndexedDB plan store + autosave/offline restore. |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | 🔲 pending  | —                                                        |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | ✅ resolved | PR #99. 16 `/zones/:slug` pages, `/zones` pillar, landing links.          |
 | M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | —                                                        |
 | M-8 | Vastu matrix source citation + methodology page   | S        | ✅ resolved | PR #95.                                                  |
 
@@ -622,7 +622,7 @@ See [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md) §5.5 for the fu
 | **P2 — Refactor**        | S-1 and S-4 shipped        | ✅     |
 | **P3 — Polish**          | all G / Q items resolved   | ✅     |
 
-**Where to start next:** The §1–§5 bug backlog is empty. M-1 through M-5 and M-8 are resolved (M-4/M-5 merged via PR #98). Begin with **M-6** (SEO content: 16 zone pages + pillar + landing) or **M-7** (mobile UX polish). See [`tasks.md`](../../tasks.md) for the day-to-day tracker.
+**Where to start next:** The §1–§5 bug backlog is empty. M-1 through M-6 and M-8 are resolved. Begin with **M-7** (mobile UX polish: touch targets, property panel). See [`tasks.md`](../../tasks.md) for the day-to-day tracker.
 
 ---
 

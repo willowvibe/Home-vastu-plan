@@ -406,8 +406,8 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 | M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95. WhatsApp/contractor on-ramp.                                      |
 | M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved | PR #98. `CommentModeToolbar`, reviewer name persistence, add-pin UX.      |
 | M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved | PR #98. IndexedDB plan store in SW, client API, autosave/offline restore. |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | 🔲 pending  | Primary acquisition; urgent before AI tools own SERP.                     |
-| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | Persona A is mobile-web-first.                                            |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | ✅ resolved | PR #99. 16 `/zones/:slug` pages + `/zones` pillar + landing links.          |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | Persona A is mobile-web-first.                                              |
 
 ### SHIP — v0.3 (90–180 days)
 
