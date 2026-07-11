@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import App from './App.tsx';
 import { Landing } from './pages/Landing';
 import { Methodology } from './pages/Methodology';
+import { ZonesPillar } from './pages/ZonesPillar';
+import { ZonePage } from './pages/ZonePage';
 import { AuthCallback } from './pages/AuthCallback';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -42,6 +44,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/" element={<Landing />} />
                 <Route path="/app" element={<App />} />
                 <Route path="/methodology" element={<Methodology />} />
+                <Route path="/zones" element={<ZonesPillar />} />
+                <Route path="/zones/:slug" element={<ZonePage />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

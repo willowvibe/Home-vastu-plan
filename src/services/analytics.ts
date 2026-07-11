@@ -128,6 +128,9 @@ export const EVENTS = {
   SHARE_COMMENT_MODE: 'share_comment_mode',
   SHARE_QR_OPENED: 'share_qr_opened',
 
+  // SEO / content events
+  ZONE_PILLAR_CLICK: 'zone_pillar_click',
+
   // Comment events
   COMMENT_ADDED: 'comment_added',
   COMMENT_DELETED: 'comment_deleted',
