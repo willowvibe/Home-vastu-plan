@@ -570,21 +570,21 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 
 ## 6. Triage recommendations
 
-> **State as of 2026-07-10:** The historical bug/refactor backlog (§1–§5) is fully resolved. Supabase Auth Phase 1 merged via PR #89. The active roadmap is now the **v0.2 / v0.3 market-driven feature backlog** sourced from [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md). CODE_REVIEW.md keeps the historical §1–§5 entries for traceability; the living "what's next" list is below.
+> **State as of 2026-07-11:** The historical bug/refactor backlog (§1–§5) is fully resolved. M-1, M-2, M-3, and M-8 are now resolved. Supabase Auth Phase 1 merged via PR #89. The active roadmap is now the **v0.2 / v0.3 market-driven feature backlog** sourced from [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md). CODE_REVIEW.md keeps the historical §1–§5 entries for traceability; the living "what's next" list is below.
 
 ### 6.1 v0.2 — SHIP next 60–90 days (gates the 90-day hypothesis test)
 
-| ID  | Title                                             | Effort   | Status      | Owner                        |
-| --- | ------------------------------------------------- | -------- | ----------- | ---------------------------- |
-| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90.                      |
-| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI proxy on Railway. |
-| M-2 | Razorpay / Instamojo payment integration          | S        | 🔲 pending  | —                            |
-| M-3 | QR-code share export                              | XS       | 🔲 pending  | —                            |
-| M-4 | Wire up `?mode=comment` annotation UI             | S        | 🔲 pending  | —                            |
-| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | 🔲 pending  | —                            |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | 🔲 pending  | —                            |
-| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | —                            |
-| M-8 | Vastu matrix source citation + methodology page   | S        | 🔲 pending  | —                            |
+| ID  | Title                                             | Effort   | Status      | Owner                                  |
+| --- | ------------------------------------------------- | -------- | ----------- | -------------------------------------- |
+| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90.                                |
+| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI proxy on Railway.           |
+| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved | PR #97. One-time ₹499 Pro Export Pack. |
+| M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95.                                |
+| M-4 | Wire up `?mode=comment` annotation UI             | S        | 🔲 pending  | —                                      |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | 🔲 pending  | —                                      |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | 🔲 pending  | —                                      |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | —                                      |
+| M-8 | Vastu matrix source citation + methodology page   | S        | ✅ resolved | PR #95.                                |
 
 ### 6.2 v0.3 — SHIP 90–180 days
 
@@ -622,7 +622,7 @@ See [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md) §5.5 for the fu
 | **P2 — Refactor**        | S-1 and S-4 shipped        | ✅     |
 | **P3 — Polish**          | all G / Q items resolved   | ✅     |
 
-**Where to start next:** The §1–§5 bug backlog is empty. Begin with **M-1** (vector PDF + watermark gate) and **M-2** (payments) — they unblock the ₹499 Pro Export hypothesis. See [`tasks.md`](../../tasks.md) for the day-to-day tracker.
+**Where to start next:** The §1–§5 bug backlog is empty. M-1, M-2, M-3, and M-8 are resolved. Begin with **M-4** (`?mode=comment` annotation viral loop) or **M-5** (PWA offline plan persistence). See [`tasks.md`](../../tasks.md) for the day-to-day tracker.
 
 ---
 

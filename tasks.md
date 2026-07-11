@@ -23,16 +23,16 @@
 
 These gate the 90-day hypothesis test. Source: [`docs/vastuplan-market-dig.md`](./docs/vastuplan-market-dig.md) §5.1.
 
-| ID  | Feature                                               | Owner | Effort | Status     | Notes / files                                                                                      |
-| --- | ----------------------------------------------------- | ----- | ------ | ---------- | -------------------------------------------------------------------------------------------------- |
-| M-1 | **Vector PDF export + watermark gate**                | —     | M      | 🔲 pending | Core ₹499 deliverable; replaces free screenshots. Reuse `jsPDF` + `html-to-image`.                 |
-| M-2 | **Razorpay / Instamojo payment integration**          | —     | S      | 🔲 pending | Blocks monetization hypothesis. One-time ₹499 Pro Export Pack.                                     |
-| M-3 | **QR-code share export**                              | —     | XS     | 🔲 pending | WhatsApp/contractor on-ramp. Pure front-end QR generation.                                         |
-| M-4 | **Wire up `?mode=comment` annotation UI**             | —     | S      | 🔲 pending | Unique viral loop. The back-end link already supports `comment` mode; polish the drop-pin UX.      |
-| M-5 | **PWA basics: manifest + service worker + IndexedDB** | —     | S      | 🔲 pending | Offline use at construction sites. Service worker exists; extend to plan persistence in IndexedDB. |
-| M-6 | **SEO content: 16 zone pages + pillar + landing**     | —     | L      | 🔲 pending | Primary acquisition channel; must ship before AI tools own the SERP.                               |
-| M-7 | **Mobile UX polish (touch targets, property panel)**  | —     | S      | 🔲 pending | Persona A is mobile-web-first.                                                                     |
-| M-8 | **Vastu matrix source citation + methodology page**   | —     | S      | 🔲 pending | Trust-builder vs. AI black-box competitors.                                                        |
+| ID  | Feature                                               | Owner | Effort | Status         | Notes / files                                                                                      |
+| --- | ----------------------------------------------------- | ----- | ------ | -------------- | -------------------------------------------------------------------------------------------------- |
+| M-1 | **Vector PDF export + watermark gate**                | —     | M      | ✅ resolved    | Core ₹499 deliverable; replaces free screenshots. Reuse `jsPDF` + `html-to-image`.                 |
+| M-2 | **Razorpay / Instamojo payment integration**          | —     | S      | ✅ resolved    | Blocks monetization hypothesis. One-time ₹499 Pro Export Pack.                                     |
+| M-3 | **QR-code share export**                              | —     | XS     | ✅ resolved    | WhatsApp/contractor on-ramp. Pure front-end QR generation.                                         |
+| M-4 | **Wire up `?mode=comment` annotation UI**             | —     | S      | 🟡 in progress | Unique viral loop. The back-end link already supports `comment` mode; polish the drop-pin UX.      |
+| M-5 | **PWA basics: manifest + service worker + IndexedDB** | —     | S      | 🔲 pending     | Offline use at construction sites. Service worker exists; extend to plan persistence in IndexedDB. |
+| M-6 | **SEO content: 16 zone pages + pillar + landing**     | —     | L      | 🔲 pending     | Primary acquisition channel; must ship before AI tools own the SERP.                               |
+| M-7 | **Mobile UX polish (touch targets, property panel)**  | —     | S      | 🔲 pending     | Persona A is mobile-web-first.                                                                     |
+| M-8 | **Vastu matrix source citation + methodology page**   | —     | S      | ✅ resolved    | Trust-builder vs. AI black-box competitors.                                                        |
 
 ---
 
@@ -98,9 +98,13 @@ Source: [`docs/vastuplan-market-dig.md`](./docs/vastuplan-market-dig.md) §5.3�
 
 ## ✅ Recently resolved
 
-| ID             | Title                                                                                                                                 | PR / commit        | Notes                                                                                                     |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------- |
-| M-10 (Phase 1) | Supabase Auth — email/password sign-up, sign-in, password reset, sign-out, `AuthContext`, auth modal, Sentry/Plausible identity hooks | PR #89 (`ba149ef`) | Optional auth: UI falls back to anonymous-only when env vars are missing. Cloud sync deferred to Phase 2. |
+| ID             | Title                                                                                                                                 | PR / commit        | Notes                                                                                                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M-1            | Vector PDF export + watermark gate                                                                                                    | PR #90 (`5e3a1c0`) | Entitlements service, vector PDF library (data/render split), `PresentationExport` raster→vector swap, watermark gate. Core ₹499 Pro Export deliverable.                        |
+| M-2            | Razorpay / Instamojo payment integration                                                                                              | PR #97 (`f43decd`) | Supabase JWT auth middleware, Razorpay payments module, checkout/verify/webhook endpoints, client entitlement sync, upgrade CTA in `PresentationExport`.                        |
+| M-3            | QR-code share export                                                                                                                  | PR #95 (`1d06b50`) | `QrShareModal` renders current share URL as an SVG QR code with Copy Link + Download QR SVG actions; wired into `Toolbar` and `usePlanEditor`; tracked under `SHARE_QR_OPENED`. |
+| M-8            | Vastu matrix source citation + methodology page                                                                                       | PR #95 (`1d06b50`) | New `/methodology` route renders live `IDEAL_ZONES` matrix and `getVastuZoneInfo` with source citations and direction-by-room table. Footer link added on `Landing`.            |
+| M-10 (Phase 1) | Supabase Auth — email/password sign-up, sign-in, password reset, sign-out, `AuthContext`, auth modal, Sentry/Plausible identity hooks | PR #89 (`ba149ef`) | Optional auth: UI falls back to anonymous-only when env vars are missing. Cloud sync deferred to Phase 2.                                                                       |
 
 ---
 
