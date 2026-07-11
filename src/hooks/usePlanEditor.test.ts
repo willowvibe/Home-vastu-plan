@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { usePlanEditor } from './usePlanEditor';
 
 // ---------------------------------------------------------------------------
@@ -70,6 +70,14 @@ vi.mock('../services/vastu', () => ({
   calculateOverallVastuScore: vi.fn(() => 72),
 }));
 
+const savePlanToIndexedDB = vi.fn().mockResolvedValue(undefined);
+const loadPlanFromIndexedDB = vi.fn().mockResolvedValue(null);
+vi.mock('../services/planPersistence', () => ({
+  savePlanToIndexedDB: (...args: unknown[]) => savePlanToIndexedDB(...args),
+  loadPlanFromIndexedDB: (...args: unknown[]) => loadPlanFromIndexedDB(...args),
+  AUTOSAVE_ID: 'autosave',
+}));
+
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
@@ -107,6 +115,7 @@ describe('usePlanEditor public API', () => {
       [
         'activeTab',
         'addComment',
+        'addCommentAtCenter',
         'addRoom',
         'addRoomElement',
         'analysis',
@@ -121,6 +130,7 @@ describe('usePlanEditor public API', () => {
         'builtUpArea',
         'clearSelection',
         'closeQrShare',
+        'commentAuthor',
         'commitHistory',
         'cursorPositions',
         'currentFloor',
@@ -189,6 +199,7 @@ describe('usePlanEditor public API', () => {
         'setAnalysis',
         'setAnalysisProgress',
         'setAppMode',
+        'setCommentAuthor',
         'setCurrentFloor',
         'setIsAnalyzing',
         'setIsExporting',
@@ -578,5 +589,76 @@ describe('usePlanEditor derived metrics', () => {
 
     expect(result.current.analyzeBtn.disabled).toBe(true);
     expect(result.current.analyzeBtn.title).toMatch(/VITE_API_URL/);
+  });
+});
+
+describe('usePlanEditor offline persistence (M-5)', () => {
+  beforeEach(() => {
+    savePlanToIndexedDB.mockClear();
+    loadPlanFromIndexedDB.mockClear();
+    loadPlanFromIndexedDB.mockResolvedValue(null);
+  });
+
+  it('autosaves the plan after changes', async () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.addRoom('Bedroom', 12, 12));
+
+    await waitFor(() => expect(savePlanToIndexedDB).toHaveBeenCalled(), { timeout: 3000 });
+    const saved = savePlanToIndexedDB.mock.calls.at(-1)?.[0] as { rooms: unknown[] };
+    expect(saved.rooms).toHaveLength(1);
+  });
+
+  it('does not autosave in view mode', async () => {
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    act(() => result.current.setAppMode('view'));
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(savePlanToIndexedDB).not.toHaveBeenCalled();
+  });
+
+  it('restores an autosaved plan when offline on mount', async () => {
+    const persistedPlan = {
+      id: 'autosave',
+      name: 'Autosave',
+      plan: {
+        plotWidth: 25,
+        plotHeight: 35,
+        northAngle: 0,
+        roadDirection: 'N' as const,
+        unit: 'ft' as const,
+        setbacks: { top: 0, right: 0, bottom: 0, left: 0 },
+        rooms: [],
+      },
+      timestamp: 1,
+      version: '0.1.1',
+    };
+    loadPlanFromIndexedDB.mockResolvedValueOnce(persistedPlan);
+
+    const originalOnline = Object.getOwnPropertyDescriptor(navigator, 'onLine');
+    Object.defineProperty(navigator, 'onLine', {
+      value: false,
+      configurable: true,
+      writable: true,
+    });
+
+    const ref = makeRef();
+    const { result } = renderHook(() => usePlanEditor({ canvasContainerRef: ref }));
+
+    await waitFor(() => expect(result.current.plan.plotWidth).toBe(25));
+    expect(result.current.plan.plotHeight).toBe(35);
+
+    if (originalOnline) {
+      Object.defineProperty(navigator, 'onLine', originalOnline);
+    } else {
+      Object.defineProperty(navigator, 'onLine', {
+        value: true,
+        configurable: true,
+        writable: true,
+      });
+    }
   });
 });

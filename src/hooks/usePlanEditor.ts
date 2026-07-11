@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { decompressPlan, decryptPlan, isEncryptedShare } from '../lib/shareLink';
 import { v4 as uuidv4 } from 'uuid';
 import { AppMode, FloorPlan, Room, RoomCategory, RoomType } from '../types';
@@ -6,12 +6,18 @@ import { analyzeFloorPlan } from '../services/gemini';
 import { calculateOverallVastuScore } from '../services/vastu';
 import { addBreadcrumb, setUser } from '../services/sentry';
 import { trackEvent, EVENTS, EVENT_METADATA } from '../services/analytics';
+import {
+  savePlanToIndexedDB,
+  loadPlanFromIndexedDB,
+  AUTOSAVE_ID,
+} from '../services/planPersistence';
 import { useToast } from '../components/Toast';
 import { useFloorPlan } from './useFloorPlan';
 import { useSelection } from './useSelection';
 import { useCollaboration } from './useCollaboration';
 import { useExportWithClearSelection } from './useExportWithClearSelection';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
+import { useCommentAuthor } from './useCommentAuthor';
 import { useTheme } from '../contexts/ThemeContext';
 import {
   getAnalyzeButtonState,
@@ -93,6 +99,8 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     setSelectedCommentId(null);
   }, [clearSelectionRaw]);
 
+  const { author: commentAuthor, setAuthor: setCommentAuthor } = useCommentAuthor();
+
   const { runExport } = useExportWithClearSelection({
     exportFn: async () => {
       if (!canvasContainerRef.current) return;
@@ -112,6 +120,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
   const [isExporting, setIsExporting] = useState(false);
 
   const [zoom, setZoom] = useState(1);
+  const sharedPlanLoadedRef = useRef(false);
   const [linkSetbacks, setLinkSetbacks] = useState(true);
   const [showVastuGrid, setShowVastuGrid] = useState(false);
   const [showVastuTour, setShowVastuTour] = useState(false);
@@ -194,6 +203,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
             return;
           }
           replacePlanPreservingHistory(result.plan);
+          sharedPlanLoadedRef.current = true;
           if (result.analysis) {
             setAnalysis(result.analysis);
           }
@@ -206,6 +216,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
         const result = decompressPlan(sharedPlan);
         if (result) {
           replacePlanPreservingHistory(result.plan);
+          sharedPlanLoadedRef.current = true;
           if (result.analysis) {
             setAnalysis(result.analysis);
           }
@@ -227,6 +238,38 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     loadShared();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // M-5: if no shared plan was loaded and we are offline, try to restore the
+  // last autosaved plan from IndexedDB. Online users get the default plan.
+  useEffect(() => {
+    if (sharedPlanLoadedRef.current) return;
+    if (typeof navigator === 'undefined' || !navigator.onLine) {
+      loadPlanFromIndexedDB(AUTOSAVE_ID)
+        .then((record) => {
+          if (record?.plan) {
+            replacePlanPreservingHistory(record.plan as FloorPlan);
+            showToast('Restored your last autosaved plan (offline).', 'success');
+          }
+        })
+        .catch(() => {
+          // Offline restore is best-effort; silently fall back to default plan.
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // M-5: debounced autosave to IndexedDB. This gives users an offline safety
+  // net without writing on every keystroke. Shared plans are not autosaved.
+  useEffect(() => {
+    if (appMode === 'view' || sharedPlanLoadedRef.current) return;
+    const timeout = setTimeout(() => {
+      savePlanToIndexedDB(plan, { name: 'Autosave' }).catch((error) => {
+        // IndexedDB is best-effort; don't surface storage quota errors to users.
+        console.warn('Autosave failed', error);
+      });
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [plan, appMode]);
 
   // On a viewport change to mobile, default the right-sidebar tab to
   // 'properties' so a freshly-added / selected room is visible.
@@ -376,7 +419,7 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
         text: '',
         x,
         y,
-        author: 'Reviewer',
+        author: commentAuthor,
         timestamp: Date.now(),
         floor: currentFloor,
       };
@@ -387,12 +430,19 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
       commitHistory();
       setSelectedCommentId(newComment.id);
       trackEvent(EVENTS.COMMENT_ADDED, {
-        props: { floor: currentFloor },
+        props: { floor: currentFloor, authorSet: commentAuthor !== 'Reviewer' },
       });
       showToast('Comment pin added', 'success');
     },
-    [appMode, currentFloor, updatePlan, commitHistory, showToast]
+    [appMode, currentFloor, commentAuthor, updatePlan, commitHistory, showToast]
   );
+
+  const addCommentAtCenter = useCallback(() => {
+    if (appMode !== 'comment') return;
+    const x = plan.plotWidth / 2;
+    const y = plan.plotHeight / 2;
+    addComment(x, y);
+  }, [appMode, plan.plotWidth, plan.plotHeight, addComment]);
 
   const updateComment = useCallback(
     (id: string, updates: Partial<FloorPlan['comments'][number]>) => {
@@ -988,8 +1038,11 @@ export function usePlanEditor({ canvasContainerRef }: UsePlanEditorOptions) {
     selectedCommentId,
     setSelectedCommentId,
     addComment,
+    addCommentAtCenter,
     updateComment,
     deleteComment,
+    commentAuthor,
+    setCommentAuthor,
 
     // UI state
     activeTab,

@@ -52,13 +52,25 @@ interface Client {
   postMessage(message: unknown, transfer?: Transferable[]): void;
 }
 
+interface ExtendableMessageEvent extends ExtendableEvent {
+  data: unknown;
+  source: Client | null;
+}
+
 interface ServiceWorkerGlobalScopeEventMap {
   install: ExtendableEvent;
   activate: ExtendableEvent;
   fetch: FetchEvent;
   push: PushEvent;
   notificationclick: NotificationEvent;
+  message: ExtendableMessageEvent;
 }
+
+// Client is a global constructor inside a service worker.
+declare const Client: {
+  prototype: Client;
+  new (): Client;
+};
 
 interface ExtendableEvent extends Event {
   waitUntil(promise: Promise<unknown>): void;
