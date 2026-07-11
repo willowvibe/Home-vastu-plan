@@ -12,6 +12,7 @@ import { ComplianceReportExport } from './components/ComplianceReportExport';
 import { QrShareModal } from './components/QrShareModal';
 import { ShortcutHelp } from './components/ShortcutHelp';
 import { Onboarding } from './components/Onboarding';
+import { CommentModeToolbar } from './components/CommentModeToolbar';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { CollaborationPanel } from './components/CollaborationPanel';
 import { AuthModal } from './components/AuthModal';
@@ -100,6 +101,22 @@ export default function App() {
                 editor.mobileTab === 'canvas' ? 'flex' : 'hidden md:flex'
               } bg-bg`}
             >
+              <CommentModeToolbar
+                plan={editor.plan}
+                appMode={editor.appMode}
+                currentFloor={editor.currentFloor}
+                selectedCommentId={editor.selectedCommentId}
+                author={editor.commentAuthor}
+                onAuthorChange={(name) => {
+                  // The toolbar only renders in comment mode; no-op if not.
+                  if (editor.appMode === 'comment') {
+                    editor.setCommentAuthor?.(name);
+                  }
+                }}
+                onAddPin={editor.addCommentAtCenter}
+                onSelectComment={editor.setSelectedCommentId}
+                onDeleteComment={editor.deleteComment}
+              />
               <Toolbar
                 zoom={editor.zoom}
                 onZoomIn={editor.handleZoomIn}
