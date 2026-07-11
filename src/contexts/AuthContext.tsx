@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import type { ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { refreshProExportEntitlement } from '../services/entitlements';
 
 export interface AuthCredentials {
   email: string;
@@ -86,6 +87,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       subscription.unsubscribe();
     };
   }, []);
+
+  // Keep the Pro Export entitlement cache in sync with auth state.
+  useEffect(() => {
+    refreshProExportEntitlement(session).catch((error) => {
+      console.error('[Auth] Failed to refresh Pro Export entitlement:', error);
+    });
+  }, [session]);
 
   const signIn = useMemo(
     () =>

@@ -12,6 +12,7 @@ import {
 import { queueChange, syncChanges, getSyncStatus } from './sync.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import aiRouter from '../ai/index.js';
+import paymentsRouter from '../payments/index.js';
 
 const router = Router();
 
@@ -40,6 +41,9 @@ router.get('/sync/status', authenticate, getSyncStatus);
 
 // AI routes (authenticated)
 router.use('/ai', aiRouter);
+
+// Payments routes (authenticated via Supabase for user-facing endpoints)
+router.use('/payments', paymentsRouter);
 
 // Health check
 router.get('/health', (req: Request, res: Response) => {

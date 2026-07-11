@@ -1,12 +1,18 @@
 import React, { useState, useRef } from 'react';
 import { FloorPlan } from '../types';
 import { jsPDF } from 'jspdf';
-import { FileText, X, Upload, Loader2, Download } from 'lucide-react';
+import { FileText, X, Upload, Loader2, Download, Crown } from 'lucide-react';
 import { addBreadcrumb } from '../services/sentry';
 import { useToast } from './Toast';
 import { formatFloorLabel } from '../constants/floorPlanConstants';
 import { buildVectorPdfOps, renderOpsToPdf, computePdfScale } from '../lib/exportVectorPdf';
-import { isWatermarkRequired } from '../services/entitlements';
+import { isWatermarkRequired, refreshProExportEntitlement } from '../services/entitlements';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  loadRazorpayScript,
+  openRazorpayCheckout,
+  RazorpayOrder,
+} from '../services/razorpayCheckout';
 
 interface PresentationExportProps {
   plan: FloorPlan;
@@ -38,8 +44,11 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
   const [consultantName, setConsultantName] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
+  const { session, isAuthenticated, user } = useAuth();
+  const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,6 +64,78 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
       setLogoUrl(event.target?.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleUpgrade = async () => {
+    if (!isAuthenticated || !session) {
+      showToast('Sign in to upgrade to Pro Export', 'error');
+      return;
+    }
+    if (!apiUrl) {
+      showToast('Payments are not configured in this build', 'error');
+      return;
+    }
+
+    setIsPurchasing(true);
+    try {
+      const createRes = await fetch(`${apiUrl}/api/payments/create-order`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!createRes.ok) {
+        const errorData = (await createRes.json().catch(() => ({}))) as { error?: string };
+        throw new Error(errorData.error || `Order creation failed (${createRes.status})`);
+      }
+
+      const order = (await createRes.json()) as RazorpayOrder;
+
+      await loadRazorpayScript();
+
+      openRazorpayCheckout(
+        order,
+        user?.email,
+        async (response) => {
+          try {
+            const verifyRes = await fetch(`${apiUrl}/api/payments/verify`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              }),
+            });
+
+            if (!verifyRes.ok) {
+              const errorData = (await verifyRes.json().catch(() => ({}))) as { error?: string };
+              throw new Error(errorData.error || `Verification failed (${verifyRes.status})`);
+            }
+
+            await refreshProExportEntitlement(session);
+            showToast('Pro Export Pack activated!', 'success');
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            showToast(
+              error instanceof Error ? error.message : 'Payment verification failed',
+              'error'
+            );
+          }
+        },
+        () => setIsPurchasing(false)
+      );
+    } catch (error) {
+      console.error('Upgrade failed:', error);
+      showToast(error instanceof Error ? error.message : 'Failed to start checkout', 'error');
+    } finally {
+      setIsPurchasing(false);
+    }
   };
 
   const handleExportPDF = async () => {
@@ -211,9 +292,25 @@ export function PresentationExport({ plan, currentFloor, onClose }: Presentation
             </div>
           </div>
 
-          {/* Entitlement status line (M-1) */}
-          <div className="text-xs text-meta text-center">
-            {isWatermarkRequired() ? 'Free plan · watermark included' : 'Pro · watermark-free'}
+          {/* Entitlement status line (M-1 / M-2) */}
+          <div className="space-y-2">
+            <div className="text-xs text-meta text-center">
+              {isWatermarkRequired() ? 'Free plan · watermark included' : 'Pro · watermark-free'}
+            </div>
+            {isWatermarkRequired() && (
+              <button
+                onClick={handleUpgrade}
+                disabled={isPurchasing}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-accent text-accent hover:bg-accent/5 transition-colors disabled:opacity-50"
+              >
+                {isPurchasing ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Crown className="w-3 h-3" />
+                )}
+                {isAuthenticated ? 'Upgrade to Pro for ₹499' : 'Sign in to upgrade to Pro'}
+              </button>
+            )}
           </div>
         </div>
 

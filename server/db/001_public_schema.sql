@@ -125,7 +125,55 @@ CREATE POLICY "Users can read own entitlements"
   ON public.user_entitlements FOR SELECT
   USING (auth.uid() = user_id);
 
--- 7. Auto-create public.users row on auth.user insert
+CREATE POLICY "Server can upsert own entitlements"
+  ON public.user_entitlements FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX idx_user_entitlements_user ON public.user_entitlements(user_id);
+
+-- 7. payments (Razorpay checkout record)
+CREATE TABLE IF NOT EXISTS public.payments (
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id            UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  razorpay_order_id  TEXT NOT NULL,
+  razorpay_payment_id TEXT,
+  razorpay_signature TEXT,
+  amount_paise       INTEGER NOT NULL,
+  currency           TEXT NOT NULL DEFAULT 'INR',
+  status             TEXT NOT NULL DEFAULT 'created',
+  tier               TEXT NOT NULL DEFAULT 'pro_export',
+  expires_at         TIMESTAMPTZ,
+  created_at         TIMESTAMPTZ DEFAULT now(),
+  updated_at         TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, razorpay_order_id)
+);
+
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own payments"
+  ON public.payments FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE INDEX idx_payments_order ON public.payments(razorpay_order_id);
+CREATE INDEX idx_payments_user_status ON public.payments(user_id, status);
+
+-- 8. webhook_events (idempotency for Razorpay webhooks)
+CREATE TABLE IF NOT EXISTS public.webhook_events (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id      TEXT NOT NULL UNIQUE,
+  source        TEXT NOT NULL,
+  event_type    TEXT,
+  payload       JSONB NOT NULL DEFAULT '{}',
+  processed_at  TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.webhook_events ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_webhook_events_event_id ON public.webhook_events(event_id);
+
+-- 9. Auto-create public.users row on auth.user insert
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
