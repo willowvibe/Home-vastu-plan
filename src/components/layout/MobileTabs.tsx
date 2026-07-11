@@ -20,7 +20,7 @@ export const MobileTabs: React.FC<MobileTabsProps> = ({ mobileTab, setMobileTab 
           <button
             key={tab.key}
             onClick={() => setMobileTab(tab.key)}
-            className={`flex-1 py-3 text-sm font-medium ${
+            className={`flex-1 min-h-11 py-3 text-sm font-medium ${
               active
                 ? 'text-accent border-b-2 border-accent'
                 : 'text-muted hover:text-fg-2 dark:text-meta '

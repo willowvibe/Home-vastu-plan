@@ -574,17 +574,17 @@ Standardized on `VITE_GEMINI_API_KEY` as the only supported source. Removed the 
 
 ### 6.1 v0.2 — SHIP next 60–90 days (gates the 90-day hypothesis test)
 
-| ID  | Title                                             | Effort   | Status      | Owner                                                    |
-| --- | ------------------------------------------------- | -------- | ----------- | -------------------------------------------------------- |
-| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90.                                                  |
-| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI proxy on Railway.                             |
-| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved | PR #97. One-time ₹499 Pro Export Pack.                   |
-| M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95.                                                  |
-| M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved | PR #98. Comment toolbar + author persistence.            |
-| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved | PR #98. IndexedDB plan store + autosave/offline restore. |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | ✅ resolved | PR #99. 16 `/zones/:slug` pages, `/zones` pillar, landing links.          |
-| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | —                                                        |
-| M-8 | Vastu matrix source citation + methodology page   | S        | ✅ resolved | PR #95.                                                  |
+| ID  | Title                                             | Effort   | Status      | Owner                                                            |
+| --- | ------------------------------------------------- | -------- | ----------- | ---------------------------------------------------------------- |
+| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90.                                                          |
+| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI proxy on Railway.                                     |
+| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved | PR #97. One-time ₹499 Pro Export Pack.                           |
+| M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95.                                                          |
+| M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved | PR #98. Comment toolbar + author persistence.                    |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved | PR #98. IndexedDB plan store + autosave/offline restore.         |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | ✅ resolved | PR #99. 16 `/zones/:slug` pages, `/zones` pillar, landing links. |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | —                                                                |
+| M-8 | Vastu matrix source citation + methodology page   | S        | ✅ resolved | PR #95.                                                          |
 
 ### 6.2 v0.3 — SHIP 90–180 days
 

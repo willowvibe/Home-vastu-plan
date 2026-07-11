@@ -129,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <label className="text-xs text-muted mb-1 block">Plan Template</label>
           <select
             onChange={(e) => handleSelectTemplate(e.target.value)}
-            className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
+            className="min-h-11 w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
           >
             <option value="">Select Template...</option>
             <option value="Small Apartment">Small Apartment (25x35 ft)</option>
@@ -151,7 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 updatePlan((p) => ({ ...p, plotWidth: val }));
                 commitHistory();
               }}
-              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
+              className="min-h-11 w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
             />
           </div>
           <div>
@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 updatePlan((p) => ({ ...p, plotHeight: val }));
                 commitHistory();
               }}
-              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
+              className="min-h-11 w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
             />
           </div>
         </div>
@@ -204,7 +204,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 updatePlan((p) => ({ ...p, gridSize }));
                 commitHistory();
               }}
-              className="text-xs border border-border rounded-lg px-2 py-1 focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
+              className="min-h-11 text-xs border border-border rounded-lg px-2 py-1 focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
             >
               {GRID_SIZE_OPTIONS_FT.map((ft) => {
                 const label =
@@ -250,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }));
                 commitHistory();
               }}
-              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
+              className="min-h-11 w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
             >
               <option value="N">North</option>
               <option value="E">East</option>
@@ -266,7 +266,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 updatePlan((p) => ({ ...p, unit: e.target.value as FloorPlan['unit'] }));
                 commitHistory();
               }}
-              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
+              className="min-h-11 w-full border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
             >
               <option value="ft">Feet (ft)</option>
               <option value="m">Meters (m)</option>
@@ -279,7 +279,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>Setbacks (ft)</span>
             <button
               onClick={() => setLinkSetbacks(!linkSetbacks)}
-              className="p-1 hover:bg-surface-warm rounded text-meta hover:text-accent transition-colors"
+              className="min-w-11 min-h-11 p-2 hover:bg-surface-warm rounded text-meta hover:text-accent transition-colors"
               title={linkSetbacks ? 'Unlink setbacks' : 'Link setbacks'}
             >
               {linkSetbacks ? (
@@ -308,7 +308,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       Math.max(0, Math.min(max, Number(e.target.value) || 0))
                     );
                   }}
-                  className="w-full border border-border rounded-md px-2 py-1 text-xs text-center focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
+                  className="min-h-11 w-full border border-border rounded-md px-2 py-1 text-xs text-center focus:ring-1 focus:ring-accent outline-none bg-bg text-fg"
                 />
               </div>
             ))}
@@ -359,13 +359,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex gap-2">
           <button
             onClick={handleImportJSON}
-            className="flex-1 py-2 text-xs font-medium text-accent hover:bg-surface-warm border border-border rounded-lg transition-colors flex items-center justify-center gap-1"
+            className="min-h-11 min-h-11 flex-1 py-2 text-xs font-medium text-accent hover:bg-surface-warm border border-border rounded-lg transition-colors flex items-center justify-center gap-1"
           >
             <FolderOpen className="w-3 h-3" /> Import JSON
           </button>
           <button
             onClick={handleExportJSON}
-            className="flex-1 py-2 text-xs font-medium text-accent hover:bg-surface-warm border border-border rounded-lg transition-colors flex items-center justify-center gap-1"
+            className="min-h-11 flex-1 py-2 text-xs font-medium text-accent hover:bg-surface-warm border border-border rounded-lg transition-colors flex items-center justify-center gap-1"
           >
             <FileText className="w-3 h-3" /> Export JSON
           </button>
@@ -381,7 +381,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={floor}
               onClick={() => setCurrentFloor(floor)}
-              className={`flex-1 min-w-[3rem] py-2 text-sm font-medium rounded-lg border transition-colors ${
+              className={`min-h-11 flex-1 min-w-[3rem] py-2 text-sm font-medium rounded-lg border transition-colors ${
                 currentFloor === floor
                   ? 'bg-surface-warm border-border text-accent'
                   : 'bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm'
@@ -394,7 +394,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={() => setCurrentFloor(lastFloor + 1)}
               title="Add floor"
-              className="px-3 py-2 text-sm font-medium rounded-lg border bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm"
+              className="min-h-11 px-3 py-2 text-sm font-medium rounded-lg border bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm"
             >
               +
             </button>
@@ -409,14 +409,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               !onDuplicateFloor || plan.rooms.filter((r) => r.floor === currentFloor).length === 0
             }
             title="Duplicate current floor to the next unused floor"
-            className="flex-1 py-2 text-xs font-medium rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm"
+            className="min-h-11 flex-1 py-2 text-xs font-medium rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm"
           >
             Duplicate {formatFloorLabel(currentFloor, plan.floorNames)}
           </button>
           <button
             onClick={handleClearFloor}
             title="Clear all rooms on the current floor"
-            className="flex-1 py-2 text-xs font-medium text-danger hover:bg-danger/10 hover:text-danger border border-danger/30 rounded-lg transition-colors flex items-center justify-center gap-1"
+            className="min-h-11 flex-1 py-2 text-xs font-medium text-danger hover:bg-danger/10 hover:text-danger border border-danger/30 rounded-lg transition-colors flex items-center justify-center gap-1"
           >
             <Trash2 className="w-3 h-3" /> Clear Floor
           </button>
@@ -428,7 +428,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Eye className="w-4 h-4 text-meta" /> Overlays
         </h3>
         <div className="space-y-2">
-          <label className="flex items-center justify-between text-xs text-muted dark:text-meta cursor-pointer">
+          <label className="min-h-11 py-2 flex items-center justify-between text-xs text-muted dark:text-meta cursor-pointer">
             <span className="flex items-center gap-1.5">
               <Map className="w-3.5 h-3.5" /> Vastu Grid
             </span>
@@ -439,7 +439,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="rounded text-accent focus:ring-accent"
             />
           </label>
-          <label className="flex items-center justify-between text-xs text-muted dark:text-meta cursor-pointer">
+          <label className="min-h-11 py-2 flex items-center justify-between text-xs text-muted dark:text-meta cursor-pointer">
             <span className="flex items-center gap-1.5">
               <Droplets className="w-3.5 h-3.5" /> Plumbing
             </span>
@@ -450,7 +450,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="rounded text-accent focus:ring-accent"
             />
           </label>
-          <label className="flex items-center justify-between text-xs text-muted dark:text-meta cursor-pointer">
+          <label className="min-h-11 py-2 flex items-center justify-between text-xs text-muted dark:text-meta cursor-pointer">
             <span className="flex items-center gap-1.5">
               <Sun className="w-3.5 h-3.5" /> Sun Path
             </span>
@@ -471,7 +471,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     type="date"
                     value={sunDate ? sunDate.toISOString().split('T')[0] : ''}
                     onChange={(e) => onSetSunDate?.(e.target.value)}
-                    className="w-full text-xs border border-border rounded-lg px-2 py-1 bg-bg text-fg"
+                    className="min-h-11 w-full text-xs border border-border rounded-lg px-2 py-1 bg-bg text-fg"
                   />
                 </div>
                 <div>
@@ -484,7 +484,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         : ''
                     }
                     onChange={(e) => onSetSunTime?.(e.target.value)}
-                    className="w-full text-xs border border-border rounded-lg px-2 py-1 bg-bg text-fg"
+                    className="min-h-11 w-full text-xs border border-border rounded-lg px-2 py-1 bg-bg text-fg"
                   />
                 </div>
               </div>
@@ -504,12 +504,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       updatePlan((p) => ({ ...p, latitude: Math.max(-90, Math.min(90, val)) }));
                     }
                   }}
-                  className="w-full text-xs border border-border rounded-lg px-2 py-1 bg-bg text-fg"
+                  className="min-h-11 w-full text-xs border border-border rounded-lg px-2 py-1 bg-bg text-fg"
                 />
               </div>
               <button
                 onClick={onSetSunNow}
-                className="w-full text-xs py-1.5 px-2 bg-surface-warm border border-border rounded hover:border-border-strong hover:bg-surface transition-colors text-accent font-medium"
+                className="min-h-11 w-full text-xs py-2 px-2 bg-surface-warm border border-border rounded hover:border-border-strong hover:bg-surface transition-colors text-accent font-medium"
               >
                 Use current time
               </button>
@@ -535,7 +535,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setRoomCategoryFilter(null)}
-              className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+              className={`min-h-11 px-3 py-2 text-xs font-medium rounded-full border transition-colors ${
                 roomCategoryFilter === null
                   ? 'bg-surface-warm border-accent text-accent'
                   : 'bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm'
@@ -547,7 +547,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={cat.id}
                 onClick={() => setRoomCategoryFilter(cat.id)}
-                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                className={`min-h-11 px-3 py-2 text-xs font-medium rounded-full border transition-colors ${
                   roomCategoryFilter === cat.id
                     ? 'bg-surface-warm border-accent text-accent'
                     : 'bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm'
@@ -566,7 +566,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             placeholder="Search room types..."
             value={roomSearch}
             onChange={(e) => setRoomSearch(e.target.value)}
-            className="w-full border border-border rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg placeholder:text-meta"
+            className="min-h-11 w-full border border-border rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-1 focus:ring-accent outline-none bg-bg text-fg placeholder:text-meta"
           />
         </div>
 
@@ -586,7 +586,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={rt.type}
               onClick={() => addRoom(rt.type, rt.w, rt.h)}
-              className="flex flex-col items-center justify-center p-3 border border-border rounded-xl hover:border-accent hover:bg-surface-warm transition-colors group bg-surface"
+              className="min-h-11 flex flex-col items-center justify-center p-3 border border-border rounded-xl hover:border-accent hover:bg-surface-warm transition-colors group bg-surface"
             >
               <span className="text-xs font-medium text-fg-2 text-center">{rt.type}</span>
               <span className="text-[10px] text-meta mt-1">

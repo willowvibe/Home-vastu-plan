@@ -93,7 +93,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             onClick={onAnalyze}
             disabled={analyzeBtn.disabled}
             title={analyzeBtn.title}
-            className="w-full font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 shrink-0 bg-accent hover:bg-accent-hover text-accent-on"
+            className="min-h-11 w-full font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 shrink-0 bg-accent hover:bg-accent-hover text-accent-on"
           >
             {isAnalyzing ? (
               <>

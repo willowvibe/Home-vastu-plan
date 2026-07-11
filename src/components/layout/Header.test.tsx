@@ -48,4 +48,25 @@ describe('Header', () => {
     fireEvent.click(signInButton);
     expect(mockOnOpenAuth).toHaveBeenCalled();
   });
+
+  it('gives header controls a minimum 44px touch target', () => {
+    render(
+      <Header
+        plan={INITIAL_PLAN}
+        appMode="edit"
+        setAppMode={vi.fn()}
+        activeTab="design"
+        setActiveTab={vi.fn()}
+        setShowProjectManager={vi.fn()}
+        vastuScore={0}
+        onOpenAuth={mockOnOpenAuth}
+      />
+    );
+
+    expect(screen.getByLabelText(/switch to/i)).toHaveClass('min-h-11');
+    expect(screen.getByLabelText(/keyboard shortcuts/i)).toHaveClass('min-h-11');
+    expect(screen.getByLabelText(/sign in/i)).toHaveClass('min-h-11');
+    expect(screen.getByText('Floor Plan').closest('button')).toHaveClass('min-h-11');
+    expect(screen.getByText('AI Image Editor').closest('button')).toHaveClass('min-h-11');
+  });
 });

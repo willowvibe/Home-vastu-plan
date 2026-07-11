@@ -65,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="border-b border-border bg-surface-warm/95 /95 backdrop-blur-sm px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between sticky top-0 z-20 gap-3 md:gap-0 transition-colors duration-200">
       <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-105 bg-accent shadow-elev-ring">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-105 bg-accent shadow-elev-ring">
             <Layers className="w-6 h-6 text-accent-on" />
           </div>
           <div>
@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={toggleDarkMode}
-          className="p-2 rounded-lg border transition-all duration-300 hover:scale-105 hover:shadow-sm bg-surface border-border text-muted dark:text-warn hover:bg-surface-warm hover:border-border-strong dark:hover:border-warn"
+          className="min-w-11 min-h-11 p-2 rounded-lg border transition-all duration-300 hover:scale-105 hover:shadow-sm bg-surface border-border text-muted dark:text-warn hover:bg-surface-warm hover:border-border-strong dark:hover:border-warn"
           title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           aria-label={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
@@ -126,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={() => setShowShortcutHelp?.()}
-          className="p-2 rounded-lg border transition-colors bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm"
+          className="min-w-11 min-h-11 p-2 rounded-lg border transition-colors bg-surface border-border text-muted dark:text-meta hover:bg-surface-warm"
           title="Keyboard Shortcuts (?)"
           aria-label="Keyboard Shortcuts"
         >
@@ -136,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex bg-surface-warm/80 /80 p-1 rounded-lg w-full md:w-auto backdrop-blur-sm shadow-sm">
           <button
             onClick={() => setShowProjectManager(true)}
-            className="px-3 py-1.5 text-sm font-medium rounded-md text-muted dark:text-meta hover:text-accent hover:bg-surface-warm transition-all flex items-center gap-2"
+            className="min-h-11 px-3 py-2 text-sm font-medium rounded-md text-muted dark:text-meta hover:text-accent hover:bg-surface-warm transition-all flex items-center gap-2"
             title="Projects & Versions"
           >
             <FolderOpen className="w-4 h-4" />
@@ -145,13 +145,13 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="w-px h-6 bg-border mx-1 self-center"></div>
           <button
             onClick={() => setActiveTab('design')}
-            className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'design' ? 'bg-surface-100 text-fg shadow-sm ring-1 ring-border' : 'text-muted hover:text-fg'}`}
+            className={`min-h-11 flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'design' ? 'bg-surface-100 text-fg shadow-sm ring-1 ring-border' : 'text-muted hover:text-fg'}`}
           >
             Floor Plan
           </button>
           <button
             onClick={() => setActiveTab('image')}
-            className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'image' ? 'bg-surface-100 text-fg shadow-sm ring-1 ring-border' : 'text-muted hover:text-fg'}`}
+            className={`min-h-11 flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'image' ? 'bg-surface-100 text-fg shadow-sm ring-1 ring-border' : 'text-muted hover:text-fg'}`}
           >
             AI Image Editor
           </button>
@@ -163,7 +163,7 @@ export const Header: React.FC<HeaderProps> = ({
               <>
                 <button
                   onClick={() => setShowUserMenu((v) => !v)}
-                  className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg border bg-surface border-border text-fg-2 dark:text-fg hover:bg-surface-warm transition-colors"
+                  className="min-h-11 flex items-center gap-2 pl-2 pr-3 py-2 rounded-lg border bg-surface border-border text-fg-2 dark:text-fg hover:bg-surface-warm transition-colors"
                   aria-label="User menu"
                   aria-haspopup="true"
                   aria-expanded={showUserMenu}
@@ -191,7 +191,7 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-surface border-border text-fg-2 dark:text-fg hover:bg-surface-warm transition-colors"
+                className="min-h-11 flex items-center gap-2 px-3 py-2 rounded-lg border bg-surface border-border text-fg-2 dark:text-fg hover:bg-surface-warm transition-colors"
                 aria-label="Sign in"
               >
                 <User className="w-4 h-4" />

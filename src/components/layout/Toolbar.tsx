@@ -67,7 +67,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       <div className="flex gap-2">
         <button
           onClick={onToggleGrid}
-          className={`flex items-center justify-center w-10 h-10 border rounded-lg shadow-sm transition-colors ${
+          className={`flex items-center justify-center w-11 h-11 border rounded-lg shadow-sm transition-colors ${
             showVastuGrid
               ? 'bg-surface-warm border-border text-accent'
               : 'bg-surface border-border hover:bg-surface-warm text-fg-2    dark:text-meta'
@@ -78,7 +78,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </button>
         <button
           onClick={onToggleTour}
-          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
+          className="flex items-center justify-center w-11 h-11 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
           title="Vastu Zone Tour"
           data-testid="vastu-tour-button"
         >
@@ -87,7 +87,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           onClick={undo}
           disabled={historyIndex === 0}
-          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center w-11 h-11 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Undo (Ctrl+Z)"
         >
           <Undo2 className="w-4 h-4" />
@@ -95,7 +95,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           onClick={redo}
           disabled={historyIndex === historyLength - 1}
-          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center w-11 h-11 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Redo (Ctrl+Y)"
         >
           <Redo2 className="w-4 h-4" />
@@ -105,7 +105,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       <div className="flex gap-2">
         <button
           onClick={onZoomOut}
-          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
+          className="flex items-center justify-center w-11 h-11 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
           title="Zoom Out"
         >
           <ZoomOut className="w-4 h-4" />
@@ -115,7 +115,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
         <button
           onClick={onZoomIn}
-          className="flex items-center justify-center w-10 h-10 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
+          className="flex items-center justify-center w-11 h-11 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta rounded-lg shadow-sm transition-colors"
           title="Zoom In"
         >
           <ZoomIn className="w-4 h-4" />
@@ -126,14 +126,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div className="flex rounded-lg shadow-sm overflow-hidden border border-border ">
           <button
             onClick={() => onShare('view')}
-            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta transition-colors"
+            className="flex items-center justify-center w-11 h-11 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta transition-colors"
             title="Share View-Only Link (read-only)"
           >
             <Share2 className="w-4 h-4" />
           </button>
           <button
             onClick={() => onShare('comment')}
-            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
+            className="flex items-center justify-center w-11 h-11 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
             title="Share Comment-Enabled Link (reviewers can add notes)"
           >
             <MessageSquare className="w-4 h-4" />
@@ -145,14 +145,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               );
               if (password) onShare('view', password);
             }}
-            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
+            className="flex items-center justify-center w-11 h-11 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
             title="Password-Protected Share Link (view-only)"
           >
             <Lock className="w-4 h-4" />
           </button>
           <button
             onClick={onShareQR}
-            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
+            className="flex items-center justify-center w-11 h-11 bg-surface hover:bg-surface-warm  text-fg-2 dark:text-meta border-l border-border  transition-colors"
             title="Show QR Code for this plan"
             data-testid="share-qr-button"
           >
@@ -161,14 +161,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
         <button
           onClick={onPresentationExport}
-          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta min-h-11 px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">Presentation Export</span>
         </button>
         <button
           onClick={onComplianceExport}
-          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta min-h-11 px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-colors"
           title="Export Vastu compliance report PDF"
         >
           <FileCheck className="w-4 h-4" />
@@ -177,7 +177,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           onClick={onExport}
           disabled={isExporting}
-          className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-accent-on px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-accent-on min-h-11 px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           {isExporting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -188,28 +188,28 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </button>
         <button
           onClick={onPrint}
-          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta min-h-11 px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">Print</span>
         </button>
         <button
           onClick={onExportJSON}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta"
+          className="flex items-center gap-2 min-h-11 px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-colors bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">JSON Export</span>
         </button>
         <button
           onClick={onMeasure}
-          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta min-h-11 px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           <Ruler className="w-4 h-4" />
           <span className="hidden sm:inline">Ruler</span>
         </button>
         <button
           onClick={onExportSVG}
-          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+          className="flex items-center gap-2 bg-surface border border-border  hover:bg-surface-warm  text-fg-2 dark:text-meta min-h-11 px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-colors"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">SVG Export</span>

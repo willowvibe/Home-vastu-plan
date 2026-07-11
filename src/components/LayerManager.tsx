@@ -61,12 +61,12 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
             if (e.key === 'Enter') addLayer();
           }}
           placeholder="New layer name..."
-          className="flex-1 border rounded-md px-2 py-1.5 text-xs focus:ring-1 focus:ring-accent outline-none bg-bg border-border text-fg"
+          className="min-h-11 flex-1 border rounded-md px-2 py-2 text-xs focus:ring-1 focus:ring-accent outline-none bg-bg border-border text-fg"
         />
         <button
           onClick={addLayer}
           disabled={!newLayerName.trim()}
-          className="p-1.5 bg-accent text-accent-on rounded-md hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="min-w-11 min-h-11 p-2 bg-accent text-accent-on rounded-md hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           title="Add Layer"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -77,11 +77,11 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
         {layers.map((layer) => (
           <div
             key={layer.id}
-            className={`flex items-center gap-2 px-2 py-1.5 rounded-md border transition-colors border-border-soft  ${layer.visible ? '' : 'opacity-50'}`}
+            className={`min-h-11 flex items-center gap-2 px-2 py-2 rounded-md border transition-colors border-border-soft  ${layer.visible ? '' : 'opacity-50'}`}
           >
             <button
               onClick={() => toggleVisibility(layer.id)}
-              className="p-0.5 text-meta hover:text-accent transition-colors"
+              className="min-w-11 min-h-11 p-2 text-meta hover:text-accent transition-colors"
               title={layer.visible ? 'Hide Layer' : 'Show Layer'}
             >
               {layer.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -98,7 +98,7 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
             </span>
             <button
               onClick={() => removeLayer(layer.id)}
-              className="p-0.5 text-meta hover:text-danger transition-colors"
+              className="min-w-11 min-h-11 p-2 text-meta hover:text-danger transition-colors"
               title="Remove Layer"
             >
               <Trash2 className="w-3 h-3" />

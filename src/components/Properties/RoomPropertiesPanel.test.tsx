@@ -161,4 +161,28 @@ describe('RoomPropertiesPanel', () => {
     fireEvent.change(widthInput, { target: { value: '1000' } });
     expect(onUpdateRoom).toHaveBeenLastCalledWith('r1', { w: 30, x: 0 });
   });
+
+  it('uses responsive, full-width stacking on narrow viewports', () => {
+    const { container } = render(<RoomPropertiesPanel {...baseProps()} selectedRoomIds={['r1']} />);
+    const widthLengthGrid = container.querySelector('.grid.grid-cols-1');
+    expect(widthLengthGrid).not.toBeNull();
+  });
+
+  it('uses a minimum 44px touch target for action and form controls', () => {
+    const { container } = render(<RoomPropertiesPanel {...baseProps()} selectedRoomIds={['r1']} />);
+
+    const controls = [
+      container.querySelector('button[title="Duplicate Room"]'),
+      container.querySelector('button[title="Rotate 90°"]'),
+      container.querySelector('button[title="Delete Room"]'),
+      ...Array.from(container.querySelectorAll('input[type="number"]')),
+      container.querySelector('select'),
+    ].filter(Boolean) as HTMLElement[];
+
+    expect(controls.length).toBeGreaterThan(0);
+    controls.forEach((el) => {
+      const cls = el.className ?? '';
+      expect(cls.includes('min-h-11') || cls.includes('min-w-11')).toBe(true);
+    });
+  });
 });
