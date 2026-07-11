@@ -2,7 +2,7 @@
 
 > **Status:** Living tracker. The historical bug backlog (P0/P1/P2/P3/G/Q) from `docs/CODE_REVIEW.md` §1–§5 is fully resolved. The **active backlog** is now the v0.2/v0.3 market-driven feature list at the bottom of this file, sourced from [`docs/vastuplan-market-dig.md`](./vastuplan-market-dig.md).
 > **Source of truth for "what's next":** the v0.2/v0.3 tables below and [`docs/CODE_REVIEW.md`](./CODE_REVIEW.md) §6.
-> **Last updated:** 2026-07-11 (M-2 Razorpay Pro Export Pack merged via PR #97; M-1, M-3, M-8 resolved).
+> **Last updated:** 2026-07-11 (M-2 Razorpay Pro Export Pack merged via PR #97; M-1, M-3, M-8 resolved; M-4/M-5 implemented on branch `feat/m4-comment-mode-m5-pwa`, PR pending).
 
 ## Quick links
 
@@ -398,16 +398,16 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 
 ### SHIP — v0.2 (next 60–90 days)
 
-| ID  | Title                                             | Effort   | Status      | Notes                                                                     |
-| --- | ------------------------------------------------- | -------- | ----------- | ------------------------------------------------------------------------- |
-| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90. Core ₹499 Pro Export deliverable.                                 |
-| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI calls proxied through server/ on Railway. Zero keys in client. |
-| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved | PR #97. One-time ₹499 Pro Export Pack.                                    |
-| M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95. WhatsApp/contractor on-ramp.                                      |
-| M-4 | Wire up `?mode=comment` annotation UI             | S        | 🔲 pending  | Unique viral loop; backend link already supports comment mode.            |
-| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | 🔲 pending  | Offline use at construction sites; SW exists, extend plan persistence.    |
-| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | 🔲 pending  | Primary acquisition; urgent before AI tools own SERP.                     |
-| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | Persona A is mobile-web-first.                                            |
+| ID  | Title                                             | Effort   | Status      | Notes                                                                                                                |
+| --- | ------------------------------------------------- | -------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| M-1 | Vector PDF export + watermark gate                | M        | ✅ resolved | PR #90. Core ₹499 Pro Export deliverable.                                                                            |
+| C1  | Gemini API key exposed to browser bundle          | Critical | ✅ resolved | PR #91. AI calls proxied through server/ on Railway. Zero keys in client.                                            |
+| M-2 | Razorpay / Instamojo payment integration          | S        | ✅ resolved | PR #97. One-time ₹499 Pro Export Pack.                                                                               |
+| M-3 | QR-code share export                              | XS       | ✅ resolved | PR #95. WhatsApp/contractor on-ramp.                                                                                 |
+| M-4 | Wire up `?mode=comment` annotation UI             | S        | ✅ resolved | Branch `feat/m4-comment-mode-m5-pwa` (PR pending). `CommentModeToolbar`, reviewer name persistence, add-pin UX.      |
+| M-5 | PWA basics: manifest + service worker + IndexedDB | S        | ✅ resolved | Branch `feat/m4-comment-mode-m5-pwa` (PR pending). IndexedDB plan store in SW, client API, autosave/offline restore. |
+| M-6 | SEO content: 16 zone pages + pillar + landing     | L        | 🔲 pending  | Primary acquisition; urgent before AI tools own SERP.                                                                |
+| M-7 | Mobile UX polish (touch targets, property panel)  | S        | 🔲 pending  | Persona A is mobile-web-first.                                                                                       |
 
 ### SHIP — v0.3 (90–180 days)
 
@@ -434,13 +434,15 @@ See the `✅ Recently Resolved` sections above for earlier batches.
 
 ### ✅ Recently resolved (market-driven backlog)
 
-| ID           | Title                                    | PR / commit        | Notes                                                                                                                                                                                                           |
-| ------------ | ---------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| M-10 Phase 1 | Supabase Auth integration                | PR #89 (`ba149ef`) | Email/password sign-up/sign-in, password reset, sign-out, `AuthContext`, theme-aware accessible auth modal, Sentry/Plausible identity hooks. Optional auth: falls back to anonymous-only when env vars missing. |
-| M-1          | Vector PDF export + watermark gate       | PR #90 (`5e3a1c0`) | Entitlements service, vector PDF library (data/render split), `PresentationExport` raster→vector swap, watermark gate. Core ₹499 Pro Export deliverable.                                                        |
-| M-2          | Razorpay / Instamojo payment integration | PR #97 (`f43decd`) | Supabase JWT auth middleware, Razorpay payments module, checkout/verify/webhook endpoints, client entitlement sync, upgrade CTA in `PresentationExport`. One-time ₹499 Pro Export Pack.                         |
-| M-3          | QR-code share export                     | PR #95 (`1d06b50`) | New `QrShareModal` renders the current share URL as an SVG QR code with Copy Link + Download QR SVG actions. Wired into `Toolbar` and `usePlanEditor`; tracked under `SHARE_QR_OPENED`.                         |
-| M-8          | Vastu methodology page                   | PR #95 (`1d06b50`) | New `/methodology` route renders the live `IDEAL_ZONES` matrix and `getVastuZoneInfo` with source citations and a direction-by-room table. Footer link added on `Landing`.                                      |
+| ID           | Title                                             | PR / commit                                       | Notes                                                                                                                                                                                                           |
+| ------------ | ------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M-10 Phase 1 | Supabase Auth integration                         | PR #89 (`ba149ef`)                                | Email/password sign-up/sign-in, password reset, sign-out, `AuthContext`, theme-aware accessible auth modal, Sentry/Plausible identity hooks. Optional auth: falls back to anonymous-only when env vars missing. |
+| M-1          | Vector PDF export + watermark gate                | PR #90 (`5e3a1c0`)                                | Entitlements service, vector PDF library (data/render split), `PresentationExport` raster→vector swap, watermark gate. Core ₹499 Pro Export deliverable.                                                        |
+| M-2          | Razorpay / Instamojo payment integration          | PR #97 (`f43decd`)                                | Supabase JWT auth middleware, Razorpay payments module, checkout/verify/webhook endpoints, client entitlement sync, upgrade CTA in `PresentationExport`. One-time ₹499 Pro Export Pack.                         |
+| M-3          | QR-code share export                              | PR #95 (`1d06b50`)                                | New `QrShareModal` renders the current share URL as an SVG QR code with Copy Link + Download QR SVG actions. Wired into `Toolbar` and `usePlanEditor`; tracked under `SHARE_QR_OPENED`.                         |
+| M-8          | Vastu methodology page                            | PR #95 (`1d06b50`)                                | New `/methodology` route renders the live `IDEAL_ZONES` matrix and `getVastuZoneInfo` with source citations and a direction-by-room table. Footer link added on `Landing`.                                      |
+| M-4          | Wire up `?mode=comment` annotation UI             | Branch `feat/m4-comment-mode-m5-pwa` (PR pending) | `CommentModeToolbar` with mode badge, instructions, reviewer-name input, add-pin button, and per-floor comment list. `useCommentAuthor` persists name in localStorage.                                          |
+| M-5          | PWA basics: manifest + service worker + IndexedDB | Branch `feat/m4-comment-mode-m5-pwa` (PR pending) | `src/services/sw.ts` extended with IndexedDB `vastuplan-plans` store and message handlers. `planPersistence.ts` client API. Debounced autosave + offline restore in `usePlanEditor`.                            |
 
 ---
 
